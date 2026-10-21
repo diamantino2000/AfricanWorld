@@ -1,0 +1,99 @@
+[
+    {
+        "id": 1,
+        "username": "usuariogoogle_25127",
+        "email": "ikergoogle_25127@gmail.com",
+        "profile_pic": "https://api.dicebear.com/7.x/avataaars/svg?seed=google_25127",
+        "provider": "google"
+    },
+    {
+        "id": 2,
+        "username": "usuariogoogle_27548",
+        "email": "ikergoogle_27548@gmail.com",
+        "profile_pic": "https://api.dicebear.com/7.x/avataaars/svg?seed=google_27548",
+        "last_username_change": null,
+        "followers": [],
+        "following": [],
+        "saved_articles": []
+    },
+    {
+        "id": 3,
+        "username": "emily-butterfly",
+        "email": "emilybutterfly10z@gmail.com",
+        "profile_pic": "https://lh3.googleusercontent.com/a/ACg8ocJXF6wHgzW3_xibBWSlpeCGj4x9SDbnRSViQVDaKSTQ4a9fjQ=s96-c",
+        "last_username_change": null,
+        "followers": [],
+        "following": [
+            "AfricanWorld"
+        ],
+        "saved_articles": []
+    },
+    {
+        "id": 4,
+        "username": "AfricanWorld",
+        "email": "thehappyboybyten@gmail.com",
+        "profile_pic": "/static/uploads\\profile_4_image_8d2e4eb9.jpg",
+        "last_username_change": "2026-10-17T09:41:28.303356+00:00",
+        "followers": [
+            "emily-butterfly"
+        ],
+        "following": [],
+        "saved_articles": [],
+        "notifications": [
+            {
+                "id": 5,
+                "message": "💬 @emily-butterfly comentó en tu publicación 'trensas'",
+                "link": "/articulo/trensas",
+                "read": true,
+                "date": "19/10/2026 17:17"
+            },
+            {
+                "id": 4,
+                "message": "💬 @emily-butterfly comentó en tu publicación 'trensas'",
+                "link": "/articulo/trensas",
+                "read": true,
+                "date": "19/10/2026 17:09"
+            },
+            {
+                "id": 3,
+                "message": "💬 @jey_mich comentó en tu publicación 'trensas'",
+                "link": "/articulo/trensas",
+                "read": true,
+                "date": "17/10/2026 10:43"
+            },
+            {
+                "id": 2,
+                "message": "💬 @benja_black_power comentó en tu publicación 'trensas'",
+                "link": "/articulo/trensas",
+                "read": true,
+                "date": "17/10/2026 09:57"
+            },
+            {
+                "id": 1,
+                "message": "💬 @emily-butterfly comentó en tu publicación 'trensas'",
+                "link": "/articulo/trensas",
+                "read": true,
+                "date": "16/10/2026 13:33"
+            }
+        ],
+        "password": "Barcelona10"
+    },
+    {
+        "id": 5,
+        "username": "benja_black_power",
+        "email": "theprotectedbygod10@gmail.com",
+        "profile_pic": "https://lh3.googleusercontent.com/a/ACg8ocLvT1iqwX7oVOGZdK7YAUXAjS0WsLq1ExWFPrvAX-paNyqm1g=s96-c",
+        "followers": [],
+        "following": [],
+        "notifications": []
+    },
+    {
+        "id": 6,
+        "username": "jey_mich",
+        "email": "jeymich95@gmail.com",
+        "profile_pic": "https://lh3.googleusercontent.com/a/ACg8ocLT6JCoPrd7PX5zF2T4lIypLFf8Ta6NZaGy22mXwHWH2NEjNpw=s96-c",
+        "followers": [],
+        "following": [],
+        "notifications": []
+    }
+]

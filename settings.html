@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajustes de Cuenta - AfricanWorld</title>
+
+    <!-- FAVICON -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/uploads/logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/uploads/logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/uploads/logo.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .bg-african-green { background-color: #007A3D; }
+        .text-african-green { color: #007A3D; }
+        .bg-african-yellow { background-color: #FCD116; }
+        .bg-african-red { background-color: #CE1126; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER -->
+    <header class="bg-african-green text-white shadow-md border-b-4 border-african-yellow">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="flex items-center space-x-3 shrink-0" style="display: flex !important; align-items: center !important; text-decoration: none !important;">
+                <img src="/static/uploads/logo.png" alt="AfricanWorld Logo" class="h-14 w-auto object-contain drop-shadow-md">
+                <span style="font-size: 28px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; line-height: 1 !important;">
+                    African<span style="color: #FCD116 !important;">World</span>
+                </span>
+            </a>
+            <a href="/perfil/{{ user.username }}" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-gray-100 transition flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Volver al Perfil
+            </a>
+        </div>
+    </header>
+
+    <!-- ALERTAS FLASH -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-2xl mx-auto px-4 mt-6 w-full">
+                {% for category, message in messages %}
+                    <div class="p-4 rounded-xl text-sm font-medium {% if category == 'success' %} bg-emerald-100 text-emerald-800 border-l-4 border-african-green {% else %} bg-red-100 text-red-800 border-l-4 border-african-red {% endif %} shadow">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main class="max-w-2xl mx-auto px-4 py-10 flex-grow w-full">
+        <div class="bg-white p-8 rounded-3xl border shadow-sm space-y-6">
+            <div class="border-b pb-4">
+                <h1 class="text-2xl font-black text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-african-green"></i>
+                    <span>Configuración de la Cuenta</span>
+                </h1>
+                <p class="text-xs text-gray-400 mt-1">Gestiona tu nombre de usuario público y tu foto de perfil.</p>
+            </div>
+
+            <form action="/settings" method="POST" enctype="multipart/form-data" class="space-y-6">
+                
+                <!-- FOTO DE PERFIL CON VISTA PREVIA INSTANTÁNEA -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-700">Foto de Perfil</label>
+                    <div class="flex items-center gap-4">
+                        <img id="avatar-preview" src="{{ user.profile_pic if user.profile_pic else '/static/uploads/default_user.png' }}" alt="Foto actual" class="w-20 h-20 rounded-full object-cover border-4 border-african-yellow shadow">
+                        
+                        <div>
+                            <label class="bg-emerald-50 text-african-green hover:bg-emerald-100 border border-emerald-200 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition inline-flex items-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-camera text-sm"></i>
+                                <span>Elegir Foto</span>
+                                <input type="file" name="profile_pic" id="profile-input" accept="image/*" class="hidden" onchange="previewProfilePic(event)">
+                            </label>
+                            <p class="text-[11px] text-gray-400 mt-1">Soporta formatos JPG, PNG o WEBP.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NOMBRE DE USUARIO -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Nombre de Usuario</label>
+                    <input type="text" name="username" value="{{ user.username }}" required class="w-full border px-4 py-2.5 rounded-xl text-sm font-bold focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
+                    <p class="text-[11px] text-gray-400 mt-1">Solo puedes cambiar tu nombre de usuario una vez cada 7 días.</p>
+                </div>
+
+                <!-- CORREO ELECTRÓNICO (SOLO LECTURA VÍA GOOGLE) -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Correo Vinculado de Google</label>
+                    <input type="email" value="{{ user.email }}" disabled class="w-full border px-4 py-2.5 rounded-xl text-sm text-gray-400 bg-gray-100 cursor-not-allowed">
+                </div>
+
+                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold text-sm shadow hover:opacity-90 transition">
+                    Guardar Cambios
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
+        <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- SCRIPT DE VISTA PREVIA INSTANTÁNEA -->
+    <script>
+        function previewProfilePic(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatar-preview').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>

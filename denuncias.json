@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "article_id": 1,
+        "article_title": "trensas",
+        "article_slug": "trensas",
+        "article_owner": "AfricanWorld",
+        "reported_by": "jey_mich",
+        "reason": "estafador",
+        "date": "17/10/2026 11:01"
+    },
+    {
+        "id": 2,
+        "article_id": 1,
+        "article_title": "trensas",
+        "article_slug": "trensas",
+        "article_owner": "AfricanWorld",
+        "reported_by": "jey_mich",
+        "reason": "me robooo",
+        "date": "17/10/2026 11:01"
+    },
+    {
+        "id": 3,
+        "article_id": 1,
+        "article_title": "trensas",
+        "article_slug": "trensas",
+        "article_owner": "AfricanWorld",
+        "reported_by": "jey_mich",
+        "reason": "me robo el tonto",
+        "date": "17/10/2026 11:02"
+    }
+]

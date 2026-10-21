@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "africanworld-f9a89",
+  "private_key_id": "553f3a0ea197866f19d31980a293620a4044a5be",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCw3brIJ5aRjIht\nTcCUDtk8XV8BQTKrEm4AUWts9MG3qJzazl4PKlWhfZnA3P0QdYVVwZ3zr8qpBwu0\nVCjn/wXGMofO3ipG2ZQdiusUHZb+GqJ5Li0+T4UBxpxSiV4A9n8RJIsvZD4cg30l\nqt0+e9443rKUnG889pW7GgCblBoH4vEE8tFLy9EEfYxgoSGtx1VNx1E7nvWHu1eJ\nVb+zzXhm+rVh63A6ORRXLkDpOWlgCAuq5GPqBARzUwzSAsKUBDXcmg7912KBfnCg\nDPr4ULtM7R5LYq+nYLgL78BXvf9yjV9jKd2LFukHRcFcdTQvP4NpWYyIsjFbpFW0\nQUa633sXAgMBAAECggEAF8Zb4vynWdNj93AkkK0voyoDU7OERcjJbqjYjEyZHxYU\nV7lhSB/vDjFIZ3Y4B8FfILhRLOkW5gJ4yU8oMd9vKEWx9ICa0EFT5BDA1EhnUVXF\nPLg/WV6ZHjRTiSjGsSccIkgg9EhBAoDjuW+EJBpvNIKDIO+nvbCBT3sJqorjC5Ig\njn1C5rVpDPDGFI97FGetad8ryTAYfKcs1ZRAiP5WodKdXADlgUsrtAwNS1zZKHEG\niu4E7svzxOcMzYzYKUGpgFdGiSikUGb/+yndMb36cw2UFW3ePgolpu4DCXi5KEzq\nBw3YvmKQJgWFyDEmTrILqvJwl8+01gfuRNKtDIGwMQKBgQDZrARjw5jiAV9OljUW\nnvFbgstpHXYe4JS87U0laFl+henaT8jagsMKY8jVEFmX/s6MM2BOlaPsJFjgz2vH\nHSkpJmOIjJJVE+haXbK9JQUvxlnvntyfDTRKU3W6ZKdax8qDjMNqnk1xaWvQp/O/\nXw9gWHhXCW30Bq+EntN7gjg3WQKBgQDQAk/SflbCvEcFLJEm/Klimjc53qPYTpHH\nWR4wsmmm0uqoQfzha2JnnvU28CV5/bE2M2UhOtEFZ67AxlJuSvPh/Dt1hvZCggPr\nNVkn6qnHGvp2s4TESUz+SW7CTjlygrJJHCK/UvCVow2BnHdZQBztmP0oX+JDTmfL\nYDzuFjdn7wKBgBZDWMOXatiayVOxW0awBQGWFBXxNHaeA7h7EOvli1m8epmglWt7\n+lTitdTM8kzwe9GtI4mGFpj9crWzoVNhMSeLTJzXu9PF0HsFoFVmJuym/eXbOrdt\n005S0PS6fL91NcpUqFwMSuFxpdxWgUCuiVUSV2SXi05tLKCE2h6EyBkpAoGBAJ22\nQwNcGzhHPKnloqCmzV8fgmP0NNJasBkvrr5JZ+W+4YB1l+DqZJAga9gduKyH94ca\n7MCHMdghRtSPCgzp84QSlJqFm83Nel8p8dFcESIPiHvbnPyefywGTV4xpUj3Y2of\nVREvN46dNC5jjfIztDtJ1hh4qrtRhU0kSM5UNeotAoGATHfoGd1j0O54aguEG4y2\nIBEkSGJbjUy5IKhrogFfs/dvkgBaKb2zSE4QnK9ymvc8OrsZ+JUqijKvaXBdmik4\nAWzl5SL4mpKXy6mFrFv9HB4Vw4avFesxrnZrjIWS7PeM0fwnraQR2wEicFDAJM9N\n+13W1h7yQE3EjOr0SckMw9E=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@africanworld-f9a89.iam.gserviceaccount.com",
+  "client_id": "108405092000721909572",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40africanworld-f9a89.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

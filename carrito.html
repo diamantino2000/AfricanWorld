@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras - AfricanWorld</title>
+
+    <!-- FAVICON CON EL LOGO EN LA PESTAÑA DEL NAVEGADOR -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/uploads/logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/uploads/logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/uploads/logo.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .bg-african-green { background-color: #007A3D; }
+        .text-african-green { color: #007A3D; }
+        .bg-african-yellow { background-color: #FCD116; }
+        .text-african-yellow { color: #D4AC0D; }
+        .bg-african-red { background-color: #CE1126; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER -->
+    <header class="bg-african-green text-white shadow-md border-b-4 border-african-yellow">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            
+            <!-- LOGO Y TEXTO AFRICANWORLD -->
+            <a href="/" class="flex items-center space-x-3 shrink-0" style="display: flex !important; align-items: center !important; text-decoration: none !important;">
+                <img src="/static/uploads/logo.png" alt="AfricanWorld Logo" class="h-14 w-auto object-contain drop-shadow-md">
+                <span style="font-size: 28px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; line-height: 1 !important;">
+                    African<span style="color: #FCD116 !important;">World</span>
+                </span>
+            </a>
+
+            <a href="/" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-gray-100 transition flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Volver al Catálogo
+            </a>
+        </div>
+    </header>
+
+    <!-- ALERTAS FLASH -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-5xl mx-auto px-4 mt-6 w-full">
+                {% for category, message in messages %}
+                    <div class="p-4 rounded-xl text-sm font-medium {% if category == 'success' %} bg-emerald-100 text-emerald-800 border-l-4 border-african-green {% else %} bg-red-100 text-red-800 border-l-4 border-african-red {% endif %} shadow">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main class="max-w-5xl mx-auto px-4 py-10 flex-grow w-full space-y-8">
+        <div class="flex items-center justify-between border-b pb-4">
+            <h1 class="text-3xl font-black text-gray-900 flex items-center gap-3">
+                <i class="fa-solid fa-cart-shopping text-african-yellow"></i>
+                <span>Mi Carrito de Compras</span>
+            </h1>
+            <span class="text-xs font-bold bg-emerald-100 text-african-green px-3 py-1 rounded-full">
+                {{ articles|length }} {{ 'artículo' if articles|length == 1 else 'artículos' }}
+            </span>
+        </div>
+
+        {% if articles %}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- LISTADO DE PRODUCTOS AGREGADOS -->
+                <div class="lg:col-span-2 space-y-4">
+                    {% set total_price = namespace(value=0) %}
+                    {% for art in articles %}
+                        {% set total_price.value = total_price.value + art.price %}
+                        <div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 hover:shadow-md transition">
+                            <div class="flex items-center gap-4 w-full sm:w-auto">
+                                <img src="{{ art.images.split(',')[0] if art.images else '/static/uploads/default_item.png' }}" alt="{{ art.title }}" class="w-20 h-20 rounded-xl object-cover border shrink-0">
+                                <div class="space-y-1">
+                                    <h3 class="font-bold text-gray-900 text-base">
+                                        <a href="/articulo/{{ art.slug }}" class="hover:text-african-green transition">{{ art.title }}</a>
+                                    </h3>
+                                    <p class="text-xs text-african-green font-bold">
+                                        <i class="fa-solid fa-location-dot mr-1"></i>{{ art.country }}, {{ art.city }}
+                                    </p>
+                                    <p class="text-xs text-gray-400">Vendedor: <a href="/perfil/{{ art.username }}" class="font-bold text-gray-700 hover:underline">@{{ art.username }}</a></p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0">
+                                <span class="text-lg font-black text-gray-900">${{ "%.2f"|format(art.price) }}</span>
+                                <form action="/carrito/remove/{{ art.id }}" method="POST">
+                                    <button type="submit" class="text-african-red hover:bg-red-50 p-2 rounded-xl transition font-bold text-sm" title="Quitar del carrito">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- RESUMEN DE LA ORDEN Y CONTACTO -->
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-3xl border shadow-sm space-y-4 border-t-8 border-african-yellow">
+                        <h2 class="text-xl font-black text-gray-900 border-b pb-3">Resumen del Pedido</h2>
+                        
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between text-gray-600">
+                                <span>Subtotal</span>
+                                <span class="font-bold text-gray-900">${{ "%.2f"|format(total_price.value) }}</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600">
+                                <span>Comisiones de Plataforma</span>
+                                <span class="font-bold text-african-green">GRATIS</span>
+                            </div>
+                            <div class="border-t pt-3 flex justify-between items-center text-lg font-black text-gray-900">
+                                <span>Total Estimado</span>
+                                <span class="text-african-green">${{ "%.2f"|format(total_price.value) }}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-xl text-xs text-yellow-800 space-y-1">
+                            <p class="font-bold"><i class="fa-solid fa-circle-info text-african-yellow mr-1"></i> Trato directo vendedor-comprador</p>
+                            <p class="text-[11px] leading-tight">Los pagos y envíos se acuerdan directamente con cada vendedor sin intermediarios ni comisiones extras.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        {% else %}
+            <!-- CARRITO VACÍO -->
+            <div class="text-center py-16 bg-white rounded-3xl border shadow-sm space-y-4">
+                <div class="w-20 h-20 bg-yellow-100 text-african-yellow rounded-full flex items-center justify-center mx-auto text-4xl">
+                    <i class="fa-solid fa-cart-arrow-down"></i>
+                </div>
+                <h2 class="text-2xl font-black text-gray-900">Tu carrito está vacío</h2>
+                <p class="text-gray-400 text-xs max-w-sm mx-auto">Explora nuestro catálogo de productos y añade artículos para gestionarlos de forma centralizada.</p>
+                <a href="/" class="inline-block bg-african-green text-white px-8 py-3 rounded-xl font-bold text-xs shadow hover:opacity-90 transition">
+                    Explorar Catálogo
+                </a>
+            </div>
+        {% endif %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
+        <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

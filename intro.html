@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AfricanWorld - Plataforma Global de Comercio y Negocios</title>
+    
+    <!-- FAVICON -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/uploads/logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/uploads/logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/uploads/logo.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        .bg-african-green { background-color: #007A3D; }
+        .text-african-green { color: #007A3D; }
+        .bg-african-yellow { background-color: #FCD116; }
+        .text-african-yellow { color: #D4AC0D; }
+        .bg-african-red { background-color: #CE1126; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col justify-between">
+
+    <!-- NAVBAR SUPERIOR -->
+    <nav class="border-b border-gray-800 bg-gray-900/90 backdrop-blur fixed w-full z-50 top-0">
+        <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="/" class="flex items-center space-x-3" style="display: flex !important; align-items: center !important; text-decoration: none !important;">
+                <img src="/static/uploads/logo.png" alt="AfricanWorld Logo" class="h-14 w-auto object-contain drop-shadow-md">
+                <span style="font-size: 28px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; line-height: 1 !important;">
+                    African<span style="color: #FCD116 !important;">World</span>
+                </span>
+            </a>
+            <a href="/terminos" class="text-xs font-bold text-gray-400 hover:text-african-yellow transition">Términos y Condiciones</a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden flex items-center">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80" alt="Negocios en África" class="w-full h-full object-cover opacity-25">
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/60 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                    <i class="fa-solid fa-chart-line"></i> Red Comercial Pan-Africana
+                </div>
+                <h1 class="text-4xl md:text-6xl font-black text-white leading-tight">
+                    Conectando <span class="text-african-yellow">Emprendedores</span> y Mercados Globales.
+                </h1>
+                <p class="text-gray-300 text-base md:text-lg leading-relaxed">
+                    AfricanWorld es la plataforma empresarial de libre comercio que impulsa negocios, conecta proveedores, vendedores y compradores sin intermediarios.
+                </p>
+            </div>
+
+            <!-- TARJETA DE INICIO DE SESIÓN DIRECTO CON GOOGLE -->
+            <div class="bg-gray-800/80 border border-gray-700 backdrop-blur-xl p-8 rounded-3xl shadow-2xl space-y-6 text-center border-t-4 border-african-yellow">
+                <div class="w-16 h-16 bg-african-yellow/10 rounded-2xl flex items-center justify-center mx-auto text-african-yellow text-3xl">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div class="space-y-2">
+                    <h3 class="text-2xl font-black text-white">Accede a la plataforma</h3>
+                    <p class="text-xs text-gray-400">Ingresa con tu cuenta corporativa de Google para publicar o navegar en el catálogo global.</p>
+                </div>
+
+                <div class="py-4 flex justify-center">
+                    <div id="g_id_onload" data-client_id="{{ google_client_id }}" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
+                    <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="continue_with" data-size="large"></div>
+                </div>
+
+                <p class="text-[11px] text-gray-500 leading-normal">
+                    Al ingresar, declaras haber leído y aceptado nuestros 
+                    <a href="/terminos" target="_blank" class="text-african-yellow hover:underline">Términos y Condiciones</a>.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <!-- PILARES EMPRESARIALES -->
+    <section class="py-16 bg-gray-900 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-6 space-y-12">
+            <div class="text-center space-y-3 max-w-2xl mx-auto">
+                <h2 class="text-3xl font-black text-white">¿Por qué elegir AfricanWorld?</h2>
+                <p class="text-gray-400 text-sm">Plataforma diseñada para potenciar el comercio libre e independiente.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-800/40 p-8 rounded-2xl border border-gray-800 space-y-4 hover:border-emerald-500/50 transition">
+                    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-store"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Venta Libre y Directa</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Publica productos sin intermediarios ni comisiones. Trata directamente con compradores y vendedores.
+                    </p>
+                </div>
+
+                <div class="bg-gray-800/40 p-8 rounded-2xl border border-gray-800 space-y-4 hover:border-yellow-500/50 transition">
+                    <div class="w-12 h-12 bg-yellow-500/10 text-african-yellow rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-images"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Catálogo Multimuestra</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Exhibe tus artículos con hasta 17 fotografías con calidad HD y miniaturas interactivas.
+                    </p>
+                </div>
+
+                <div class="bg-gray-800/40 p-8 rounded-2xl border border-gray-800 space-y-4 hover:border-red-500/50 transition">
+                    <div class="w-12 h-12 bg-red-500/10 text-red-400 rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Comunidad Segura</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Sistema activo de moderación, control de contenido por IA y módulo directo de denuncias.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODAL DE CONFIRMACIÓN DE TÉRMINOS PARA REGISTRO -->
+    <div id="terms-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4 border-t-8 border-african-yellow text-white">
+            <h3 class="text-xl font-black text-white flex items-center gap-2">
+                <i class="fa-solid fa-file-contract text-african-green"></i>
+                <span>Registro en AfricanWorld</span>
+            </h3>
+            <p class="text-xs text-gray-300 leading-relaxed">
+                Para completar el registro y acceder a la plataforma, debes aceptar nuestras políticas de servicio.
+            </p>
+
+            <div class="flex items-start gap-2 bg-gray-900 p-3 rounded-xl border border-gray-700">
+                <input type="checkbox" id="accept-terms-check" class="mt-1 rounded border-gray-600 text-african-green focus:ring-african-green">
+                <label for="accept-terms-check" class="text-xs text-gray-300">
+                    Acepto los <a href="/terminos" target="_blank" class="text-african-yellow font-bold hover:underline">Términos y Condiciones</a> (reconozco que los vendedores gestionan sus ventas y la web se exime de responsabilidad en transacciones).
+                </label>
+            </div>
+
+            <p id="terms-error-msg" class="text-xs text-red-400 font-bold hidden">Debes marcar la casilla para poder completar el registro.</p>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeModal('terms-modal')" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl text-xs font-bold">Cancelar</button>
+                <button type="button" onclick="confirmGoogleLogin()" class="bg-african-green text-white px-5 py-2 rounded-xl text-xs font-bold shadow hover:opacity-90">Continuar con Google</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-950 border-t border-gray-800 py-8 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
+            <a href="/terminos" class="hover:text-gray-300 transition">Términos y Condiciones</a>
+        </div>
+    </footer>
+
+    <script>
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        let pendingGoogleCredential = null;
+
+        function handleCredentialResponse(response) {
+            pendingGoogleCredential = response.credential;
+            openModal('terms-modal');
+        }
+
+        function confirmGoogleLogin() {
+            const check = document.getElementById('accept-terms-check');
+            if (!check.checked) {
+                document.getElementById('terms-error-msg').classList.remove('hidden');
+                return;
+            }
+
+            fetch('/google-login-real', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential: pendingGoogleCredential })
+            }).then(res => res.json()).then(data => {
+                if (data.status === 'success') window.location.href = data.redirect;
+            });
+        }
+    </script>
+</body>
+</html>

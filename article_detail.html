@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }} - AfricanWorld</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/uploads/logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/uploads/logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/uploads/logo.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .bg-african-green { background-color: #007A3D; }
+        .text-african-green { color: #007A3D; }
+        .bg-african-yellow { background-color: #FCD116; }
+        .text-african-yellow { color: #D4AC0D; }
+        .bg-african-red { background-color: #CE1126; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER -->
+    <header class="bg-african-green text-white shadow-md border-b-4 border-african-yellow">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="flex items-center space-x-3 shrink-0" style="display: flex !important; align-items: center !important; text-decoration: none !important;">
+                <img src="/static/uploads/logo.png" alt="AfricanWorld Logo" class="h-14 w-auto object-contain drop-shadow-md">
+                <span style="font-size: 28px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; line-height: 1 !important;">
+                    African<span style="color: #FCD116 !important;">World</span>
+                </span>
+            </a>
+            <a href="/" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-gray-100 transition flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Volver al Catálogo
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
+        
+        <!-- DETALLE DEL ARTÍCULO -->
+        <div class="bg-white rounded-3xl border shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
+            
+            <!-- GALERÍA DE IMÁGENES -->
+            {% set img_list = article.images.split(',') if article.images else [] %}
+            <div class="space-y-4">
+                <div class="h-80 md:h-96 rounded-2xl overflow-hidden bg-gray-100 border relative">
+                    <img id="main-image" src="{{ img_list[0] if img_list else '/static/uploads/default_item.png' }}" alt="{{ article.title }}" class="w-full h-full object-cover">
+                    {% if article.is_sold %}
+                        <div class="absolute top-4 left-4 bg-african-red text-white text-xs font-black px-4 py-1.5 rounded-full shadow tracking-wider uppercase">
+                            Comprado
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if img_list|length > 1 %}
+                    <div class="flex gap-2 overflow-x-auto pb-2">
+                        {% for img in img_list %}
+                            <img src="{{ img }}" onclick="document.getElementById('main-image').src = this.src" class="w-16 h-16 rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-african-yellow transition shrink-0">
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- DETALLES Y CONTACTO -->
+            <div class="space-y-6 flex flex-col justify-between">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-start">
+                        <h1 class="text-3xl font-black text-gray-900 leading-tight">{{ article.title }}</h1>
+                        <span class="text-2xl bg-african-yellow text-gray-900 px-4 py-1.5 rounded-2xl font-black shadow-sm shrink-0">
+                            ${{ "%.2f"|format(article.price) }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-4 text-xs font-bold text-gray-500">
+                        <span class="text-african-green"><i class="fa-solid fa-location-dot mr-1"></i>{{ article.country }}, {{ article.city }}</span>
+                        <span><i class="fa-solid fa-eye mr-1"></i>{{ article.views }} Visualizaciones</span>
+                        {% if avg_rating > 0 %}
+                            <span class="text-african-yellow"><i class="fa-solid fa-star mr-1"></i>{{ avg_rating }} / 5</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="border-t border-b py-4 space-y-2">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">Descripción</h3>
+                        <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{{ article.description }}</p>
+                    </div>
+
+                    <!-- VENDEDOR -->
+                    <div class="bg-gray-50 p-4 rounded-2xl border flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <img src="{{ author.profile_pic if author and author.profile_pic else '/static/uploads/default_user.png' }}" class="w-10 h-10 rounded-full object-cover border">
+                            <div>
+                                <p class="text-xs text-gray-400">Vendedor</p>
+                                <a href="/perfil/{{ article.username }}" class="font-bold text-sm text-gray-900 hover:text-african-green">@{{ article.username }}</a>
+                            </div>
+                        </div>
+                        <a href="https://wa.me/{{ article.phone }}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-emerald-700 transition flex items-center gap-1.5">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ACCIONES -->
+                <div class="flex items-center gap-3 pt-4 border-t">
+                    {% if session.get('username') %}
+                        <form action="/carrito/add/{{ article.id }}" method="POST" class="flex-grow">
+                            <button type="submit" class="w-full bg-african-yellow text-gray-900 py-3 rounded-xl font-black text-sm shadow hover:bg-yellow-400 transition">
+                                <i class="fa-solid fa-cart-plus mr-1"></i> Añadir al Carrito
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    {% if session.get('username') == article.username %}
+                        <form action="/articulo/{{ article.id }}/mark-sold" method="POST">
+                            <button type="submit" class="bg-gray-800 text-white px-4 py-3 rounded-xl text-xs font-bold shadow hover:bg-black transition">
+                                {{ 'Marcar Disponible' if article.is_sold else 'Marcar Comprado' }}
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- COMENTARIOS -->
+        <div class="bg-white p-8 rounded-3xl border shadow-sm space-y-6">
+            <h3 class="text-xl font-black text-gray-900 flex items-center gap-2">
+                <i class="fa-solid fa-comments text-african-green"></i>
+                <span>Comentarios y Calificaciones</span>
+            </h3>
+
+            {% if session.get('username') %}
+                <form action="/articulo/{{ article.slug }}/comment" method="POST" class="space-y-3 bg-gray-50 p-4 rounded-2xl border">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-bold text-gray-700">Deja tu opinión</label>
+                        <select name="rating" class="border text-xs rounded-lg px-2 py-1 bg-white font-bold text-african-yellow">
+                            <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4/5)</option>
+                            <option value="3">⭐⭐⭐ (3/5)</option>
+                            <option value="2">⭐⭐ (2/5)</option>
+                            <option value="1">⭐ (1/5)</option>
+                        </select>
+                    </div>
+                    <textarea name="content" rows="3" required placeholder="Escribe tu comentario aquí..." class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-white"></textarea>
+                    <button type="submit" class="bg-african-green text-white px-5 py-2 rounded-xl text-xs font-bold shadow hover:opacity-90 transition">Publicar Opinión</button>
+                </form>
+            {% endif %}
+
+            <div class="space-y-3">
+                {% for c in article.comments %}
+                    <div class="p-4 rounded-2xl bg-gray-50 border space-y-1">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-gray-900">@{{ c.username }}</span>
+                            <span class="text-african-yellow font-black">★ {{ c.rating }}/5</span>
+                        </div>
+                        <p class="text-xs text-gray-700">{{ c.content }}</p>
+                    </div>
+                {% else %}
+                    <p class="text-xs text-gray-400 text-center py-4 italic">Aún no hay opiniones sobre este artículo.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
+        <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>
