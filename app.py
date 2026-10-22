@@ -17,7 +17,7 @@ UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-GOOGLE_CLIENT_ID = "772976150791-2omp7imb9o0hjo84us6aded8hhlpm8fm.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleusercontent.com"
 USERS_JSON_FILE = 'cuentas.json'
 DENUNCIAS_JSON_FILE = 'denuncias.json'
 
