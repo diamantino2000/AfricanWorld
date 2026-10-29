@@ -4,22 +4,27 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import os
 import json
+import unicodedata
+import re
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 from sqlalchemy import text
 
+# Configurar rutas absolutas basadas en la ubicación de app.py
+basedir = os.path.abspath(os.path.dirname(__file__))
+
 app = Flask(__name__, template_folder='.')
-app.config['SECRET_KEY'] = 'african-world-secret-key-2026'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///africanworld_v2.db'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'africanworld_v2.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleusercontent.com"
-USERS_JSON_FILE = 'cuentas.json'
-DENUNCIAS_JSON_FILE = 'denuncias.json'
+USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
+DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
 def load_json_users():
     if not os.path.exists(USERS_JSON_FILE):
@@ -31,8 +36,11 @@ def load_json_users():
         return []
 
 def save_json_users(users_list):
-    with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
-        json.dump(users_list, f, indent=4, ensure_ascii=False)
+    try:
+        with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
+            json.dump(users_list, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error guardando usuarios: {e}")
 
 def load_denuncias():
     if not os.path.exists(DENUNCIAS_JSON_FILE):
@@ -44,8 +52,11 @@ def load_denuncias():
         return []
 
 def save_denuncias(denuncias_list):
-    with open(DENUNCIAS_JSON_FILE, 'w', encoding='utf-8') as f:
-        json.dump(denuncias_list, f, indent=4, ensure_ascii=False)
+    try:
+        with open(DENUNCIAS_JSON_FILE, 'w', encoding='utf-8') as f:
+            json.dump(denuncias_list, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error guardando denuncias: {e}")
 
 def add_notification(target_username, message, link="#"):
     users = load_json_users()
@@ -103,11 +114,10 @@ with app.app_context():
     except Exception:
         db.session.rollback()
 
-def slugify(text):
-    import unicodedata, re
-    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
-    text = re.sub(r'[^\w\s-]', '', text).strip().lower()
-    return re.sub(r'[-\s]+', '-', text)
+def slugify(text_value):
+    text_value = unicodedata.normalize('NFKD', text_value).encode('ascii', 'ignore').decode('utf-8')
+    text_value = re.sub(r'[^\w\s-]', '', text_value).strip().lower()
+    return re.sub(r'[-\s]+', '-', text_value)
 
 @app.route('/')
 def index():
@@ -192,8 +202,10 @@ def report_article(article_id):
 
 @app.route('/google-login-real', methods=['POST'])
 def google_login_real():
-    data = request.get_json()
+    data = request.get_json() or {}
     token = data.get('credential')
+    if not token:
+        return jsonify({"status": "error", "message": "Token no proporcionado"}), 400
     try:
         id_info = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
         email = id_info['email']
@@ -426,9 +438,10 @@ def settings():
 
         if profile_file and profile_file.filename != '':
             filename = secure_filename(profile_file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], f"profile_{user['id']}_{filename}")
-            profile_file.save(filepath)
-            user['profile_pic'] = f"/{filepath}"
+            filepath_rel = f"static/uploads/profile_{user['id']}_{filename}"
+            filepath_abs = os.path.join(basedir, filepath_rel)
+            profile_file.save(filepath_abs)
+            user['profile_pic'] = f"/{filepath_rel}"
 
         save_json_users(users)
         flash('¡Ajustes actualizados con éxito!', 'success')
@@ -465,9 +478,10 @@ def publish():
     for file in uploaded_files[:17]:
         if file and file.filename != '':
             filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            image_paths.append(f"/{filepath}")
+            filepath_rel = f"static/uploads/{filename}"
+            filepath_abs = os.path.join(basedir, filepath_rel)
+            file.save(filepath_abs)
+            image_paths.append(f"/{filepath_rel}")
 
     base_slug = slugify(title)
     slug = base_slug
@@ -494,6 +508,5 @@ def publish():
 
 
 if __name__ == "__main__":
-    # Render asigna un puerto dinámico en la variable PORT
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
