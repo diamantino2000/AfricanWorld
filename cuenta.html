@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ current_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -320,6 +320,62 @@
             }
             return true;
         }
+        
     </script>
+    <script>
+    // Detectar idioma del dispositivo/navegador
+    const userLang = navigator.language || navigator.userLanguage; 
+    const shortLang = userLang.split('-')[0]; // Ejemplo: 'es-ES' se convierte en 'es'
+
+    // Diccionario simple de traducciones para los elementos clave
+    const translations = {
+        en: {
+            title: "AfricanWorld - Global Marketplace",
+            subtitle: "Connecting markets, cities, and cultures across the entire continent.",
+            searchPlaceholder: "Search by title, country, city...",
+            searchBtn: "Search",
+            sold: "Sold",
+            details: "View Details",
+            cartTitle: "Cart",
+            publish: "Publish Article"
+        },
+        fr: {
+            title: "AfricanWorld - Marché Global",
+            subtitle: "Connecter les marchés, les villes et les cultures de tout le continent.",
+            searchPlaceholder: "Rechercher par titre, pays, ville...",
+            searchBtn: "Rechercher",
+            sold: "Vendu",
+            details: "Voir les détails",
+            cartTitle: "Panier",
+            publish: "Publier un article"
+        },
+        ar: {
+            title: "AfricanWorld - سوق عالمي",
+            subtitle: "ربط الأسواق والمدن والثقافات في جميع أنحاء القارة.",
+            searchPlaceholder: "ابحث بالعنوان، البلد، المدينة...",
+            searchBtn: "بحث",
+            sold: "مباع",
+            details: "عرض التفاصيل",
+            cartTitle: "السلة",
+            publish: "نشر مقال"
+        }
+    };
+
+    // Aplicar traducción si el idioma está soportado
+    document.addEventListener("DOMContentLoaded", () => {
+        if (translations[shortLang]) {
+            const t = translations[shortLang];
+            
+            // Ejemplo de reemplazo de textos según su clase o selector
+            const mainTitle = document.querySelector("main h1");
+            if (mainTitle) mainTitle.textContent = t.title;
+
+            const searchInput = document.querySelector("input[name='search']");
+            if (searchInput) searchInput.placeholder = t.searchPlaceholder;
+
+            // Puedes añadir más selectores según lo que quieras traducir automáticamente
+        }
+    });
+</script>
 </body>
 </html>
