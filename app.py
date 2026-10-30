@@ -506,6 +506,12 @@ def publish():
     db.session.commit()
     return redirect(url_for('view_article', slug=new_article.slug))
 
+@app.route('/publicar')
+def publicar_page():
+    if 'username' not in session:
+        flash('Debes iniciar sesión para publicar.', 'error')
+        return redirect(url_for('index'))
+    return redirect(url_for('profile', username=session['username'], publish='1'))
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
