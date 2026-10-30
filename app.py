@@ -513,14 +513,6 @@ def publicar_page():
         return redirect(url_for('index'))
     return redirect(url_for('profile', username=session['username'], publish='1'))
 
-@app.route('/')
-def index():
-    # Detectar el idioma preferido del navegador del usuario
-    user_lang = request.accept_languages.best_match(['es', 'en', 'fr', 'ar']) or 'es'
-    
-    # Puedes pasarlo a la plantilla
-    return render_template('index.html', google_client_id=GOOGLE_CLIENT_ID, current_lang=user_lang)
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
