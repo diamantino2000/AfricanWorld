@@ -26,34 +26,34 @@
         .bg-african-red { background-color: #CE1126; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between" onclick="closeNotificationsMenu()">
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between overflow-x-hidden" onclick="closeNotificationsMenu()">
 
     <!-- HEADER -->
     <header class="bg-african-green text-white shadow-md border-b-4 border-african-yellow relative z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 flex flex-wrap justify-between items-center gap-3">
             
             <!-- LOGO Y TEXTO AFRICANWORLD -->
-            <a href="/" class="flex items-center space-x-3 shrink-0" style="display: flex !important; align-items: center !important; text-decoration: none !important;">
-                <img src="/static/uploads/logo.png" alt="AfricanWorld Logo" class="h-14 w-auto object-contain drop-shadow-md">
-                <span style="font-size: 28px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; line-height: 1 !important; display: inline-block !important;">
+            <a href="/" class="flex items-center space-x-2 sm:space-x-3 shrink-0" style="display: flex !important; align-items: center !important; text-decoration: none !important;">
+                <img src="/static/uploads/logo.png" alt="AfricanWorld Logo" class="h-10 sm:h-14 w-auto object-contain drop-shadow-md">
+                <span style="font-size: 22px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; line-height: 1 !important; display: inline-block !important;">
                     African<span style="color: #FCD116 !important;">World</span>
                 </span>
             </a>
 
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-4">
                 {% if session.get('username') %}
                     <!-- BUSCADOR DE USUARIOS EN EL HEADER -->
                     <form action="/buscar-usuarios" method="GET" class="relative flex items-center" onclick="event.stopPropagation()">
-                        <input type="text" name="q" placeholder="Buscar usuario..." class="bg-emerald-800 text-white placeholder-emerald-200 text-xs px-3 py-1.5 pl-8 rounded-full focus:outline-none focus:ring-2 focus:ring-african-yellow w-32 sm:w-44 transition-all border border-emerald-700">
+                        <input type="text" name="q" placeholder="Buscar usuario..." class="bg-emerald-800 text-white placeholder-emerald-200 text-xs px-3 py-1.5 pl-8 rounded-full focus:outline-none focus:ring-2 focus:ring-african-yellow w-28 sm:w-44 transition-all border border-emerald-700">
                         <i class="fa-solid fa-magnifying-glass absolute left-2.5 text-emerald-200 text-xs"></i>
                     </form>
 
                     <!-- CARRITO DE COMPRAS -->
                     {% set cart_count = session.get('cart', [])|length %}
-                    <a href="/carrito" class="relative text-white hover:text-african-yellow transition text-xl p-1" title="Carrito">
+                    <a href="/carrito" class="relative text-white hover:text-african-yellow transition text-lg sm:text-xl p-1" title="Carrito">
                         <i class="fa-solid fa-cart-shopping"></i>
                         {% if cart_count > 0 %}
-                            <span class="absolute -top-1 -right-1 bg-african-yellow text-gray-900 text-xs font-black rounded-full h-5 w-5 flex items-center justify-center shadow">
+                            <span class="absolute -top-1 -right-1 bg-african-yellow text-gray-900 text-xs font-black rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center shadow">
                                 {{ cart_count }}
                             </span>
                         {% endif %}
@@ -62,14 +62,14 @@
                     <!-- CAMPANA DE NOTIFICACIONES DINÁMICA -->
                     {% set unread_count = current_user.get('notifications', [])|rejectattr('read')|list|length if current_user else 0 %}
                     <div class="relative" onclick="event.stopPropagation()">
-                        <button onclick="toggleNotificationsMenu()" class="relative text-white hover:text-african-yellow transition text-xl p-1 focus:outline-none" title="Notificaciones">
+                        <button onclick="toggleNotificationsMenu()" class="relative text-white hover:text-african-yellow transition text-lg sm:text-xl p-1 focus:outline-none" title="Notificaciones">
                             <i class="fa-solid fa-bell"></i>
-                            <span id="noti-badge" class="{% if unread_count == 0 %}hidden{% endif %} absolute -top-1 -right-1 bg-african-red text-white text-xs font-black rounded-full h-5 w-5 flex items-center justify-center animate-bounce shadow">
+                            <span id="noti-badge" class="{% if unread_count == 0 %}hidden{% endif %} absolute -top-1 -right-1 bg-african-red text-white text-xs font-black rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center animate-bounce shadow">
                                 {{ unread_count }}
                             </span>
                         </button>
 
-                        <div id="notifications-menu" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 text-gray-800 space-y-3 z-50">
+                        <div id="notifications-menu" class="hidden absolute right-0 mt-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 text-gray-800 space-y-3 z-50">
                             <div class="flex items-center justify-between border-b pb-2">
                                 <h3 class="font-black text-sm text-gray-900 flex items-center gap-1.5">
                                     <i class="fa-solid fa-bell text-african-yellow"></i> Notificaciones
@@ -94,20 +94,13 @@
                     </div>
 
                     <!-- USUARIO LOGUEADO -->
-                    <a href="/perfil/{{ session['username'] }}" class="flex items-center space-x-2 bg-african-yellow text-gray-900 px-3 py-1.5 rounded-full shadow text-sm font-bold hover:opacity-90 transition">
+                    <a href="/perfil/{{ session['username'] }}" class="flex items-center space-x-2 bg-african-yellow text-gray-900 px-2.5 sm:px-3 py-1.5 rounded-full shadow text-xs sm:text-sm font-bold hover:opacity-90 transition max-w-[130px] sm:max-w-none truncate">
                         {% if current_user and current_user.profile_pic %}
-                            <img src="{{ current_user.profile_pic }}" alt="Avatar" class="w-6 h-6 rounded-full object-cover">
+                            <img src="{{ current_user.profile_pic }}" alt="Avatar" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover shrink-0">
                         {% else %}
-                            <i class="fa-solid fa-user"></i>
+                            <i class="fa-solid fa-user shrink-0"></i>
                         {% endif %}
-                        <span>{{ session['username'] }}</span>
-                    </a>
-                    
-                    <button type="button" onclick="openModal('publish-modal')" class="bg-african-yellow text-gray-900 hover:bg-yellow-400 px-4 py-2 rounded-lg text-sm font-bold transition flex items-center space-x-1 shadow">
-                        <i class="fa-solid fa-plus"></i> <span>Publicar</span>
-                    </button>
-                    <a href="/logout" class="text-white hover:text-red-200 text-sm transition" title="Cerrar sesión">
-                        <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                        <span class="truncate">{{ session['username'] }}</span>
                     </a>
                 {% else %}
                     <div id="g_id_onload" data-client_id="{{ google_client_id }}" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
@@ -131,16 +124,11 @@
     {% endwith %}
 
     <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-6">
-        <div class="bg-gradient-to-r from-african-green via-african-yellow to-african-red rounded-2xl p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
+        <div class="bg-gradient-to-r from-african-green via-african-yellow to-african-red rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
             <div class="absolute inset-0 bg-black/10"></div>
-            <div class="space-y-2 mb-4 md:mb-0 relative z-10">
-                <h1 class="text-3xl font-black drop-shadow">AfricanWorld - Compraventa Internacional</h1>
-                <p class="text-white font-medium drop-shadow">Conectando mercados, ciudades y culturas de todo el continente.</p>
-            </div>
-            <div class="relative z-10">
-                {% if session.get('username') %}
-                    <button type="button" onclick="openModal('publish-modal')" class="bg-white text-gray-900 font-bold px-6 py-3 rounded-xl shadow hover:bg-gray-100 transition">Publicar Artículo</button>
-                {% endif %}
+            <div class="space-y-2 text-center md:text-left relative z-10">
+                <h1 class="text-2xl sm:text-3xl font-black drop-shadow">AfricanWorld - Compraventa Internacional</h1>
+                <p class="text-xs sm:text-base text-white font-medium drop-shadow">Conectando mercados, ciudades y culturas de todo el continente.</p>
             </div>
         </div>
 
@@ -148,13 +136,13 @@
         <form method="GET" action="/" class="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border">
             <div class="relative w-full sm:w-96">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fa-solid fa-search"></i></span>
-                <input type="text" name="search" value="{{ search }}" placeholder="Buscar por título, país, ciudad..." class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-african-green bg-white">
+                <input type="text" name="search" value="{{ search }}" placeholder="Buscar por título, país, ciudad..." class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-african-green bg-white text-sm">
             </div>
             <button type="submit" class="w-full sm:w-auto bg-african-green text-white px-6 py-2 rounded-xl text-sm font-bold hover:opacity-90 transition shadow">Buscar</button>
         </form>
 
         <!-- Listado de Artículos -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for art in articles %}
                 <div class="bg-white rounded-2xl shadow-sm border overflow-hidden flex flex-col justify-between hover:shadow-md transition relative">
                     
@@ -174,7 +162,7 @@
                             </div>
                         {% endif %}
 
-                        <div class="p-6 space-y-3">
+                        <div class="p-5 sm:p-6 space-y-3">
                             <div class="flex justify-between items-start gap-2">
                                 <h3 class="font-bold text-lg text-gray-900 leading-tight">
                                     <a href="/articulo/{{ art.slug }}" class="hover:text-african-green transition">{{ art.title }}</a>
@@ -193,7 +181,7 @@
                         </div>
                     </div>
 
-                    <div class="p-6 pt-0 mt-4 border-t border-gray-100 flex flex-col space-y-3">
+                    <div class="p-5 sm:p-6 pt-0 mt-4 border-t border-gray-100 flex flex-col space-y-3">
                         <div class="text-xs text-gray-500 pt-3 flex justify-between items-center">
                             <span>Vendedor: <a href="/perfil/{{ art.username }}" class="font-bold text-african-green hover:underline">@{{ art.username }}</a></span>
                             <span class="text-gray-400" title="Visualizaciones únicas"><i class="fa-solid fa-eye mr-1"></i>{{ art.views }}</span>
@@ -250,98 +238,6 @@
                     Enviar Denuncia
                 </button>
             </form>
-        </div>
-    </div>
-
-    <!-- MODAL PUBLICAR ARTÍCULO -->
-    <div id="publish-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white max-w-lg w-full p-8 rounded-2xl shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto border-t-8 border-african-yellow">
-            <button type="button" onclick="closeModal('publish-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
-            <h2 class="text-2xl font-black text-gray-900 flex items-center space-x-2">
-                <i class="fa-solid fa-bullhorn text-african-yellow"></i>
-                <span>Publicar Artículo</span>
-            </h2>
-            <form action="/publish" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="return validatePhotos()">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700">Título del Artículo</label>
-                    <input type="text" name="title" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">Precio ($ USD / Local)</label>
-                        <input type="number" step="0.01" min="0" name="price" placeholder="Ej: 25.00" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none font-bold">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">Teléfono</label>
-                        <input type="tel" name="phone" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">País</label>
-                        <input type="text" name="country" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">Ciudad</label>
-                        <input type="text" name="city" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-gray-700">Correo de Contacto</label>
-                    <input type="email" name="email" value="{{ session.get('email', '') }}" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
-                </div>
-
-                <!-- SECCIÓN DINÁMICA DE FOTOS CON BOTÓN AMARILLO (+) -->
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">
-                        Fotos del Artículo <span class="text-xs text-gray-400 font-normal">(Máximo 17 fotos)</span>
-                    </label>
-                    
-                    <input type="file" id="photo-picker" accept="image/*" multiple class="hidden" onchange="handleFileSelect(event)">
-                    
-                    <div class="grid grid-cols-4 gap-3 p-3 bg-gray-50 border rounded-2xl" id="photo-preview-grid">
-                        <button type="button" onclick="document.getElementById('photo-picker').click()" id="add-photo-btn" class="h-20 border-2 border-dashed border-african-yellow bg-yellow-50 hover:bg-yellow-100 rounded-xl flex flex-col items-center justify-center text-african-yellow transition shadow-sm group">
-                            <i class="fa-solid fa-plus text-2xl group-hover:scale-125 transition-transform"></i>
-                            <span class="text-[10px] font-black text-gray-800 mt-1">Añadir Foto</span>
-                        </button>
-                    </div>
-                    
-                    <input type="file" name="photos" id="final-photos" multiple class="hidden">
-                    <p class="text-xs text-red-500 hidden mt-1 font-bold" id="photo-error">Debes agregar al menos 1 foto válida.</p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-gray-700">Descripción</label>
-                    <textarea name="description" rows="3" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none"></textarea>
-                </div>
-
-                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold hover:opacity-90 transition shadow">Publicar Anuncio</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL DE ADVERTENCIA POR CONTENIDO INAPROPIADO -->
-    <div id="nsfw-warning-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4 border-t-8 border-african-red text-center">
-            <div class="w-16 h-16 bg-red-100 text-african-red rounded-full flex items-center justify-center mx-auto text-3xl">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <h3 class="text-2xl font-black text-gray-900">Foto no permitida</h3>
-            <p class="text-sm text-gray-600 leading-relaxed">
-                Hemos detectado que la imagen que intentas subir puede contener elementos explícitos, sexuales u ofensivos no permitidos en la comunidad.
-            </p>
-
-            <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-xl text-xs text-yellow-800 text-left">
-                <i class="fa-solid fa-book-bookmark text-african-yellow mr-1"></i>
-                Te sugerimos revisar detenidamente nuestros <a href="/terminos" target="_blank" class="font-bold underline text-african-green">Términos y Condiciones</a> sobre contenido permitido antes de intentar publicar de nuevo.
-            </div>
-
-            <button type="button" onclick="closeModal('nsfw-warning-modal')" class="w-full bg-african-red text-white py-3 rounded-xl font-bold shadow hover:bg-red-700 transition">
-                Entendido
-            </button>
         </div>
     </div>
 
@@ -411,7 +307,6 @@
             if (menu && !menu.classList.contains('hidden')) menu.classList.add('hidden');
         }
 
-        /* JAVASCRIPT: RECEPCIÓN DE NOTIFICACIONES EN TIEMPO REAL */
         let lastUnreadCount = 0;
 
         function checkNotificationsRealtime() {
@@ -443,8 +338,8 @@
                                 var html = '';
                                 data.notifications.forEach(function(noti) {
                                     html += '<a href="' + noti.link + '" class="block p-3 rounded-xl bg-gray-50 hover:bg-emerald-50 transition border border-gray-100 text-xs space-y-1">' +
-                                                '<p class="font-bold text-gray-900 leading-snug">' + noti.message + '</p>' +
-                                                '<span class="text-[10px] text-african-green font-bold block text-right">' + noti.time_ago + '</span>' +
+                                            '<p class="font-bold text-gray-900 leading-snug">' + noti.message + '</p>' +
+                                            '<span class="text-[10px] text-african-green font-bold block text-right">' + noti.time_ago + '</span>' +
                                             '</a>';
                                 });
                                 container.innerHTML = html;
@@ -497,98 +392,16 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ credential: pendingGoogleCredential })
-            }).then(res => res.json()).then(data => {
-                if (data.status === 'success') window.location.href = data.redirect;
-            });
-        }
-
-        /* MODELO DE IA PARA DETECCIÓN DE CONTENIDO SEXUAL/OFENSIVO */
-        let nsfwModel = null;
-        if (typeof nsfwjs !== 'undefined') {
-            nsfwjs.load().then(model => {
-                nsfwModel = model;
-            });
-        }
-
-        let selectedFiles = [];
-
-        async function handleFileSelect(event) {
-            const files = Array.from(event.target.files);
-            
-            for (let file of files) {
-                if (selectedFiles.length >= 17) {
-                    alert("Solo puedes subir un máximo de 17 fotos.");
-                    break;
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = data.redirect;
+                } else {
+                    alert('Error al iniciar sesión: ' + data.message);
                 }
-
-                if (nsfwModel) {
-                    const img = document.createElement('img');
-                    img.src = URL.createObjectURL(file);
-                    await img.decode();
-                    const predictions = await nsfwModel.classify(img);
-                    
-                    const nsfwAlert = predictions.some(p => (p.className === 'Porn' || p.className === 'Sexy' || p.className === 'Hentai') && p.probability > 0.60);
-
-                    if (nsfwAlert) {
-                        openModal('nsfw-warning-modal');
-                        continue;
-                    }
-                }
-
-                selectedFiles.push(file);
-            }
-            
-            updatePhotoUI();
-            event.target.value = '';
-        }
-
-        function removePhoto(index) {
-            selectedFiles.splice(index, 1);
-            updatePhotoUI();
-        }
-
-        function updatePhotoUI() {
-            const grid = document.getElementById('photo-preview-grid');
-            const addBtn = document.getElementById('add-photo-btn');
-            
-            const previews = grid.querySelectorAll('.preview-item');
-            previews.forEach(p => p.remove());
-
-            selectedFiles.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.className = 'relative h-20 rounded-xl overflow-hidden border shadow-sm preview-item group';
-                    div.innerHTML = '<img src="' + e.target.result + '" class="w-full h-full object-cover">' +
-                        '<button type="button" onclick="removePhoto(' + index + ')" class="absolute top-1 right-1 bg-african-red text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold hover:scale-110 transition shadow">' +
-                            '&times;' +
-                        '</button>';
-                    grid.insertBefore(div, addBtn);
-                };
-                reader.readAsDataURL(file);
-            });
-
-            if (selectedFiles.length >= 17) {
-                addBtn.classList.add('hidden');
-            } else {
-                addBtn.classList.remove('hidden');
-            }
-
-            const dataTransfer = new DataTransfer();
-            selectedFiles.forEach(file => dataTransfer.items.add(file));
-            document.getElementById('final-photos').files = dataTransfer.files;
-
-            if (selectedFiles.length > 0) {
-                document.getElementById('photo-error').classList.add('hidden');
-            }
-        }
-
-        function validatePhotos() {
-            if (selectedFiles.length === 0) {
-                document.getElementById('photo-error').classList.remove('hidden');
-                return false;
-            }
-            return true;
+            })
+            .catch(err => console.error(err));
         }
     </script>
 </body>
