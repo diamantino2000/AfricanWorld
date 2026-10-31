@@ -44,85 +44,92 @@
         </div>
     </div>
 
-    <!-- HEADER -->
+    <!-- HEADER OPTIMIZADO PARA MÓVILES -->
     <header class="bg-african-green text-white shadow-md border-b-4 border-african-yellow relative z-50">
-        <div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+        <div class="max-w-7xl mx-auto px-3 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
             
-            <!-- LOGO Y TEXTO AFRICANWORLD -->
-            <a href="/" class="flex items-center space-x-2 sm:space-x-3 shrink-0" style="display: flex !important; align-items: center !important; text-decoration: none !important;">
-                <img src="/static/uploads/logo.png" alt="AfricanWorld Logo" class="h-10 sm:h-14 w-auto object-contain drop-shadow-md">
-                <span style="font-size: 22px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; line-height: 1 !important; display: inline-block !important;">
-                    African<span style="color: #FCD116 !important;">World</span>
-                </span>
-            </a>
+            <!-- FILA SUPERIOR EN MÓVIL: LOGO Y ACCESOS RÁPIDOS -->
+            <div class="w-full flex justify-between items-center">
+                <a href="/" class="flex items-center space-x-2 shrink-0" style="display: flex !important; align-items: center !important; text-decoration: none !important;">
+                    <img src="/static/uploads/logo.png" alt="AfricanWorld Logo" class="h-10 sm:h-14 w-auto object-contain drop-shadow-md">
+                    <span style="font-size: 22px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; line-height: 1 !important; display: inline-block !important;">
+                        African<span style="color: #FCD116 !important;">World</span>
+                    </span>
+                </a>
 
-            <div class="flex items-center space-x-2 sm:space-x-4">
-                {% if session.get('username') %}
-                    <!-- BUSCADOR DE USUARIOS EN EL HEADER -->
-                    <form action="/buscar-usuarios" method="GET" class="relative flex items-center" onclick="event.stopPropagation()">
-                        <input type="text" name="q" placeholder="Buscar usuario..." class="bg-emerald-800 text-white placeholder-emerald-200 text-xs px-3 py-1.5 pl-8 rounded-full focus:outline-none focus:ring-2 focus:ring-african-yellow w-28 sm:w-44 transition-all border border-emerald-700">
-                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 text-emerald-200 text-xs"></i>
-                    </form>
+                <!-- ICONOS / PERFIL EN MÓVIL -->
+                <div class="flex items-center space-x-2">
+                    {% if session.get('username') %}
+                        <!-- CARRITO DE COMPRAS -->
+                        {% set cart_count = session.get('cart', [])|length %}
+                        <a href="/carrito" class="relative text-white hover:text-african-yellow transition text-lg p-1.5" title="Carrito">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            {% if cart_count > 0 %}
+                                <span class="absolute -top-1 -right-1 bg-african-yellow text-gray-900 text-xs font-black rounded-full h-4 w-4 flex items-center justify-center shadow">
+                                    {{ cart_count }}
+                                </span>
+                            {% endif %}
+                        </a>
 
-                    <!-- CARRITO DE COMPRAS -->
-                    {% set cart_count = session.get('cart', [])|length %}
-                    <a href="/carrito" class="relative text-white hover:text-african-yellow transition text-lg sm:text-xl p-1" title="Carrito">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        {% if cart_count > 0 %}
-                            <span class="absolute -top-1 -right-1 bg-african-yellow text-gray-900 text-xs font-black rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center shadow">
-                                {{ cart_count }}
-                            </span>
-                        {% endif %}
-                    </a>
+                        <!-- CAMPANA DE NOTIFICACIONES -->
+                        {% set unread_count = current_user.get('notifications', [])|rejectattr('read')|list|length if current_user else 0 %}
+                        <div class="relative" onclick="event.stopPropagation()">
+                            <button onclick="toggleNotificationsMenu()" class="relative text-white hover:text-african-yellow transition text-lg p-1.5 focus:outline-none" title="Notificaciones">
+                                <i class="fa-solid fa-bell"></i>
+                                <span id="noti-badge" class="{% if unread_count == 0 %}hidden{% endif %} absolute -top-1 -right-1 bg-african-red text-white text-xs font-black rounded-full h-4 w-4 flex items-center justify-center animate-bounce shadow">
+                                    {{ unread_count }}
+                                </span>
+                            </button>
 
-                    <!-- CAMPANA DE NOTIFICACIONES DINÁMICA -->
-                    {% set unread_count = current_user.get('notifications', [])|rejectattr('read')|list|length if current_user else 0 %}
-                    <div class="relative" onclick="event.stopPropagation()">
-                        <button onclick="toggleNotificationsMenu()" class="relative text-white hover:text-african-yellow transition text-lg sm:text-xl p-1 focus:outline-none" title="Notificaciones">
-                            <i class="fa-solid fa-bell"></i>
-                            <span id="noti-badge" class="{% if unread_count == 0 %}hidden{% endif %} absolute -top-1 -right-1 bg-african-red text-white text-xs font-black rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center animate-bounce shadow">
-                                {{ unread_count }}
-                            </span>
-                        </button>
-
-                        <div id="notifications-menu" class="hidden absolute right-0 mt-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 text-gray-800 space-y-3 z-50">
-                            <div class="flex items-center justify-between border-b pb-2">
-                                <h3 class="font-black text-sm text-gray-900 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-bell text-african-yellow"></i> Notificaciones
-                                </h3>
-                                <span class="text-xs text-gray-400">Actividad reciente</span>
-                            </div>
-                            <div id="notifications-container" class="space-y-2 max-h-72 overflow-y-auto">
-                                {% if current_user and current_user.get('notifications') %}
-                                    {% for noti in current_user.get('notifications') %}
-                                        <a href="{{ noti.link }}" class="block p-3 rounded-xl bg-gray-50 hover:bg-emerald-50 transition border border-gray-100 text-xs space-y-1">
-                                            <p class="font-bold text-gray-900 leading-snug">{{ noti.message }}</p>
-                                            <span class="text-[10px] text-african-green font-bold block text-right">
-                                                {{ noti.created_at|time_ago if noti.created_at else noti.get('date', '') }}
-                                            </span>
-                                        </a>
-                                    {% endfor %}
-                                {% else %}
-                                    <p class="text-gray-400 text-xs text-center py-4 italic">No tienes notificaciones nuevas.</p>
-                                {% endif %}
+                            <div id="notifications-menu" class="hidden absolute right-0 mt-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 text-gray-800 space-y-3 z-50">
+                                <div class="flex items-center justify-between border-b pb-2">
+                                    <h3 class="font-black text-sm text-gray-900 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-bell text-african-yellow"></i> Notificaciones
+                                    </h3>
+                                    <span class="text-xs text-gray-400">Actividad reciente</span>
+                                </div>
+                                <div id="notifications-container" class="space-y-2 max-h-72 overflow-y-auto">
+                                    {% if current_user and current_user.get('notifications') %}
+                                        {% for noti in current_user.get('notifications') %}
+                                            <a href="{{ noti.link }}" class="block p-3 rounded-xl bg-gray-50 hover:bg-emerald-50 transition border border-gray-100 text-xs space-y-1">
+                                                <p class="font-bold text-gray-900 leading-snug">{{ noti.message }}</p>
+                                                <span class="text-[10px] text-african-green font-bold block text-right">
+                                                    {{ noti.created_at|time_ago if noti.created_at else noti.get('date', '') }}
+                                                </span>
+                                            </a>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-gray-400 text-xs text-center py-4 italic">No tienes notificaciones nuevas.</p>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- USUARIO LOGUEADO -->
-                    <a href="/perfil/{{ session['username'] }}" class="flex items-center space-x-2 bg-african-yellow text-gray-900 px-2.5 sm:px-3 py-1.5 rounded-full shadow text-xs sm:text-sm font-bold hover:opacity-90 transition max-w-[130px] sm:max-w-none truncate">
-                        {% if current_user and current_user.profile_pic %}
-                            <img src="{{ current_user.profile_pic }}" alt="Avatar" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover shrink-0">
-                        {% else %}
-                            <i class="fa-solid fa-user shrink-0"></i>
-                        {% endif %}
-                        <span class="truncate">{{ session['username'] }}</span>
-                    </a>
-                {% else %}
-                    <div id="g_id_onload" data-client_id="{{ google_client_id }}" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-                    <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="large"></div>
-                {% endif %}
+                        <!-- USUARIO LOGUEADO -->
+                        <a href="/perfil/{{ session['username'] }}" class="flex items-center space-x-1.5 bg-african-yellow text-gray-900 px-2.5 py-1.5 rounded-full shadow text-xs font-bold hover:opacity-90 transition max-w-[110px] sm:max-w-none truncate">
+                            {% if current_user and current_user.profile_pic %}
+                                <img src="{{ current_user.profile_pic }}" alt="Avatar" class="w-5 h-5 rounded-full object-cover shrink-0">
+                            {% else %}
+                                <i class="fa-solid fa-user shrink-0"></i>
+                            {% endif %}
+                            <span class="truncate">{{ session['username'] }}</span>
+                        </a>
+                    {% else %}
+                        <div id="g_id_onload" data-client_id="{{ google_client_id }}" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
+                        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="medium"></div>
+                    {% endif %}
+                </div>
             </div>
+
+            <!-- BUSCADOR DE USUARIOS ADAPTADO A ANCHO COMPLETO EN MÓVIL -->
+            {% if session.get('username') %}
+            <div class="w-full sm:w-auto">
+                <form action="/buscar-usuarios" method="GET" class="relative flex items-center w-full" onclick="event.stopPropagation()">
+                    <input type="text" name="q" placeholder="Buscar usuario..." class="bg-emerald-800 text-white placeholder-emerald-200 text-xs px-3 py-2 pl-8 rounded-full focus:outline-none focus:ring-2 focus:ring-african-yellow w-full sm:w-44 transition-all border border-emerald-700">
+                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 text-emerald-200 text-xs"></i>
+                </form>
+            </div>
+            {% endif %}
         </div>
     </header>
 
@@ -139,18 +146,19 @@
         {% endif %}
     {% endwith %}
 
-    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-6">
-        <div class="bg-gradient-to-r from-african-green via-african-yellow to-african-red rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+        <!-- BANNER RESPONSIVO -->
+        <div class="bg-gradient-to-r from-african-green via-african-yellow to-african-red rounded-2xl p-5 sm:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
             <div class="absolute inset-0 bg-black/10"></div>
             <div class="space-y-2 text-center md:text-left relative z-10">
-                <h1 class="text-2xl sm:text-3xl font-black drop-shadow">AfricanWorld - Compraventa Internacional</h1>
+                <h1 class="text-xl sm:text-3xl font-black drop-shadow">AfricanWorld - Compraventa Internacional</h1>
                 <p class="text-xs sm:text-base text-white font-medium drop-shadow">Conectando mercados, ciudades y culturas de todo el continente.</p>
             </div>
         </div>
 
         <!-- Buscador de Artículos -->
-        <form method="GET" action="/" class="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border">
-            <div class="relative w-full sm:w-96">
+        <form method="GET" action="/" class="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border">
+            <div class="relative w-full">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fa-solid fa-search"></i></span>
                 <input type="text" name="search" value="{{ search }}" placeholder="Buscar por título, país, ciudad..." class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-african-green bg-white text-sm">
             </div>
