@@ -24,9 +24,48 @@
         .bg-african-yellow { background-color: #FCD116; }
         .text-african-yellow { color: #D4AC0D; }
         .bg-african-red { background-color: #CE1126; }
+
+        /* ESTILOS PARA LA INTRO PERSONALIZADA VERDE Y BLANCO */
+        #custom-intro {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #007A3D 0%, #004d26 100%);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        .intro-logo-container {
+            animation: pulseIntro 1.5s infinite alternate ease-in-out;
+            text-align: center;
+        }
+        .intro-logo-container img {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            margin: 0 auto 15px auto;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+        }
+        @keyframes pulseIntro {
+            0% { transform: scale(0.95); opacity: 0.85; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between overflow-x-hidden" onclick="closeNotificationsMenu()">
+
+    <!-- INTRO PERSONALIZADA VERDE Y BLANCO CON LOGO -->
+    <div id="custom-intro">
+        <div class="intro-logo-container">
+            <img src="/static/uploads/logo.png" alt="AfricanWorld Logo">
+            <h1 style="font-size: 28px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important;">
+                African<span style="color: #FCD116 !important;">World</span>
+            </h1>
+            <p class="text-emerald-100 text-xs mt-2 font-medium tracking-widest uppercase">Cargando experiencia...</p>
+        </div>
+    </div>
 
     <!-- HEADER -->
     <header class="bg-african-green text-white shadow-md border-b-4 border-african-yellow relative z-50">
@@ -279,6 +318,18 @@
     </footer>
 
     <script>
+        // SCRIPT PARA OCULTAR LA INTRO TRAS LA CARGA
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const intro = document.getElementById('custom-intro');
+                if (intro) {
+                    intro.style.opacity = '0';
+                    intro.style.visibility = 'hidden';
+                    setTimeout(function() { intro.remove(); }, 600);
+                }
+            }, 1800); // Se muestra durante 1.8 segundos y se desvanece
+        });
+
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         
