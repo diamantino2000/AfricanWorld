@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +31,7 @@
                 </span>
             </a>
             <a href="/" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-gray-100 transition flex items-center gap-2">
-                <i class="fa-solid fa-house"></i> Volver
+                <i class="fa-solid fa-house"></i> <span data-es="Volver" data-fr="Retour" data-en="Back">Volver</span>
             </a>
         </div>
     </header>
@@ -43,10 +43,14 @@
                 <img src="{{ profile_user.profile_pic if profile_user.profile_pic else '/static/uploads/default_user.png' }}" alt="Foto" class="w-24 h-24 rounded-full object-cover border-4 border-african-yellow shadow-lg">
                 <div class="space-y-1">
                     <h1 class="text-3xl font-black text-gray-900">@{{ profile_user.username }}</h1>
-                    <p class="text-xs text-gray-500"><i class="fa-solid fa-envelope mr-1"></i>{{ profile_user.email }}</p>
+                    <p class="text-xs text-gray-500"><i class="fa-solid fa-envelope mr-1"></i>{{ profile_user.email if profile_user.email else '' }}</p>
                     <div class="flex gap-4 pt-2 justify-center md:justify-start text-xs font-bold text-gray-600">
-                        <span><strong id="followers-count" class="text-gray-900 text-sm">{{ profile_user.followers|length if profile_user.followers else 0 }}</strong> Seguidores</span>
-                        <span><strong class="text-gray-900 text-sm">{{ profile_user.following|length if profile_user.following else 0 }}</strong> Siguiendo</span>
+                        <!-- COMPROBACIÓN SEGURA DE LONGITUD DE SEGUIDORES -->
+                        {% set followers_list = profile_user.followers if profile_user.followers is sequence and profile_user.followers is not string else [] %}
+                        {% set following_list = profile_user.following if profile_user.following is sequence and profile_user.following is not string else [] %}
+                        
+                        <span><strong id="followers-count" class="text-gray-900 text-sm">{{ followers_list|length }}</strong> <span data-es="Seguidores" data-fr="Abonnés" data-en="Followers">Seguidores</span></span>
+                        <span><strong class="text-gray-900 text-sm">{{ following_list|length }}</strong> <span data-es="Siguiendo" data-fr="Abonnements" data-en="Following">Siguiendo</span></span>
                     </div>
                 </div>
             </div>
@@ -54,10 +58,11 @@
             <div class="flex items-center gap-3">
                 {% if session.get('username') and session['username'] == profile_user.username %}
                     <a href="/settings" class="bg-gray-100 text-gray-800 border px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-200 transition flex items-center gap-2">
-                        <i class="fa-solid fa-gear"></i> Editar Ajustes
+                        <i class="fa-solid fa-gear"></i> <span data-es="Editar Ajustes" data-fr="Modifier Paramètres" data-en="Edit Settings">Editar Ajustes</span>
                     </a>
                 {% elif session.get('username') %}
-                    {% set is_following = session['username'] in (profile_user.followers or []) %}
+                    <!-- EVALUACIÓN SEGURA DE SI SIGUE AL USUARIO -->
+                    {% set is_following = session['username'] in followers_list %}
                     <button id="follow-btn" onclick="toggleFollow('{{ profile_user.username }}')" class="{% if is_following %} bg-gray-200 text-gray-800 {% else %} bg-african-green text-white {% endif %} px-6 py-2.5 rounded-xl text-xs font-bold shadow hover:opacity-90 transition">
                         {{ 'Siguiendo' if is_following else 'Seguir' }}
                     </button>
@@ -69,7 +74,7 @@
         <div class="space-y-4">
             <h2 class="text-xl font-black text-gray-900 flex items-center gap-2 border-b pb-2">
                 <i class="fa-solid fa-box text-african-yellow"></i>
-                <span>Publicaciones de {{ profile_user.username }}</span>
+                <span><span data-es="Publicaciones de" data-fr="Publications de" data-en="Posts by">Publicaciones de</span> {{ profile_user.username }}</span>
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -91,17 +96,17 @@
                         </div>
 
                         <div class="p-5 pt-0 border-t mt-3 flex justify-between items-center text-xs">
-                            <a href="/articulo/{{ art.slug }}" class="text-african-green font-bold hover:underline">Ver Publicación &rarr;</a>
+                            <a href="/articulo/{{ art.slug }}" class="text-african-green font-bold hover:underline" data-es="Ver Publicación &rarr;" data-fr="Voir Publication &rarr;" data-en="View Post &rarr;">Ver Publicación &rarr;</a>
                             {% if session.get('username') == profile_user.username %}
                                 <form action="/articulo/{{ art.id }}/delete" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?')">
-                                    <button type="submit" class="text-african-red font-bold hover:underline"><i class="fa-solid fa-trash mr-1"></i>Eliminar</button>
+                                    <button type="submit" class="text-african-red font-bold hover:underline"><i class="fa-solid fa-trash mr-1"></i><span data-es="Eliminar" data-fr="Supprimer" data-en="Delete">Eliminar</span></button>
                                 </form>
                             {% endif %}
                         </div>
                     </div>
                 {% else %}
                     <div class="col-span-full text-center py-12 text-gray-400 bg-white rounded-2xl border">
-                        <p>Este usuario aún no ha publicado artículos.</p>
+                        <p data-es="Este usuario aún no ha publicado artículos." data-fr="Cet utilisateur n'a pas encore publié d'articles." data-en="This user has not posted any articles yet.">Este usuario aún no ha publicado artículos.</p>
                     </div>
                 {% endfor %}
             </div>
@@ -109,10 +114,26 @@
     </main>
 
     <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
-        <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
+        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved.">Todos los derechos reservados.</span></p>
     </footer>
 
     <script>
+        // DETECTOR DE IDIOMA DEL DISPOSITIVO
+        document.addEventListener("DOMContentLoaded", function() {
+            const rawLang = (navigator.language || navigator.userLanguage || "es").toLowerCase();
+            let langCode = "es";
+            if (rawLang.startsWith("fr")) langCode = "fr";
+            else if (rawLang.startsWith("en")) langCode = "en";
+
+            document.getElementById("html-root").setAttribute("lang", langCode);
+
+            document.querySelectorAll("[data-es][data-fr]").forEach(function(el) {
+                if (langCode === "fr" && el.hasAttribute("data-fr")) el.textContent = el.getAttribute("data-fr");
+                else if (langCode === "en" && el.hasAttribute("data-en")) el.textContent = el.getAttribute("data-en");
+                else el.textContent = el.getAttribute("data-es");
+            });
+        });
+
         function toggleFollow(username) {
             fetch('/follow/' + username, { method: 'POST' })
             .then(res => res.json())
