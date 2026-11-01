@@ -390,9 +390,25 @@ def view_cart():
 @app.route('/perfil/<username>')
 def profile(username):
     users = load_json_users()
+    
+    # Si por alguna razón el usuario no está en el JSON aún, lo creamos al vuelo con su sesión actual
     profile_user = next((u for u in users if u['username'] == username), None)
     if not profile_user:
-        return redirect(url_for('index'))
+        if session.get('username') == username:
+            profile_user = {
+                "id": len(users) + 1,
+                "username": username,
+                "email": session.get('email', ''),
+                "profile_pic": session.get('profile_pic', '/static/uploads/default_user.png'),
+                "followers": [],
+                "following": [],
+                "notifications": []
+            }
+            users.append(profile_user)
+            save_json_users(users)
+        else:
+            flash("El usuario no existe.", "error")
+            return redirect(url_for('index'))
     
     current_user = next((u for u in users if u['username'] == session.get('username')), None) if 'username' in session else None
     user_articles = Article.query.filter_by(username=username).order_by(Article.id.desc()).all()
