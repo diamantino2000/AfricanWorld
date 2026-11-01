@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-es="AfricanWorld - Compraventa Global" data-fr="AfricanWorld - Commerce Global">AfricanWorld - Compraventa Global</title>
+    <title>AfricanWorld - Compraventa Global</title>
     
-    <!-- FAVICON OPTIMIZADO EN PESTAÑA -->
+    <!-- FAVICON -->
     <link rel="icon" type="image/png" sizes="32x32" href="/static/uploads/logo.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/static/uploads/logo.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/static/uploads/logo.png">
 
+    <!-- TAILWIND CSS & FONT AWESOME -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GOOGLE SIGN-IN -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
-    <!-- TENSORFLOW Y NSFWJS PARA MODERACIÓN DE IMÁGENES AUTOMÁTICA -->
+    <!-- TENSORFLOW Y NSFWJS -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nsfwjs@2.4.1/dist/nsfwjs.min.js"></script>
 
@@ -33,32 +36,32 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between overflow-x-hidden" onclick="closeNotificationsMenu()">
 
-    <!-- INTRO PERSONALIZADA PARA CUBRIR LA CARGA DE RENDER -->
+    <!-- INTRO DE CARGA -->
     <div id="render-cover-intro" style="position: fixed; inset: 0; background: linear-gradient(135deg, #007A3D 0%, #004d26 100%); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, visibility 0.5s ease;">
         <div style="text-align: center; animation: pulseIntro 1.2s infinite alternate ease-in-out;">
             <img src="/static/uploads/logo.png" alt="AfricanWorld Logo" style="width: 90px; height: 90px; object-fit: contain; margin: 0 auto 15px auto; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));">
             <h1 style="font-size: 28px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; margin: 0;">
                 African<span style="color: #FCD116 !important;">World</span>
             </h1>
-            <p data-es="Cargando plataforma..." data-fr="Chargement de la plateforme..." style="color: #d1fae5; font-size: 12px; margin-top: 8px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;">Cargando plataforma...</p>
+            <p data-es="Cargando plataforma..." data-fr="Chargement de la plateforme..." data-en="Loading platform..." style="color: #d1fae5; font-size: 12px; margin-top: 8px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;">Cargando plataforma...</p>
         </div>
     </div>
 
-    <!-- HEADER OPTIMIZADO PARA MÓVILES -->
+    <!-- HEADER -->
     <header class="bg-african-green text-white shadow-md border-b-4 border-african-yellow relative z-50">
         <div class="max-w-7xl mx-auto px-3 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
             
-            <!-- FILA SUPERIOR EN MÓVIL: LOGO Y ACCESOS RÁPIDOS -->
             <div class="w-full flex justify-between items-center">
-                <a href="/" class="flex items-center space-x-2 shrink-0" style="display: flex !important; align-items: center !important; text-decoration: none !important;">
+                <!-- LOGO -->
+                <a href="/" class="flex items-center space-x-2 shrink-0">
                     <img src="/static/uploads/logo.png" alt="AfricanWorld Logo" class="h-10 sm:h-14 w-auto object-contain drop-shadow-md">
-                    <span style="font-size: 22px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; line-height: 1 !important; display: inline-block !important;">
+                    <span style="font-size: 22px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: -0.5px !important; line-height: 1 !important;">
                         African<span style="color: #FCD116 !important;">World</span>
                     </span>
                 </a>
 
                 <!-- ICONOS / PERFIL EN MÓVIL -->
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-3">
                     {% if session.get('username') %}
                         <!-- CARRITO DE COMPRAS -->
                         {% set cart_count = session.get('cart', [])|length %}
@@ -71,8 +74,8 @@
                             {% endif %}
                         </a>
 
-                        <!-- CAMPANA DE NOTIFICACIONES -->
-                        {% set unread_count = current_user.get('notifications', [])|rejectattr('read')|list|length if current_user else 0 %}
+                        <!-- NOTIFICACIONES -->
+                        {% set unread_count = current_user.get('notifications', [])|rejectattr('read')|list|length if current_user and current_user.get('notifications') else 0 %}
                         <div class="relative" onclick="event.stopPropagation()">
                             <button onclick="toggleNotificationsMenu()" class="relative text-white hover:text-african-yellow transition text-lg p-1.5 focus:outline-none" title="Notificaciones">
                                 <i class="fa-solid fa-bell"></i>
@@ -84,9 +87,10 @@
                             <div id="notifications-menu" class="hidden absolute right-0 mt-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 text-gray-800 space-y-3 z-50">
                                 <div class="flex items-center justify-between border-b pb-2">
                                     <h3 class="font-black text-sm text-gray-900 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-bell text-african-yellow"></i> <span data-es="Notificaciones" data-fr="Notifications">Notificaciones</span>
+                                        <i class="fa-solid fa-bell text-african-yellow"></i> 
+                                        <span data-es="Notificaciones" data-fr="Notifications" data-en="Notifications">Notificaciones</span>
                                     </h3>
-                                    <span class="text-xs text-gray-400" data-es="Actividad reciente" data-fr="Activité récente">Actividad reciente</span>
+                                    <span class="text-xs text-gray-400" data-es="Actividad reciente" data-fr="Activité récente" data-en="Recent activity">Actividad reciente</span>
                                 </div>
                                 <div id="notifications-container" class="space-y-2 max-h-72 overflow-y-auto">
                                     {% if current_user and current_user.get('notifications') %}
@@ -99,20 +103,22 @@
                                             </a>
                                         {% endfor %}
                                     {% else %}
-                                        <p class="text-gray-400 text-xs text-center py-4 italic" data-es="No tienes notificaciones nuevas." data-fr="Vous n'avez pas de nouvelles notifications.">No tienes notificaciones nuevas.</p>
+                                        <p class="text-gray-400 text-xs text-center py-4 italic" data-es="No tienes notificaciones nuevas." data-fr="Vous n'avez pas de nouvelles notifications." data-en="No new notifications.">No tienes notificaciones nuevas.</p>
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
 
-                        <!-- USUARIO LOGUEADO -->
-                        <a href="/perfil/{{ session['username'] }}" class="flex items-center space-x-1.5 bg-african-yellow text-gray-900 px-2.5 py-1.5 rounded-full shadow text-xs font-bold hover:opacity-90 transition max-w-[110px] sm:max-w-none truncate">
+                        <!-- ACCESO DIRECTO AL PERFIL CORREGIDO -->
+                        <a href="/perfil/{{ session['username'] }}" class="flex items-center space-x-2 bg-african-yellow text-gray-900 px-3 py-1.5 rounded-full shadow text-xs font-bold hover:bg-yellow-400 transition shrink-0 z-10">
                             {% if current_user and current_user.profile_pic %}
-                                <img src="{{ current_user.profile_pic }}" alt="Avatar" class="w-5 h-5 rounded-full object-cover shrink-0">
+                                <img src="{{ current_user.profile_pic }}" alt="Avatar" class="w-6 h-6 rounded-full object-cover shrink-0 border border-gray-900/20">
+                            {% elif session.get('profile_pic') %}
+                                <img src="{{ session['profile_pic'] }}" alt="Avatar" class="w-6 h-6 rounded-full object-cover shrink-0 border border-gray-900/20">
                             {% else %}
-                                <i class="fa-solid fa-user shrink-0"></i>
+                                <i class="fa-solid fa-circle-user text-base shrink-0"></i>
                             {% endif %}
-                            <span class="truncate">{{ session['username'] }}</span>
+                            <span class="truncate max-w-[100px] sm:max-w-[140px]">{{ session['username'] }}</span>
                         </a>
                     {% else %}
                         <div id="g_id_onload" data-client_id="{{ google_client_id }}" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
@@ -121,11 +127,11 @@
                 </div>
             </div>
 
-            <!-- BUSCADOR DE USUARIOS ADAPTADO A ANCHO COMPLETO EN MÓVIL -->
+            <!-- BUSCADOR -->
             {% if session.get('username') %}
             <div class="w-full sm:w-auto">
                 <form action="/buscar-usuarios" method="GET" class="relative flex items-center w-full" onclick="event.stopPropagation()">
-                    <input type="text" name="q" placeholder="Buscar usuario..." data-es-placeholder="Buscar usuario..." data-fr-placeholder="Rechercher un utilisateur..." class="bg-emerald-800 text-white placeholder-emerald-200 text-xs px-3 py-2 pl-8 rounded-full focus:outline-none focus:ring-2 focus:ring-african-yellow w-full sm:w-44 transition-all border border-emerald-700">
+                    <input type="text" name="q" placeholder="Buscar usuario..." data-es-placeholder="Buscar usuario..." data-fr-placeholder="Rechercher un utilisateur..." data-en-placeholder="Search user..." class="bg-emerald-800 text-white placeholder-emerald-200 text-xs px-3 py-2 pl-8 rounded-full focus:outline-none focus:ring-2 focus:ring-african-yellow w-full sm:w-44 transition-all border border-emerald-700">
                     <i class="fa-solid fa-magnifying-glass absolute left-2.5 text-emerald-200 text-xs"></i>
                 </form>
             </div>
@@ -151,28 +157,28 @@
         <div class="bg-gradient-to-r from-african-green via-african-yellow to-african-red rounded-2xl p-5 sm:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
             <div class="absolute inset-0 bg-black/10"></div>
             <div class="space-y-2 text-center md:text-left relative z-10">
-                <h1 class="text-xl sm:text-3xl font-black drop-shadow" data-es="AfricanWorld - Compraventa Internacional" data-fr="AfricanWorld - Commerce International">AfricanWorld - Compraventa Internacional</h1>
-                <p class="text-xs sm:text-base text-white font-medium drop-shadow" data-es="Conectando mercados, ciudades y culturas de todo el continente." data-fr="Connectant les marchés, les villes et les cultures à travers tout le continent.">Conectando mercados, ciudades y culturas de todo el continente.</p>
+                <h1 class="text-xl sm:text-3xl font-black drop-shadow" data-es="AfricanWorld - Compraventa Internacional" data-fr="AfricanWorld - Commerce International" data-en="AfricanWorld - Global Marketplace">AfricanWorld - Compraventa Internacional</h1>
+                <p class="text-xs sm:text-base text-white font-medium drop-shadow" data-es="Conectando mercados, ciudades y culturas de todo el continente." data-fr="Connectant les marchés, les villes et les cultures à travers tout le continent." data-en="Connecting markets, cities, and cultures across the continent.">Conectando mercados, ciudades y culturas de todo el continente.</p>
             </div>
         </div>
 
-        <!-- Buscador de Artículos -->
+        <!-- BUSCADOR DE ARTÍCULOS -->
         <form method="GET" action="/" class="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border">
             <div class="relative w-full">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fa-solid fa-search"></i></span>
-                <input type="text" name="search" value="{{ search }}" placeholder="Buscar por título, país, ciudad..." data-es-placeholder="Buscar por título, país, ciudad..." data-fr-placeholder="Rechercher par titre, pays, ville..." class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-african-green bg-white text-sm">
+                <input type="text" name="search" value="{{ search }}" placeholder="Buscar por título, país, ciudad..." data-es-placeholder="Buscar por título, país, ciudad..." data-fr-placeholder="Rechercher par titre, pays, ville..." data-en-placeholder="Search by title, country, city..." class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-african-green bg-white text-sm">
             </div>
-            <button type="submit" class="w-full sm:w-auto bg-african-green text-white px-6 py-2 rounded-xl text-sm font-bold hover:opacity-90 transition shadow" data-es="Buscar" data-fr="Rechercher">Buscar</button>
+            <button type="submit" class="w-full sm:w-auto bg-african-green text-white px-6 py-2 rounded-xl text-sm font-bold hover:opacity-90 transition shadow" data-es="Buscar" data-fr="Rechercher" data-en="Search">Buscar</button>
         </form>
 
-        <!-- Listado de Artículos -->
+        <!-- LISTADO DE ARTÍCULOS -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for art in articles %}
                 <div class="bg-white rounded-2xl shadow-sm border overflow-hidden flex flex-col justify-between hover:shadow-md transition relative">
                     
                     {% if art.is_sold %}
                         <div class="absolute top-3 left-3 z-20 bg-african-red text-white text-xs font-black px-3 py-1 rounded-full shadow tracking-wider uppercase flex items-center gap-1">
-                            <i class="fa-solid fa-check-double"></i> <span data-es="Comprado" data-fr="Acheté">Comprado</span>
+                            <i class="fa-solid fa-check-double"></i> <span data-es="Comprado" data-fr="Acheté" data-en="Sold">Comprado</span>
                         </div>
                     {% endif %}
 
@@ -181,7 +187,7 @@
                             <div class="h-48 bg-gray-200 overflow-hidden relative">
                                 <img src="{{ art.images.split(',')[0] }}" alt="{{ art.title }}" class="w-full h-full object-cover {% if art.is_sold %} opacity-60 grayscale {% endif %}">
                                 <span class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md font-bold">
-                                    <i class="fa-solid fa-images mr-1"></i> {{ art.images.split(',')|length }} <span data-es="fotos" data-fr="photos">fotos</span>
+                                    <i class="fa-solid fa-images mr-1"></i> {{ art.images.split(',')|length }} <span data-es="fotos" data-fr="photos" data-en="photos">fotos</span>
                                 </span>
                             </div>
                         {% endif %}
@@ -207,13 +213,13 @@
 
                     <div class="p-5 sm:p-6 pt-0 mt-4 border-t border-gray-100 flex flex-col space-y-3">
                         <div class="text-xs text-gray-500 pt-3 flex justify-between items-center">
-                            <span><span data-es="Vendedor" data-fr="Vendeur">Vendedor</span>: <a href="/perfil/{{ art.username }}" class="font-bold text-african-green hover:underline">@{{ art.username }}</a></span>
+                            <span><span data-es="Vendedor" data-fr="Vendeur" data-en="Seller">Vendedor</span>: <a href="/perfil/{{ art.username }}" class="font-bold text-african-green hover:underline">@{{ art.username }}</a></span>
                             <span class="text-gray-400" title="Visualizaciones únicas"><i class="fa-solid fa-eye mr-1"></i>{{ art.views }}</span>
                         </div>
 
-                        <!-- MÓDULO DE BOTONES: DETALLE + CARRITO + DENUNCIAR -->
+                        <!-- MÓDULO DE BOTONES -->
                         <div class="flex items-center gap-2">
-                            <a href="/articulo/{{ art.slug }}" class="flex-grow bg-african-green text-white hover:opacity-90 py-2 rounded-xl text-center text-sm font-bold transition block shadow" data-es="Ver Detalle" data-fr="Voir Détails">
+                            <a href="/articulo/{{ art.slug }}" class="flex-grow bg-african-green text-white hover:opacity-90 py-2 rounded-xl text-center text-sm font-bold transition block shadow" data-es="Ver Detalle" data-fr="Voir Détails" data-en="View Details">
                                 Ver Detalle
                             </a>
 
@@ -236,58 +242,58 @@
             {% else %}
                 <div class="col-span-full text-center py-12 text-gray-400 bg-white rounded-2xl border">
                     <i class="fa-solid fa-box-open text-4xl mb-2 text-african-yellow"></i>
-                    <p data-es="No se encontraron artículos publicados." data-fr="Aucun article publié trouvé.">No se encontraron artículos publicados.</p>
+                    <p data-es="No se encontraron artículos publicados." data-fr="Aucun article publié trouvé." data-en="No articles found.">No se encontraron artículos publicados.</p>
                 </div>
             {% endfor %}
         </div>
     </main>
 
-    <!-- MODAL PARA ESCRIBIR LA DENUNCIA -->
+    <!-- MODAL DE DENUNCIA -->
     <div id="report-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl relative space-y-4 border-t-8 border-african-red">
             <button type="button" onclick="closeModal('report-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
             <h3 class="text-xl font-black text-gray-900 flex items-center gap-2">
                 <i class="fa-solid fa-flag text-african-red"></i>
-                <span data-es="Denunciar Publicación" data-fr="Signaler la Publication">Denunciar Publicación</span>
+                <span data-es="Denunciar Publicación" data-fr="Signaler la Publication" data-en="Report Listing">Denunciar Publicación</span>
             </h3>
             <p class="text-xs text-gray-600 leading-relaxed">
-                <span data-es="Escribe el motivo por el cual denuncias la publicación" data-fr="Écrivez la raison pour laquelle vous signalez la publication">Escribe el motivo por el cual denuncias la publicación</span> <strong id="report-article-title" class="text-gray-900"></strong>:
+                <span data-es="Escribe el motivo por el cual denuncias la publicación" data-fr="Écrivez la raison pour laquelle vous signalez la publication" data-en="Reason for reporting listing">Escribe el motivo por el cual denuncias la publicación</span> <strong id="report-article-title" class="text-gray-900"></strong>:
             </p>
             <form id="report-form" method="POST" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Explica detalladamente la razón" data-fr="Expliquez en détail la raison">Explica detalladamente la razón</label>
-                    <textarea name="reason" rows="4" placeholder="Ej: Es un intento de estafa..." data-es-placeholder="Ej: Es un intento de estafa, contiene información falsa..." data-fr-placeholder="Ex: C'est une tentative d'arnaque..." required class="w-full border p-3 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-african-red focus:outline-none"></textarea>
+                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Explica detalladamente la razón" data-fr="Expliquez en détail la raison" data-en="Explain the reason in detail">Explica detalladamente la razón</label>
+                    <textarea name="reason" rows="4" placeholder="Ej: Es un intento de estafa..." data-es-placeholder="Ej: Es un intento de estafa..." data-fr-placeholder="Ex: C'est une tentative d'arnaque..." data-en-placeholder="Ex: It is a scam attempt..." required class="w-full border p-3 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-african-red focus:outline-none"></textarea>
                 </div>
-                <button type="submit" class="w-full bg-african-red text-white py-2.5 rounded-xl text-sm font-bold shadow hover:bg-red-700 transition" data-es="Enviar Denuncia" data-fr="Envoyer le Signalement">
+                <button type="submit" class="w-full bg-african-red text-white py-2.5 rounded-xl text-sm font-bold shadow hover:bg-red-700 transition" data-es="Enviar Denuncia" data-fr="Envoyer le Signalement" data-en="Submit Report">
                     Enviar Denuncia
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMACIÓN DE TÉRMINOS PARA REGISTRO -->
+    <!-- MODAL TÉRMINOS Y CONDICIONES REGISTRO -->
     <div id="terms-modal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4 border-t-8 border-african-yellow">
             <h3 class="text-xl font-black text-gray-900 flex items-center gap-2">
                 <i class="fa-solid fa-file-contract text-african-green"></i>
-                <span data-es="Registro en AfricanWorld" data-fr="Inscription sur AfricanWorld">Registro en AfricanWorld</span>
+                <span data-es="Registro en AfricanWorld" data-fr="Inscription sur AfricanWorld" data-en="Register on AfricanWorld">Registro en AfricanWorld</span>
             </h3>
-            <p class="text-xs text-gray-600 leading-relaxed" data-es="Para continuar y crear tu cuenta, debes revisar y aceptar nuestras políticas de servicio." data-fr="Pour continuer et créer votre compte, vous devez lire et accepter nos conditions de service.">
+            <p class="text-xs text-gray-600 leading-relaxed" data-es="Para continuar y crear tu cuenta, debes revisar y aceptar nuestras políticas de servicio." data-fr="Pour continuer et créer votre compte, vous devez lire et accepter nos conditions de service." data-en="To continue and create your account, you must accept our service policies.">
                 Para continuar y crear tu cuenta, debes revisar y aceptar nuestras políticas de servicio.
             </p>
 
             <div class="flex items-start gap-2 bg-gray-50 p-3 rounded-xl border">
                 <input type="checkbox" id="accept-terms-check" class="mt-1 rounded border-gray-300 text-african-green focus:ring-african-green">
                 <label for="accept-terms-check" class="text-xs text-gray-700">
-                    <span data-es="Acepto los" data-fr="J'accepte les">Acepto los</span> <a href="/terminos" target="_blank" class="text-african-green font-bold hover:underline" data-es="Términos y Condiciones" data-fr="Termes et Conditions">Términos y Condiciones</a> (<span data-es="reconozco que los vendedores gestionan directamente sus ventas y la web exime responsabilidad de estafas" data-fr="je reconnais que les vendeurs gèrent directement leurs ventes">reconozco que los vendedores gestionan directamente sus ventas y la web exime responsabilidad de estafas</span>).
+                    <span data-es="Acepto los" data-fr="J'accepte les" data-en="I accept the">Acepto los</span> <a href="/terminos" target="_blank" class="text-african-green font-bold hover:underline" data-es="Términos y Condiciones" data-fr="Termes et Conditions" data-en="Terms & Conditions">Términos y Condiciones</a> (<span data-es="reconozco que los vendedores gestionan directamente sus ventas" data-fr="je reconnais que les vendeurs gèrent directement leurs ventes" data-en="I acknowledge sellers manage their sales directly">reconozco que los vendedores gestionan directamente sus ventas</span>).
                 </label>
             </div>
 
-            <p id="terms-error-msg" class="text-xs text-red-500 font-bold hidden" data-es="Debes marcar la casilla para poder completar el registro." data-fr="Vous devez cocher la case pour terminer l'inscription.">Debes marcar la casilla para poder completar el registro.</p>
+            <p id="terms-error-msg" class="text-xs text-red-500 font-bold hidden" data-es="Debes marcar la casilla para poder completar el registro." data-fr="Vous devez cocher la case pour terminer l'inscription." data-en="You must check the box to complete registration.">Debes marcar la casilla para poder completar el registro.</p>
 
             <div class="flex justify-end gap-2 pt-2">
-                <button type="button" onclick="closeModal('terms-modal')" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-xl text-xs font-bold" data-es="Cancelar" data-fr="Annuler">Cancelar</button>
-                <button type="button" onclick="confirmGoogleLogin()" class="bg-african-green text-white px-5 py-2 rounded-xl text-xs font-bold shadow hover:opacity-90" data-es="Continuar con Google" data-fr="Continuer avec Google">Continuar con Google</button>
+                <button type="button" onclick="closeModal('terms-modal')" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-xl text-xs font-bold" data-es="Cancelar" data-fr="Annuler" data-en="Cancel">Cancelar</button>
+                <button type="button" onclick="confirmGoogleLogin()" class="bg-african-green text-white px-5 py-2 rounded-xl text-xs font-bold shadow hover:opacity-90" data-es="Continuar con Google" data-fr="Continuer avec Google" data-en="Continue with Google">Continuar con Google</button>
             </div>
         </div>
     </div>
@@ -295,51 +301,59 @@
     <!-- FOOTER -->
     <footer class="bg-white border-t mt-12 py-6 text-center text-sm text-gray-500 border-t-4 border-african-red">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés.">Todos los derechos reservados.</span></p>
+            <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved.">Todos los derechos reservados.</span></p>
             <a href="/terminos" class="text-xs font-bold text-african-green hover:underline flex items-center gap-1">
-                <i class="fa-solid fa-scale-balanced"></i> <span data-es="Términos y Condiciones" data-fr="Termes et Conditions">Términos y Condiciones</span>
+                <i class="fa-solid fa-scale-balanced"></i> <span data-es="Términos y Condiciones" data-fr="Termes et Conditions" data-en="Terms & Conditions">Términos y Condiciones</span>
             </a>
         </div>
     </footer>
 
+    <!-- JAVASCRIPT CORREGIDO Y SISTEMA DE IDIOMA AUTOMÁTICO -->
     <script>
-        // SCRIPT DE DETECCIÓN AUTOMÁTICA DE IDIOMA DEL NAVEGADOR (ES / FR)
         document.addEventListener("DOMContentLoaded", function() {
-            // Obtener idioma del navegador (ej: "fr-FR" o "fr" o "es-ES")
-            const userLang = navigator.language || navigator.userLanguage || "es";
-            const langCode = userLang.startsWith("fr") ? "fr" : "es";
+            // DETECTAR IDIOMA DEL NAVEGADOR / DISPOSITIVO
+            const rawLang = (navigator.language || navigator.userLanguage || "es").toLowerCase();
+            let langCode = "es";
 
-            // Cambiar atributo lang en la etiqueta <html>
+            if (rawLang.startsWith("fr")) {
+                langCode = "fr";
+            } else if (rawLang.startsWith("en")) {
+                langCode = "en";
+            }
+
+            // Cambiar el atributo lang en la etiqueta <html>
             document.getElementById("html-root").setAttribute("lang", langCode);
 
-            // Traducir todos los elementos que tengan data-es y data-fr
+            // TRADUCIR ELEMENTOS CON TEXTO DINÁMICO (data-es, data-fr, data-en)
             document.querySelectorAll("[data-es][data-fr]").forEach(function(el) {
-                if (langCode === "fr") {
+                if (langCode === "fr" && el.hasAttribute("data-fr")) {
                     el.textContent = el.getAttribute("data-fr");
+                } else if (langCode === "en" && el.hasAttribute("data-en")) {
+                    el.textContent = el.getAttribute("data-en");
                 } else {
                     el.textContent = el.getAttribute("data-es");
                 }
             });
 
-            // Traducir inputs con placeholders (data-es-placeholder y data-fr-placeholder)
-            document.querySelectorAll("[data-es-placeholder][data-fr-placeholder]").forEach(function(el) {
-                if (langCode === "fr") {
+            // TRADUCIR INPUTS Y PLACEHOLDERS
+            document.querySelectorAll("[data-es-placeholder]").forEach(function(el) {
+                if (langCode === "fr" && el.hasAttribute("data-fr-placeholder")) {
                     el.setAttribute("placeholder", el.getAttribute("data-fr-placeholder"));
+                } else if (langCode === "en" && el.hasAttribute("data-en-placeholder")) {
+                    el.setAttribute("placeholder", el.getAttribute("data-en-placeholder"));
                 } else {
                     el.setAttribute("placeholder", el.getAttribute("data-es-placeholder"));
                 }
             });
         });
 
-        // DESVANECER LA INTRO TAN PRONTO LA PÁGINA COMPLETE SU CARGA EN RENDER
+        // DESVANECER PANTALLA DE INTRO AL CARGAR
         window.addEventListener('load', function() {
             const cover = document.getElementById('render-cover-intro');
             if (cover) {
                 cover.style.opacity = '0';
                 cover.style.visibility = 'hidden';
-                setTimeout(function() {
-                    cover.remove();
-                }, 500);
+                setTimeout(function() { cover.remove(); }, 500);
             }
         });
 
@@ -358,7 +372,6 @@
             
             if (menu) {
                 menu.classList.toggle('hidden');
-                
                 if (!menu.classList.contains('hidden')) {
                     if (badge) badge.classList.add('hidden');
                     fetch('/mark-notifications-read', { method: 'POST' });
@@ -407,10 +420,6 @@
                                             '</a>';
                                 });
                                 container.innerHTML = html;
-                            } else {
-                                const userLang = navigator.language || "es";
-                                const noNotiText = userLang.startsWith("fr") ? "Vous n'avez pas de nouvelles notifications." : "No tienes notificaciones nuevas.";
-                                container.innerHTML = '<p class="text-gray-400 text-xs text-center py-4 italic">' + noNotiText + '</p>';
                             }
                         }
                     })
