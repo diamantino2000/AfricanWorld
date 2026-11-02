@@ -32,6 +32,7 @@ USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
 # --- INICIALIZAR FIREBASE REALTIME DATABASE ---
+# --- INICIALIZAR FIREBASE REALTIME DATABASE ---
 cred_filename = 'africanworld-f9a89-firebase-adminsdk-fbsvc-59ac8f384d.json'
 cred_path = os.path.join(basedir, cred_filename)
 
@@ -39,11 +40,12 @@ try:
     if os.path.exists(cred_path):
         cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred, {
-            'databaseURL': 'https://africanworld-f9a89-default-rtdb.firebaseio.com/'
+            # CAMBIA ESTA URL POR LA EXACTA DE TU CONSOLA DE FIREBASE:
+            'databaseURL': 'https://africanworld-f9a89-default-rtdb.europe-west1.firebasedatabase.app/'
         })
-        print("Firebase inicializado correctamente con el archivo JSON.")
+        print("Firebase inicializado correctamente con la región de Europa.")
     else:
-        print(f"Advertencia: No se encontró el archivo {cred_filename}. Usando almacenamiento local (cuentas.json).")
+        print(f"Advertencia: No se encontró el archivo {cred_filename}.")
 except Exception as e:
     print(f"Error al inicializar Firebase: {e}")
 
