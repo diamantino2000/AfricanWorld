@@ -12,7 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- TENSORFLOW Y NSFWJS -->
+    <!-- TENSORFLOW Y NSFWJS PARA MODERACIÓN DE IMÁGENES AUTOMÁTICA -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nsfwjs@2.4.1/dist/nsfwjs.min.js"></script>
 
@@ -56,12 +56,12 @@
                 </div>
             </div>
 
-            <!-- BOTONES DE ACCIÓN -->
+            <!-- BOTONES DE ACCIÓN: PUBLICAR + AJUSTES -->
             <div class="flex items-center gap-3 flex-wrap justify-center">
                 {% if session.get('username') and session['username'] == profile_user.username %}
-                    <a href="/publicar" class="bg-african-yellow text-gray-900 px-5 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-yellow-400 transition flex items-center gap-2">
+                    <button type="button" onclick="openModal('publish-modal')" class="bg-african-yellow text-gray-900 px-5 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-yellow-400 transition flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> <span data-es="Publicar Artículo" data-fr="Publier un Article" data-en="Publish Listing" data-ar="نشر إعلان" data-pt="Publicar Anúncio">Publicar Artículo</span>
-                    </a>
+                    </button>
                     <a href="/settings" class="bg-gray-100 text-gray-800 border px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-200 transition flex items-center gap-2">
                         <i class="fa-solid fa-gear"></i> <span data-es="Editar Ajustes" data-fr="Modifier les Paramètres" data-en="Edit Settings" data-ar="تعديل الإعدادات" data-pt="Editar Configurações">Editar Ajustes</span>
                     </a>
@@ -117,11 +117,96 @@
         </div>
     </main>
 
+    <!-- MODAL PUBLICAR ARTÍCULO -->
+    <div id="publish-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-lg w-full p-8 rounded-2xl shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto border-t-8 border-african-yellow">
+            <button type="button" onclick="closeModal('publish-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+            <h2 class="text-2xl font-black text-gray-900 flex items-center space-x-2">
+                <i class="fa-solid fa-bullhorn text-african-yellow"></i>
+                <span data-es="Publicar Artículo" data-fr="Publier un Article" data-en="Publish Listing" data-ar="نشر إعلان" data-pt="Publicar Anúncio">Publicar Artículo</span>
+            </h2>
+            <form action="/publish" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="return validatePhotos()">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700" data-es="Título del Artículo" data-fr="Titre de l'Article" data-en="Listing Title" data-ar="عنوان الإعلان" data-pt="Título do Anúncio">Título del Artículo</label>
+                    <input type="text" name="title" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700" data-es="Precio ($ USD / Local)" data-fr="Prix ($ USD / Local)" data-en="Price ($ USD / Local)" data-ar="السعر ($ USD / محلي)" data-pt="Preço ($ USD / Local)">Precio ($ USD / Local)</label>
+                        <input type="number" step="0.01" min="0" name="price" placeholder="Ej: 25.00" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700" data-es="Teléfono" data-fr="Téléphone" data-en="Phone" data-ar="الهاتف" data-pt="Telefone">Teléfono</label>
+                        <input type="tel" name="phone" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700" data-es="País" data-fr="Pays" data-en="Country" data-ar="الدولة" data-pt="País">País</label>
+                        <input type="text" name="country" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700" data-es="Ciudad" data-fr="Ville" data-en="City" data-ar="المدينة" data-pt="Cidade">Ciudad</label>
+                        <input type="text" name="city" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700" data-es="Correo de Contacto" data-fr="E-mail de Contact" data-en="Contact Email" data-ar="بريد التواصل" data-pt="E-mail de Contato">Correo de Contacto</label>
+                    <input type="email" name="email" value="{{ session.get('email', '') }}" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        <span data-es="Fotos del Artículo" data-fr="Photos de l'Article" data-en="Listing Photos" data-ar="صور الإعلان" data-pt="Fotos do Anúncio">Fotos del Artículo</span> <span class="text-xs text-gray-400 font-normal" data-es="(Máximo 17 fotos)" data-fr="(Maximum 17 photos)" data-en="(Maximum 17 photos)" data-ar="(الحد الأقصى 17 صورة)" data-pt="(Máximo 17 fotos)">(Máximo 17 fotos)</span>
+                    </label>
+                    
+                    <input type="file" id="photo-picker" accept="image/*" multiple class="hidden" onchange="handleFileSelect(event)">
+                    
+                    <div class="grid grid-cols-4 gap-3 p-3 bg-gray-50 border rounded-2xl" id="photo-preview-grid">
+                        <button type="button" onclick="document.getElementById('photo-picker').click()" id="add-photo-btn" class="h-20 border-2 border-dashed border-african-yellow bg-yellow-50 hover:bg-yellow-100 rounded-xl flex flex-col items-center justify-center text-african-yellow transition shadow-sm group">
+                            <i class="fa-solid fa-plus text-2xl group-hover:scale-125 transition-transform"></i>
+                            <span class="text-[10px] font-black text-gray-800 mt-1" data-es="Añadir Foto" data-fr="Ajouter" data-en="Add Photo" data-ar="إضافة صورة" data-pt="Adicionar Foto">Añadir Foto</span>
+                        </button>
+                    </div>
+                    
+                    <input type="file" name="photos" id="final-photos" multiple class="hidden">
+                    <p class="text-xs text-red-500 hidden mt-1 font-bold" id="photo-error" data-es="Debes agregar al menos 1 foto válida." data-fr="Vous devez ajouter au moins 1 photo valide." data-en="You must add at least 1 valid photo." data-ar="يجب عليك إضافة صورة واحدة صحيحة على الأقل." data-pt="Você deve adicionar pelo menos 1 foto válida.">Debes agregar al menos 1 foto válida.</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700" data-es="Descripción" data-fr="Description" data-en="Description" data-ar="الوصف" data-pt="Descrição">Descripción</label>
+                    <textarea name="description" rows="3" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold hover:opacity-90 transition shadow" data-es="Publicar Anuncio" data-fr="Publier l'Annonce" data-en="Publish Ad" data-ar="نشر الإعلان" data-pt="Publicar Anúncio">Publicar Anuncio</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE ADVERTENCIA NSFW -->
+    <div id="nsfw-warning-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4 border-t-8 border-african-red text-center">
+            <div class="w-16 h-16 bg-red-100 text-african-red rounded-full flex items-center justify-center mx-auto text-3xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-2xl font-black text-gray-900" data-es="Foto no permitida" data-fr="Photo non autorisée" data-en="Photo not allowed" data-ar="صورة غير مسموح بها" data-pt="Foto não permitida">Foto no permitida</h3>
+            <p class="text-sm text-gray-600 leading-relaxed" data-es="Hemos detectado que la imagen que intentas subir puede contener elementos explícitos, sexuales u ofensivos no permitidos." data-fr="Nous avons détecté que l'image que vous essayez de télécharger..." data-en="We have detected that the image you are trying to upload..." data-ar="لقد اكتشفنا أن الصورة التي تحاول تحميلها قد تحتوي على عناصر صريحة..." data-pt="Detectamos que a imagem que você está tentando enviar pode conter elementos explícitos...">
+                Hemos detectado que la imagen que intentas subir puede contener elementos explícitos, sexuales u ofensivos no permitidos.
+            </p>
+            <button type="button" onclick="closeModal('nsfw-warning-modal')" class="w-full bg-african-red text-white py-3 rounded-xl font-bold shadow hover:bg-red-700 transition" data-es="Entendido" data-fr="Compris" data-en="Understood" data-ar="حسناً" data-pt="Entendido">
+                Entendido
+            </button>
+        </div>
+    </div>
+
     <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
         <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-ar="جميع الحقوق محفوظة." data-pt="Todos os direitos reservados.">Todos los derechos reservados.</span></p>
     </footer>
 
-    <!-- SCRIPT DE MODALES, SEGUIR E IDIOMA -->
+    <!-- SCRIPT DE MODALES, SEGUIR, NSFW E IDIOMA -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const savedLang = localStorage.getItem("user_selected_language") || "es";
@@ -142,7 +227,16 @@
                     el.textContent = el.getAttribute("data-es");
                 }
             });
+
+            // Abrir modal automáticamente si el URL contiene ?publish=1
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('publish') === '1') {
+                openModal('publish-modal');
+            }
         });
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function toggleFollow(username) {
             fetch('/follow/' + username, { method: 'POST' })
@@ -162,6 +256,89 @@
                     if (count) count.textContent = data.followers_count;
                 }
             });
+        }
+
+        /* LÓGICA DE DETECCIÓN Y SUBIDA DE IMÁGENES */
+        let nsfwModel = null;
+        if (typeof nsfwjs !== 'undefined') {
+            nsfwjs.load().then(model => { nsfwModel = model; });
+        }
+
+        let selectedFiles = [];
+
+        async function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            for (let file of files) {
+                if (selectedFiles.length >= 17) {
+                    alert("Solo puedes subir un máximo de 17 fotos.");
+                    break;
+                }
+
+                if (nsfwModel) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    await img.decode();
+                    const predictions = await nsfwModel.classify(img);
+                    const nsfwAlert = predictions.some(p => (p.className === 'Porn' || p.className === 'Sexy' || p.className === 'Hentai') && p.probability > 0.60);
+
+                    if (nsfwAlert) {
+                        openModal('nsfw-warning-modal');
+                        continue;
+                    }
+                }
+                selectedFiles.push(file);
+            }
+            updatePhotoUI();
+            event.target.value = '';
+        }
+
+        function removePhoto(index) {
+            selectedFiles.splice(index, 1);
+            updatePhotoUI();
+        }
+
+        function updatePhotoUI() {
+            const grid = document.getElementById('photo-preview-grid');
+            const addBtn = document.getElementById('add-photo-btn');
+            
+            const previews = grid.querySelectorAll('.preview-item');
+            previews.forEach(p => p.remove());
+
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'relative h-20 rounded-xl overflow-hidden border shadow-sm preview-item group';
+                    div.innerHTML = '<img src="' + e.target.result + '" class="w-full h-full object-cover">' +
+                        '<button type="button" onclick="removePhoto(' + index + ')" class="absolute top-1 right-1 bg-african-red text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold hover:scale-110 transition shadow">' +
+                            '&times;' +
+                        '</button>';
+                    grid.insertBefore(div, addBtn);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            if (selectedFiles.length >= 17) {
+                addBtn.classList.add('hidden');
+            } else {
+                addBtn.classList.remove('hidden');
+            }
+
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            document.getElementById('final-photos').files = dataTransfer.files;
+
+            if (selectedFiles.length > 0) {
+                document.getElementById('photo-error').classList.add('hidden');
+            }
+        }
+
+        function validatePhotos() {
+            if (selectedFiles.length === 0) {
+                document.getElementById('photo-error').classList.remove('hidden');
+                return false;
+            }
+            return true;
         }
     </script>
 </body>
