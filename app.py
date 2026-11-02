@@ -32,15 +32,18 @@ USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
 # --- INICIALIZAR FIREBASE REALTIME DATABASE ---
-cred_path = os.path.join(basedir, 'tu-archivo-de-firebase.json')
+cred_filename = 'africanworld-f9a89-firebase-adminsdk-fbsvc-59ac8f384d.json'
+cred_path = os.path.join(basedir, cred_filename)
+
 try:
     if os.path.exists(cred_path):
         cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred, {
             'databaseURL': 'https://africanworld-f9a89-default-rtdb.firebaseio.com/'
         })
+        print("Firebase inicializado correctamente con el archivo JSON.")
     else:
-        print("Advertencia: No se encontró el archivo JSON de Firebase. Usando almacenamiento local (cuentas.json).")
+        print(f"Advertencia: No se encontró el archivo {cred_filename}. Usando almacenamiento local (cuentas.json).")
 except Exception as e:
     print(f"Error al inicializar Firebase: {e}")
 
@@ -423,7 +426,7 @@ def remove_from_cart(article_id):
 @app.route('/carrito')
 def view_cart():
     users = load_json_users()
-    current_user = next((u for u in users if u.get('username'] == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
     
     cart_ids = session.get('cart', [])
     cart_articles = Article.query.filter(Article.id.in_(cart_ids)).all() if cart_ids else []
@@ -452,7 +455,7 @@ def profile(username):
             flash("El usuario no existe.", "error")
             return redirect(url_for('index'))
     
-    current_user = next((u for u in users if u.get('username'] == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
     user_articles = Article.query.filter_by(username=username).order_by(Article.id.desc()).all()
 
     return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
@@ -564,7 +567,7 @@ def publish():
     db.session.add(new_article)
     db.session.commit()
 
-    # 2. Sincronizar el artículo en Firebase Realtime Database
+    # 2. Sincronizar en Firebase Realtime Database
     try:
         if firebase_admin._apps:
             article_ref = firebase_db.reference(f'articles/{new_article.id}')
