@@ -18,7 +18,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
 
-# Configurar base de datos SQLite con ruta absoluta persistente
+# Configurar base de datos SQLite con ruta absoluta persistente (respaldo local)
 db_path = os.path.join(basedir, 'africanworld_v2.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', f'sqlite:///{db_path}')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -423,7 +423,7 @@ def remove_from_cart(article_id):
 @app.route('/carrito')
 def view_cart():
     users = load_json_users()
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username'] == session.get('username')), None) if 'username' in session else None
     
     cart_ids = session.get('cart', [])
     cart_articles = Article.query.filter(Article.id.in_(cart_ids)).all() if cart_ids else []
@@ -452,7 +452,7 @@ def profile(username):
             flash("El usuario no existe.", "error")
             return redirect(url_for('index'))
     
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username'] == session.get('username')), None) if 'username' in session else None
     user_articles = Article.query.filter_by(username=username).order_by(Article.id.desc()).all()
 
     return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
@@ -548,6 +548,7 @@ def publish():
         slug = f"{base_slug}-{counter}"
         counter += 1
 
+    # 1. Guardar en SQLite local
     new_article = Article(
         title=title, 
         price=price, 
@@ -562,6 +563,29 @@ def publish():
     )
     db.session.add(new_article)
     db.session.commit()
+
+    # 2. Sincronizar el artículo en Firebase Realtime Database
+    try:
+        if firebase_admin._apps:
+            article_ref = firebase_db.reference(f'articles/{new_article.id}')
+            article_ref.set({
+                "id": new_article.id,
+                "title": title,
+                "price": price,
+                "slug": slug,
+                "country": country,
+                "city": city,
+                "email": email,
+                "phone": phone,
+                "description": description,
+                "username": session['username'],
+                "images": ",".join(image_paths),
+                "is_sold": False,
+                "views": 0
+            })
+    except Exception as e:
+        print(f"Error al sincronizar artículo con Firebase: {e}")
+
     return redirect(url_for('view_article', slug=new_article.slug))
 
 @app.route('/publicar')
