@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ current_lang }}">
+<html lang="{{ current_lang }}" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Búsqueda de Usuarios - AfricanWorld</title>
+    <title data-es="Búsqueda de Usuarios - AfricanWorld" data-fr="Recherche d'utilisateurs - AfricanWorld" data-en="User Search - AfricanWorld" data-ar="البحث عن المستخدمين - AfricanWorld" data-pt="Pesquisa de Usuários - AfricanWorld">Búsqueda de Usuarios - AfricanWorld</title>
 
     <link rel="icon" type="image/png" sizes="32x32" href="/static/uploads/logo.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/static/uploads/logo.png">
@@ -30,7 +30,7 @@
                 </span>
             </a>
             <a href="/" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-gray-100 transition flex items-center gap-2">
-                <i class="fa-solid fa-house"></i> Volver al Catálogo
+                <i class="fa-solid fa-house"></i> <span data-es="Volver al Catálogo" data-fr="Retour au Catalogue" data-en="Back to Catalog" data-ar="العودة إلى الكتالوج" data-pt="Voltar ao Catálogo">Volver al Catálogo</span>
             </a>
         </div>
     </header>
@@ -39,19 +39,19 @@
         <div class="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
             <h1 class="text-2xl font-black text-gray-900 flex items-center gap-2">
                 <i class="fa-solid fa-users-viewfinder text-african-green"></i>
-                <span>Directorio de Usuarios</span>
+                <span data-es="Directorio de Usuarios" data-fr="Annuaire des Utilisateurs" data-en="User Directory" data-ar="دليل المستخدمين" data-pt="Diretório de Usuários">Directorio de Usuarios</span>
             </h1>
 
             <form action="/buscar-usuarios" method="GET" class="flex gap-3">
-                <input type="text" name="q" value="{{ query }}" placeholder="Escribe un nombre de usuario o correo..." class="flex-grow border px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
-                <button type="submit" class="bg-african-green text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow hover:opacity-90 transition">Buscar</button>
+                <input type="text" name="q" value="{{ query }}" placeholder="Escribe un nombre de usuario o correo..." data-es-placeholder="Escribe un nombre de usuario o correo..." data-fr-placeholder="Tapez un nom d'utilisateur ou un e-mail..." data-en-placeholder="Type a username or email..." data-ar-placeholder="اكتب اسم مستخدم أو بريدًا إلكترونيًا..." data-pt-placeholder="Digite um nome de usuário ou e-mail..." class="flex-grow border px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
+                <button type="submit" class="bg-african-green text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow hover:opacity-90 transition" data-es="Buscar" data-fr="Rechercher" data-en="Search" data-ar="بحث" data-pt="Pesquisar">Buscar</button>
             </form>
         </div>
 
         <!-- RESULTADOS DE BÚSQUEDA -->
         <div class="space-y-4">
             {% if query %}
-                <p class="text-xs text-gray-500">Resultados para "<strong class="text-gray-800">{{ query }}</strong>":</p>
+                <p class="text-xs text-gray-500"><span data-es="Resultados para" data-fr="Résultats pour" data-en="Results for" data-ar="نتائج" data-pt="Resultados para">Resultados para</span> "<strong class="text-gray-800">{{ query }}</strong>":</p>
             {% endif %}
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -64,14 +64,14 @@
                                 <p class="text-xs text-gray-400">{{ u.email }}</p>
                             </div>
                         </div>
-                        <a href="/perfil/{{ u.username }}" class="bg-african-yellow text-gray-900 px-4 py-2 rounded-xl text-xs font-black shadow hover:bg-yellow-400 transition">
+                        <a href="/perfil/{{ u.username }}" class="bg-african-yellow text-gray-900 px-4 py-2 rounded-xl text-xs font-black shadow hover:bg-yellow-400 transition" data-es="Ver Perfil" data-fr="Voir le Profil" data-en="View Profile" data-ar="عرض الملف الشخصي" data-pt="Ver Perfil">
                             Ver Perfil
                         </a>
                     </div>
                 {% else %}
                     <div class="col-span-full text-center py-12 text-gray-400 bg-white rounded-2xl border">
                         <i class="fa-solid fa-user-slash text-3xl text-african-yellow mb-2"></i>
-                        <p class="text-sm">No se encontraron usuarios coincidentes.</p>
+                        <p class="text-sm" data-es="No se encontraron usuarios coincidentes." data-fr="Aucun utilisateur correspondant trouvé." data-en="No matching users found." data-ar="لم يتم العثور على مستخدمين متطابقين." data-pt="Nenhum usuário correspondente encontrado.">No se encontraron usuarios coincidentes.</p>
                     </div>
                 {% endfor %}
             </div>
@@ -79,7 +79,40 @@
     </main>
 
     <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
-        <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
+        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-ar="جميع الحقوق محفوظة." data-pt="Todos os direitos reservados.">Todos los derechos reservados.</span></p>
     </footer>
+
+    <!-- SCRIPT DE IDIOMA Y NAVEGACIÓN -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const savedLang = localStorage.getItem("user_selected_language") || "es";
+            const htmlRoot = document.documentElement;
+            htmlRoot.setAttribute("lang", savedLang);
+
+            if (savedLang === "ar") {
+                htmlRoot.setAttribute("dir", "rtl");
+            } else {
+                htmlRoot.removeAttribute("dir");
+            }
+
+            document.querySelectorAll("[data-es][data-fr]").forEach(function(el) {
+                const translation = el.getAttribute("data-" + savedLang);
+                if (translation) {
+                    el.textContent = translation;
+                } else {
+                    el.textContent = el.getAttribute("data-es");
+                }
+            });
+
+            document.querySelectorAll("[data-es-placeholder]").forEach(function(el) {
+                const placeholderTranslation = el.getAttribute("data-" + savedLang + "-placeholder");
+                if (placeholderTranslation) {
+                    el.setAttribute("placeholder", placeholderTranslation);
+                } else {
+                    el.setAttribute("placeholder", el.getAttribute("data-es-placeholder"));
+                }
+            });
+        });
+    </script>
 </body>
 </html>
