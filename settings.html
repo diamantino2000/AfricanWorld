@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajustes de Cuenta - AfricanWorld</title>
+    <title data-es="Ajustes de Cuenta - AfricanWorld" data-fr="Paramètres du Compte - AfricanWorld" data-en="Account Settings - AfricanWorld" data-ar="إعدادات الحساب - AfricanWorld" data-pt="Configurações da Conta - AfricanWorld">Ajustes de Cuenta - AfricanWorld</title>
 
     <!-- FAVICON -->
     <link rel="icon" type="image/png" sizes="32x32" href="/static/uploads/logo.png">
@@ -31,7 +31,7 @@
                 </span>
             </a>
             <a href="/perfil/{{ user.username }}" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-gray-100 transition flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> Volver al Perfil
+                <i class="fa-solid fa-arrow-left"></i> <span data-es="Volver al Perfil" data-fr="Retour au Profil" data-en="Back to Profile" data-ar="العودة إلى الملف الشخصي" data-pt="Voltar ao Perfil">Volver al Perfil</span>
             </a>
         </div>
     </header>
@@ -54,44 +54,60 @@
             <div class="border-b pb-4">
                 <h1 class="text-2xl font-black text-gray-900 flex items-center gap-2">
                     <i class="fa-solid fa-gear text-african-green"></i>
-                    <span>Configuración de la Cuenta</span>
+                    <span data-es="Configuración de la Cuenta" data-fr="Paramètres du Compte" data-en="Account Settings" data-ar="إعدادات الحساب" data-pt="Configurações da Conta">Configuración de la Cuenta</span>
                 </h1>
-                <p class="text-xs text-gray-400 mt-1">Gestiona tu nombre de usuario público y tu foto de perfil.</p>
+                <p class="text-xs text-gray-400 mt-1" data-es="Gestiona tu nombre de usuario público y tu foto de perfil." data-fr="Gérez votre nom d'utilisateur public et votre photo de profil." data-en="Manage your public username and profile picture." data-ar="إدارة اسم المستخدم العام وصورة ملفك الشخصي." data-pt="Gerencie seu nome de usuário público e foto de perfil.">Gestiona tu nombre de usuario público y tu foto de perfil.</p>
+            </div>
+
+            <!-- PREFERENCIA DE IDIOMA -->
+            <div class="bg-gray-50 p-4 rounded-2xl border space-y-2">
+                <label class="block text-xs font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fa-solid fa-language text-african-green"></i>
+                    <span data-es="Idioma de la Plataforma" data-fr="Langue de la Plateforme" data-en="Platform Language" data-ar="لغة المنصة" data-pt="Idioma da Plataforma">Idioma de la Plataforma</span>
+                </label>
+                <select id="settings-lang-select" onchange="changePlatformLanguage(this.value)" class="w-full border px-4 py-2.5 rounded-xl text-sm font-bold bg-white focus:ring-2 focus:ring-african-green focus:outline-none">
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="pt">🇵🇹 Português</option>
+                </select>
+                <p class="text-[11px] text-gray-400" data-es="Elige el idioma con el que deseas navegar por AfricanWorld." data-fr="Choisissez la langue avec laquelle vous souhaitez naviguer sur AfricanWorld." data-en="Choose the language you want to browse AfricanWorld with." data-ar="اختر اللغة التي تريد تصفح AfricanWorld بها." data-pt="Escolha o idioma com o qual deseja navegar no AfricanWorld.">Elige el idioma con el que deseas navegar por AfricanWorld.</p>
             </div>
 
             <form action="/settings" method="POST" enctype="multipart/form-data" class="space-y-6">
                 
                 <!-- FOTO DE PERFIL CON VISTA PREVIA INSTANTÁNEA -->
                 <div class="space-y-2">
-                    <label class="block text-xs font-bold text-gray-700">Foto de Perfil</label>
+                    <label class="block text-xs font-bold text-gray-700" data-es="Foto de Perfil" data-fr="Photo de Profil" data-en="Profile Picture" data-ar="صورة الملف الشخصي" data-pt="Foto de Perfil">Foto de Perfil</label>
                     <div class="flex items-center gap-4">
                         <img id="avatar-preview" src="{{ user.profile_pic if user.profile_pic else '/static/uploads/default_user.png' }}" alt="Foto actual" class="w-20 h-20 rounded-full object-cover border-4 border-african-yellow shadow">
                         
                         <div>
                             <label class="bg-emerald-50 text-african-green hover:bg-emerald-100 border border-emerald-200 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition inline-flex items-center gap-2 shadow-sm">
                                 <i class="fa-solid fa-camera text-sm"></i>
-                                <span>Elegir Foto</span>
+                                <span data-es="Elegir Foto" data-fr="Choisir une Photo" data-en="Choose Photo" data-ar="اختر صورة" data-pt="Escolher Foto">Elegir Foto</span>
                                 <input type="file" name="profile_pic" id="profile-input" accept="image/*" class="hidden" onchange="previewProfilePic(event)">
                             </label>
-                            <p class="text-[11px] text-gray-400 mt-1">Soporta formatos JPG, PNG o WEBP.</p>
+                            <p class="text-[11px] text-gray-400 mt-1" data-es="Soporta formatos JPG, PNG o WEBP." data-fr="Prend en charge les formats JPG, PNG ou WEBP." data-en="Supports JPG, PNG or WEBP formats." data-ar="يدعم صيغ JPG أو PNG أو WEBP." data-pt="Suporta formatos JPG, PNG ou WEBP.">Soporta formatos JPG, PNG o WEBP.</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- NOMBRE DE USUARIO -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Nombre de Usuario</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Nombre de Usuario" data-fr="Nom d'utilisateur" data-en="Username" data-ar="اسم المستخدم" data-pt="Nome de Usuário">Nombre de Usuario</label>
                     <input type="text" name="username" value="{{ user.username }}" required class="w-full border px-4 py-2.5 rounded-xl text-sm font-bold focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
-                    <p class="text-[11px] text-gray-400 mt-1">Solo puedes cambiar tu nombre de usuario una vez cada 7 días.</p>
+                    <p class="text-[11px] text-gray-400 mt-1" data-es="Solo puedes cambiar tu nombre de usuario una vez cada 7 días." data-fr="Vous ne pouvez changer votre nom d'utilisateur qu'une fois tous les 7 jours." data-en="You can only change your username once every 7 days." data-ar="يمكنك تغيير اسم المستخدم الخاص بك مرة واحدة كل 7 أيام فقط." data-pt="Você só pode alterar seu nome de usuário uma vez a cada 7 dias.">Solo puedes cambiar tu nombre de usuario una vez cada 7 días.</p>
                 </div>
 
                 <!-- CORREO ELECTRÓNICO (SOLO LECTURA VÍA GOOGLE) -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Correo Vinculado de Google</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Correo Vinculado de Google" data-fr="E-mail Google associé" data-en="Linked Google Email" data-ar="بريد Google المرتبط" data-pt="E-mail do Google Vinculado">Correo Vinculado de Google</label>
                     <input type="email" value="{{ user.email }}" disabled class="w-full border px-4 py-2.5 rounded-xl text-sm text-gray-400 bg-gray-100 cursor-not-allowed">
                 </div>
 
-                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold text-sm shadow hover:opacity-90 transition">
+                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold text-sm shadow hover:opacity-90 transition" data-es="Guardar Cambios" data-fr="Enregistrer les Modifications" data-en="Save Changes" data-ar="حفظ التغييرات" data-pt="Salvar Alterações">
                     Guardar Cambios
                 </button>
             </form>
@@ -99,14 +115,14 @@
             <!-- ZONA DE PELIGRO: CERRAR SESIÓN Y ELIMINAR CUENTA -->
             <div class="border-t pt-6 space-y-4">
                 <h3 class="text-sm font-black text-gray-900 flex items-center gap-2">
-                    <i class="fa-solid fa-shield-halved text-african-yellow"></i> Gestión de Sesión y Cuenta
+                    <i class="fa-solid fa-shield-halved text-african-yellow"></i> <span data-es="Gestión de Sesión y Cuenta" data-fr="Gestion de Session et de Compte" data-en="Session and Account Management" data-ar="إدارة الجلسة والحساب" data-pt="Gerenciamento de Sessão e Conta">Gestión de Sesión y Cuenta</span>
                 </h3>
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button type="button" onclick="openModal('logout-modal')" class="flex-1 bg-yellow-50 text-yellow-800 border border-yellow-200 hover:bg-yellow-100 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm">
-                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                        <i class="fa-solid fa-right-from-bracket"></i> <span data-es="Cerrar Sesión" data-fr="Se Déconnecter" data-en="Log Out" data-ar="تسجيل الخروج" data-pt="Sair">Cerrar Sesión</span>
                     </button>
                     <button type="button" onclick="openModal('delete-account-modal')" class="flex-1 bg-red-50 text-african-red border border-red-200 hover:bg-african-red hover:text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm">
-                        <i class="fa-solid fa-user-xmark"></i> Eliminar Cuenta
+                        <i class="fa-solid fa-user-xmark"></i> <span data-es="Eliminar Cuenta" data-fr="Supprimer le Compte" data-en="Delete Account" data-ar="حذف الحساب" data-pt="Excluir Conta">Eliminar Cuenta</span>
                     </button>
                 </div>
             </div>
@@ -119,13 +135,13 @@
             <div class="w-12 h-12 bg-yellow-100 text-african-yellow rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                 <i class="fa-solid fa-right-from-bracket"></i>
             </div>
-            <h3 class="text-xl font-black text-gray-900">¿Cerrar Sesión?</h3>
-            <p class="text-xs text-gray-600 leading-relaxed">
+            <h3 class="text-xl font-black text-gray-900" data-es="¿Cerrar Sesión?" data-fr="Se déconnecter ?" data-en="Log out?" data-ar="هل تريد تسجيل الخروج؟" data-pt="Deseja sair?">¿Cerrar Sesión?</h3>
+            <p class="text-xs text-gray-600 leading-relaxed" data-es="¿Estás seguro de que deseas cerrar tu sesión actual en AfricanWorld? Tendrás que volver a iniciar sesión cuando regreses." data-fr="Êtes-vous sûr de vouloir fermer votre session actuelle sur AfricanWorld ?" data-en="Are you sure you want to log out of AfricanWorld?" data-ar="هل أنت متأكد أنك تريد تسجيل الخروج من AfricanWorld؟" data-pt="Tem certeza de que deseja sair do AfricanWorld?">
                 ¿Estás seguro de que deseas cerrar tu sesión actual en AfricanWorld? Tendrás que volver a iniciar sesión cuando regreses.
             </p>
             <div class="flex gap-2 pt-2">
-                <button type="button" onclick="closeModal('logout-modal')" class="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-xl text-xs font-bold hover:bg-gray-300 transition">Cancelar</button>
-                <a href="/logout" class="flex-1 bg-african-yellow text-gray-900 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-yellow-400 transition flex items-center justify-center">Sí, salir</a>
+                <button type="button" onclick="closeModal('logout-modal')" class="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-xl text-xs font-bold hover:bg-gray-300 transition" data-es="Cancelar" data-fr="Annuler" data-en="Cancel" data-ar="إلغاء" data-pt="Cancelar">Cancelar</button>
+                <a href="/logout" class="flex-1 bg-african-yellow text-gray-900 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-yellow-400 transition flex items-center justify-center" data-es="Sí, salir" data-fr="Oui, sortir" data-en="Yes, log out" data-ar="نعم، خروج" data-pt="Sim, sair">Sí, salir</a>
             </div>
         </div>
     </div>
@@ -136,24 +152,58 @@
             <div class="w-12 h-12 bg-red-100 text-african-red rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                 <i class="fa-solid fa-user-xmark"></i>
             </div>
-            <h3 class="text-xl font-black text-gray-900">¿Eliminar Cuenta?</h3>
-            <p class="text-xs text-gray-600 leading-relaxed">
+            <h3 class="text-xl font-black text-gray-900" data-es="¿Eliminar Cuenta?" data-fr="Supprimer le compte ?" data-en="Delete Account?" data-ar="حذف الحساب؟" data-pt="Excluir Conta?">¿Eliminar Cuenta?</h3>
+            <p class="text-xs text-gray-600 leading-relaxed" data-es="¿Estás completamente seguro? Esta acción es irreversible y borrará permanentemente todos tus datos y publicaciones." data-fr="Êtes-vous absolument sûr ? Cette action est irréversible." data-en="Are you completely sure? This action is irreversible." data-ar="هل أنت متأكد تماماً؟ هذا الإجراء لا رجعة فيه." data-pt="Tem certeza absoluta? Esta ação é irreversível.">
                 ¿Estás completamente seguro? Esta acción es <strong>irreversible</strong> y borrará permanentemente todos tus datos y publicaciones de la plataforma.
             </p>
             <div class="flex gap-2 pt-2">
-                <button type="button" onclick="closeModal('delete-account-modal')" class="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-xl text-xs font-bold hover:bg-gray-300 transition">Cancelar</button>
-                <a href="/eliminar-cuenta" class="flex-1 bg-african-red text-white py-2.5 rounded-xl text-xs font-bold shadow hover:bg-red-700 transition flex items-center justify-center">Sí, eliminar</a>
+                <button type="button" onclick="closeModal('delete-account-modal')" class="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-xl text-xs font-bold hover:bg-gray-300 transition" data-es="Cancelar" data-fr="Annuler" data-en="Cancel" data-ar="إلغاء" data-pt="Cancelar">Cancelar</button>
+                <a href="/eliminar-cuenta" class="flex-1 bg-african-red text-white py-2.5 rounded-xl text-xs font-bold shadow hover:bg-red-700 transition flex items-center justify-center" data-es="Sí, eliminar" data-fr="Oui, supprimer" data-en="Yes, delete" data-ar="نعم، حذف" data-pt="Sim, excluir">Sí, eliminar</a>
             </div>
         </div>
     </div>
 
     <!-- FOOTER -->
     <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
-        <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
+        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-ar="جميع الحقوق محفوظة." data-pt="Todos os direitos reservados.">Todos los derechos reservados.</span></p>
     </footer>
 
-    <!-- SCRIPT DE VISTA PREVIA Y MODALES -->
+    <!-- SCRIPT DE VISTA PREVIA, MODALES Y GESTIÓN DE IDIOMA -->
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const savedLang = localStorage.getItem("user_selected_language") || "es";
+            const selectEl = document.getElementById("settings-lang-select");
+            if (selectEl) {
+                selectEl.value = savedLang;
+            }
+            applyLanguage(savedLang);
+        });
+
+        function changePlatformLanguage(langCode) {
+            localStorage.setItem("user_selected_language", langCode);
+            applyLanguage(langCode);
+        }
+
+        function applyLanguage(langCode) {
+            const htmlRoot = document.getElementById("html-root");
+            htmlRoot.setAttribute("lang", langCode);
+
+            if (langCode === "ar") {
+                htmlRoot.setAttribute("dir", "rtl");
+            } else {
+                htmlRoot.removeAttribute("dir");
+            }
+
+            document.querySelectorAll("[data-es][data-fr]").forEach(function(el) {
+                const translation = el.getAttribute("data-" + langCode);
+                if (translation) {
+                    el.textContent = translation;
+                } else {
+                    el.textContent = el.getAttribute("data-es");
+                }
+            });
+        }
+
         function previewProfilePic(event) {
             const file = event.target.files[0];
             if (file) {
