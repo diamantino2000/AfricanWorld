@@ -9,13 +9,18 @@ import re
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 from sqlalchemy import text
+import firebase_admin
+from firebase_admin import credentials, db as firebase_db
 
 # Configurar rutas absolutas basadas en la ubicación de app.py
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'africanworld_v2.db'))
+
+# Configurar base de datos SQLite con ruta absoluta persistente
+db_path = os.path.join(basedir, 'africanworld_v2.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', f'sqlite:///{db_path}')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
@@ -23,24 +28,42 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleusercontent.com"
-USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
+# --- INICIALIZAR FIREBASE REALTIME DATABASE ---
+# REEMPLAZA 'tu-archivo-de-firebase.json' POR EL NOMBRE REAL DE TU ARCHIVO JSON DE CREDENCIALES
+cred_path = os.path.join(basedir, 'tu-archivo-de-firebase.json')
+try:
+    if os.path.exists(cred_path):
+        cred = credentials.Certificate(cred_path)
+        firebase_admin.initialize_app(cred, {
+            'databaseURL': 'https://africanworld-f9a89-default-rtdb.firebaseio.com/'
+        })
+    else:
+        print("Advertencia: No se encontró el archivo JSON de Firebase. Las funciones de nube pueden fallar.")
+except Exception as e:
+    print(f"Error al inicializar Firebase: {e}")
+
 def load_json_users():
-    if not os.path.exists(USERS_JSON_FILE):
-        return []
     try:
-        with open(USERS_JSON_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
+        ref = firebase_db.reference('users')
+        users_data = ref.get()
+        if not users_data:
+            return []
+        if isinstance(users_data, dict):
+            return list(users_data.values())
+        return users_data
+    except Exception as e:
+        print(f"Error cargando usuarios desde Firebase: {e}")
         return []
 
 def save_json_users(users_list):
     try:
-        with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
-            json.dump(users_list, f, indent=4, ensure_ascii=False)
+        users_dict = {str(u.get('username', i)): u for i, u in enumerate(users_list)}
+        ref = firebase_db.reference('users')
+        ref.set(users_dict)
     except Exception as e:
-        print(f"Error guardando usuarios: {e}")
+        print(f"Error guardando usuarios en Firebase: {e}")
 
 def load_denuncias():
     if not os.path.exists(DENUNCIAS_JSON_FILE):
@@ -61,7 +84,7 @@ def save_denuncias(denuncias_list):
 def add_notification(target_username, message, link="#"):
     users = load_json_users()
     for u in users:
-        if u['username'] == target_username:
+        if u.get('username') == target_username:
             if 'notifications' not in u:
                 u['notifications'] = []
             u['notifications'].insert(0, {
@@ -135,7 +158,7 @@ def index():
         articles = Article.query.order_by(Article.id.desc()).all()
     
     users = load_json_users()
-    current_user = next((u for u in users if u['username'] == session.get('username')), None)
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
 
     return render_template('index.html', articles=articles, search=search, current_user=current_user, google_client_id=GOOGLE_CLIENT_ID)
 
@@ -147,10 +170,10 @@ def search_users():
 
     if query:
         for u in users:
-            if query in u['username'].lower() or query in u.get('email', '').lower():
+            if query in u.get('username', '').lower() or query in u.get('email', '').lower():
                 matched_users.append(u)
 
-    current_user = next((u for u in users if u['username'] == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
 
     return render_template('Busca_user.html', query=query, users=matched_users, current_user=current_user)
 
@@ -163,7 +186,7 @@ def mark_notifications_read():
     if 'username' in session:
         users = load_json_users()
         for u in users:
-            if u['username'] == session['username']:
+            if u.get('username') == session['username']:
                 for n in u.get('notifications', []):
                     n['read'] = True
                 break
@@ -213,13 +236,13 @@ def google_login_real():
         picture = id_info.get('picture', '/static/uploads/default_user.png')
 
         users = load_json_users()
-        user = next((u for u in users if u['email'] == email), None)
+        user = next((u for u in users if u.get('email') == email), None)
 
         if not user:
             base_username = slugify(name.replace(" ", "_"))
             username = base_username if base_username else "usuario"
             counter = 1
-            while any(u['username'] == username for u in users):
+            while any(u.get('username') == username for u in users):
                 username = f"{base_username}{counter}"
                 counter += 1
 
@@ -255,8 +278,8 @@ def view_article(slug):
         session.modified = True
     
     users = load_json_users()
-    current_user = next((u for u in users if u['username'] == session.get('username')), None) if 'username' in session else None
-    author = next((u for u in users if u['username'] == article.username), None)
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
+    author = next((u for u in users if u.get('username') == article.username), None)
     
     avg_rating = 0
     if article.comments:
@@ -297,8 +320,8 @@ def follow_user(username):
         return jsonify({"status": "error", "message": "No puedes seguirte a ti mismo"}), 400
 
     users = load_json_users()
-    current_u = next((u for u in users if u['username'] == session['username']), None)
-    target_u = next((u for u in users if u['username'] == username), None)
+    current_u = next((u for u in users if u.get('username') == session['username']), None)
+    target_u = next((u for u in users if u.get('username') == username), None)
 
     if current_u and target_u:
         if 'following' not in current_u: current_u['following'] = []
@@ -306,11 +329,13 @@ def follow_user(username):
 
         if username in current_u['following']:
             current_u['following'].remove(username)
-            target_u['followers'].remove(session['username'])
+            if session['username'] in target_u['followers']:
+                target_u['followers'].remove(session['username'])
             is_following = False
         else:
             current_u['following'].append(username)
-            target_u['followers'].append(session['username'])
+            if session['username'] not in target_u['followers']:
+                target_u['followers'].append(session['username'])
             is_following = True
 
             add_notification(
@@ -380,7 +405,7 @@ def remove_from_cart(article_id):
 @app.route('/carrito')
 def view_cart():
     users = load_json_users()
-    current_user = next((u for u in users if u['username'] == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
     
     cart_ids = session.get('cart', [])
     cart_articles = Article.query.filter(Article.id.in_(cart_ids)).all() if cart_ids else []
@@ -391,8 +416,7 @@ def view_cart():
 def profile(username):
     users = load_json_users()
     
-    # Si por alguna razón el usuario no está en el JSON aún, lo creamos al vuelo con su sesión actual
-    profile_user = next((u for u in users if u['username'] == username), None)
+    profile_user = next((u for u in users if u.get('username') == username), None)
     if not profile_user:
         if session.get('username') == username:
             profile_user = {
@@ -410,7 +434,7 @@ def profile(username):
             flash("El usuario no existe.", "error")
             return redirect(url_for('index'))
     
-    current_user = next((u for u in users if u['username'] == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
     user_articles = Article.query.filter_by(username=username).order_by(Article.id.desc()).all()
 
     return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
@@ -421,7 +445,7 @@ def settings():
         return redirect(url_for('index'))
 
     users = load_json_users()
-    user = next((u for u in users if u['username'] == session['username']), None)
+    user = next((u for u in users if u.get('username') == session['username']), None)
     if not user:
         return redirect(url_for('index'))
 
@@ -430,7 +454,7 @@ def settings():
         profile_file = request.files.get('profile_pic')
 
         if new_username and new_username != user['username']:
-            if any(u['username'] == new_username for u in users):
+            if any(u.get('username') == new_username for u in users):
                 flash('Este nombre de usuario ya está en uso.', 'error')
                 return redirect(url_for('settings'))
 
@@ -454,7 +478,7 @@ def settings():
 
         if profile_file and profile_file.filename != '':
             filename = secure_filename(profile_file.filename)
-            filepath_rel = f"static/uploads/profile_{user['id']}_{filename}"
+            filepath_rel = f"static/uploads/profile_{user.get('id', 1)}_{filename}"
             filepath_abs = os.path.join(basedir, filepath_rel)
             profile_file.save(filepath_abs)
             user['profile_pic'] = f"/{filepath_rel}"
