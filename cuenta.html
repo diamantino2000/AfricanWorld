@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" id="html-root">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +11,11 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- TENSORFLOW Y NSFWJS PARA MODERACIÓN DE IMÁGENES AUTOMÁTICA -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nsfwjs@2.4.1/dist/nsfwjs.min.js"></script>
+
     <style>
         .bg-african-green { background-color: #007A3D; }
         .text-african-green { color: #007A3D; }
@@ -31,7 +36,7 @@
                 </span>
             </a>
             <a href="/" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-gray-100 transition flex items-center gap-2">
-                <i class="fa-solid fa-house"></i> <span data-es="Volver" data-fr="Retour" data-en="Back">Volver</span>
+                <i class="fa-solid fa-house"></i> Volver
             </a>
         </div>
     </header>
@@ -43,26 +48,25 @@
                 <img src="{{ profile_user.profile_pic if profile_user.profile_pic else '/static/uploads/default_user.png' }}" alt="Foto" class="w-24 h-24 rounded-full object-cover border-4 border-african-yellow shadow-lg">
                 <div class="space-y-1">
                     <h1 class="text-3xl font-black text-gray-900">@{{ profile_user.username }}</h1>
-                    <p class="text-xs text-gray-500"><i class="fa-solid fa-envelope mr-1"></i>{{ profile_user.email if profile_user.email else '' }}</p>
+                    <p class="text-xs text-gray-500"><i class="fa-solid fa-envelope mr-1"></i>{{ profile_user.email }}</p>
                     <div class="flex gap-4 pt-2 justify-center md:justify-start text-xs font-bold text-gray-600">
-                        <!-- COMPROBACIÓN SEGURA DE LONGITUD DE SEGUIDORES -->
-                        {% set followers_list = profile_user.followers if profile_user.followers is sequence and profile_user.followers is not string else [] %}
-                        {% set following_list = profile_user.following if profile_user.following is sequence and profile_user.following is not string else [] %}
-                        
-                        <span><strong id="followers-count" class="text-gray-900 text-sm">{{ followers_list|length }}</strong> <span data-es="Seguidores" data-fr="Abonnés" data-en="Followers">Seguidores</span></span>
-                        <span><strong class="text-gray-900 text-sm">{{ following_list|length }}</strong> <span data-es="Siguiendo" data-fr="Abonnements" data-en="Following">Siguiendo</span></span>
+                        <span><strong id="followers-count" class="text-gray-900 text-sm">{{ profile_user.followers|length if profile_user.followers else 0 }}</strong> Seguidores</span>
+                        <span><strong class="text-gray-900 text-sm">{{ profile_user.following|length if profile_user.following else 0 }}</strong> Siguiendo</span>
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
+            <!-- BOTONES DE ACCIÓN: PUBLICAR + AJUSTES -->
+            <div class="flex items-center gap-3 flex-wrap justify-center">
                 {% if session.get('username') and session['username'] == profile_user.username %}
+                    <a href="/publicar" class="bg-african-yellow text-gray-900 px-5 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-yellow-400 transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Publicar Artículo
+                    </a>
                     <a href="/settings" class="bg-gray-100 text-gray-800 border px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-200 transition flex items-center gap-2">
-                        <i class="fa-solid fa-gear"></i> <span data-es="Editar Ajustes" data-fr="Modifier Paramètres" data-en="Edit Settings">Editar Ajustes</span>
+                        <i class="fa-solid fa-gear"></i> Editar Ajustes
                     </a>
                 {% elif session.get('username') %}
-                    <!-- EVALUACIÓN SEGURA DE SI SIGUE AL USUARIO -->
-                    {% set is_following = session['username'] in followers_list %}
+                    {% set is_following = session['username'] in (profile_user.followers or []) %}
                     <button id="follow-btn" onclick="toggleFollow('{{ profile_user.username }}')" class="{% if is_following %} bg-gray-200 text-gray-800 {% else %} bg-african-green text-white {% endif %} px-6 py-2.5 rounded-xl text-xs font-bold shadow hover:opacity-90 transition">
                         {{ 'Siguiendo' if is_following else 'Seguir' }}
                     </button>
@@ -74,7 +78,7 @@
         <div class="space-y-4">
             <h2 class="text-xl font-black text-gray-900 flex items-center gap-2 border-b pb-2">
                 <i class="fa-solid fa-box text-african-yellow"></i>
-                <span><span data-es="Publicaciones de" data-fr="Publications de" data-en="Posts by">Publicaciones de</span> {{ profile_user.username }}</span>
+                <span>Publicaciones de {{ profile_user.username }}</span>
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -96,42 +100,122 @@
                         </div>
 
                         <div class="p-5 pt-0 border-t mt-3 flex justify-between items-center text-xs">
-                            <a href="/articulo/{{ art.slug }}" class="text-african-green font-bold hover:underline" data-es="Ver Publicación &rarr;" data-fr="Voir Publication &rarr;" data-en="View Post &rarr;">Ver Publicación &rarr;</a>
+                            <a href="/articulo/{{ art.slug }}" class="text-african-green font-bold hover:underline">Ver Publicación &rarr;</a>
                             {% if session.get('username') == profile_user.username %}
                                 <form action="/articulo/{{ art.id }}/delete" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?')">
-                                    <button type="submit" class="text-african-red font-bold hover:underline"><i class="fa-solid fa-trash mr-1"></i><span data-es="Eliminar" data-fr="Supprimer" data-en="Delete">Eliminar</span></button>
+                                    <button type="submit" class="text-african-red font-bold hover:underline"><i class="fa-solid fa-trash mr-1"></i>Eliminar</button>
                                 </form>
                             {% endif %}
                         </div>
                     </div>
                 {% else %}
                     <div class="col-span-full text-center py-12 text-gray-400 bg-white rounded-2xl border">
-                        <p data-es="Este usuario aún no ha publicado artículos." data-fr="Cet utilisateur n'a pas encore publié d'articles." data-en="This user has not posted any articles yet.">Este usuario aún no ha publicado artículos.</p>
+                        <p>Este usuario aún no ha publicado artículos.</p>
                     </div>
                 {% endfor %}
             </div>
         </div>
     </main>
 
+    <!-- MODAL PUBLICAR ARTÍCULO -->
+    <div id="publish-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-lg w-full p-8 rounded-2xl shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto border-t-8 border-african-yellow">
+            <button type="button" onclick="closeModal('publish-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+            <h2 class="text-2xl font-black text-gray-900 flex items-center space-x-2">
+                <i class="fa-solid fa-bullhorn text-african-yellow"></i>
+                <span>Publicar Artículo</span>
+            </h2>
+            <form action="/publish" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="return validatePhotos()">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Título del Artículo</label>
+                    <input type="text" name="title" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Precio ($ USD / Local)</label>
+                        <input type="number" step="0.01" min="0" name="price" placeholder="Ej: 25.00" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Teléfono</label>
+                        <input type="tel" name="phone" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">País</label>
+                        <input type="text" name="country" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Ciudad</label>
+                        <input type="text" name="city" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Correo de Contacto</label>
+                    <input type="email" name="email" value="{{ session.get('email', '') }}" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Fotos del Artículo <span class="text-xs text-gray-400 font-normal">(Máximo 17 fotos)</span>
+                    </label>
+                    
+                    <input type="file" id="photo-picker" accept="image/*" multiple class="hidden" onchange="handleFileSelect(event)">
+                    
+                    <div class="grid grid-cols-4 gap-3 p-3 bg-gray-50 border rounded-2xl" id="photo-preview-grid">
+                        <button type="button" onclick="document.getElementById('photo-picker').click()" id="add-photo-btn" class="h-20 border-2 border-dashed border-african-yellow bg-yellow-50 hover:bg-yellow-100 rounded-xl flex flex-col items-center justify-center text-african-yellow transition shadow-sm group">
+                            <i class="fa-solid fa-plus text-2xl group-hover:scale-125 transition-transform"></i>
+                            <span class="text-[10px] font-black text-gray-800 mt-1">Añadir Foto</span>
+                        </button>
+                    </div>
+                    
+                    <input type="file" name="photos" id="final-photos" multiple class="hidden">
+                    <p class="text-xs text-red-500 hidden mt-1 font-bold" id="photo-error">Debes agregar al menos 1 foto válida.</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Descripción</label>
+                    <textarea name="description" rows="3" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold hover:opacity-90 transition shadow">Publicar Anuncio</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE ADVERTENCIA NSFW -->
+    <div id="nsfw-warning-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4 border-t-8 border-african-red text-center">
+            <div class="w-16 h-16 bg-red-100 text-african-red rounded-full flex items-center justify-center mx-auto text-3xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-2xl font-black text-gray-900">Foto no permitida</h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
+                Hemos detectado que la imagen que intentas subir puede contener elementos explícitos, sexuales u ofensivos no permitidos.
+            </p>
+            <button type="button" onclick="closeModal('nsfw-warning-modal')" class="w-full bg-african-red text-white py-3 rounded-xl font-bold shadow hover:bg-red-700 transition">
+                Entendido
+            </button>
+        </div>
+    </div>
+
     <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
-        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved.">Todos los derechos reservados.</span></p>
+        <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
     </footer>
 
     <script>
-        // DETECTOR DE IDIOMA DEL DISPOSITIVO
-        document.addEventListener("DOMContentLoaded", function() {
-            const rawLang = (navigator.language || navigator.userLanguage || "es").toLowerCase();
-            let langCode = "es";
-            if (rawLang.startsWith("fr")) langCode = "fr";
-            else if (rawLang.startsWith("en")) langCode = "en";
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-            document.getElementById("html-root").setAttribute("lang", langCode);
-
-            document.querySelectorAll("[data-es][data-fr]").forEach(function(el) {
-                if (langCode === "fr" && el.hasAttribute("data-fr")) el.textContent = el.getAttribute("data-fr");
-                else if (langCode === "en" && el.hasAttribute("data-en")) el.textContent = el.getAttribute("data-en");
-                else el.textContent = el.getAttribute("data-es");
-            });
+        // Abrir modal automáticamente si el URL contiene ?publish=1
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('publish') === '1') {
+                openModal('publish-modal');
+            }
         });
 
         function toggleFollow(username) {
@@ -152,6 +236,89 @@
                     if (count) count.textContent = data.followers_count;
                 }
             });
+        }
+
+        /* LÓGICA DE DETECCIÓN Y SUBIDA DE IMÁGENES */
+        let nsfwModel = null;
+        if (typeof nsfwjs !== 'undefined') {
+            nsfwjs.load().then(model => { nsfwModel = model; });
+        }
+
+        let selectedFiles = [];
+
+        async function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            for (let file of files) {
+                if (selectedFiles.length >= 17) {
+                    alert("Solo puedes subir un máximo de 17 fotos.");
+                    break;
+                }
+
+                if (nsfwModel) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    await img.decode();
+                    const predictions = await nsfwModel.classify(img);
+                    const nsfwAlert = predictions.some(p => (p.className === 'Porn' || p.className === 'Sexy' || p.className === 'Hentai') && p.probability > 0.60);
+
+                    if (nsfwAlert) {
+                        openModal('nsfw-warning-modal');
+                        continue;
+                    }
+                }
+                selectedFiles.push(file);
+            }
+            updatePhotoUI();
+            event.target.value = '';
+        }
+
+        function removePhoto(index) {
+            selectedFiles.splice(index, 1);
+            updatePhotoUI();
+        }
+
+        function updatePhotoUI() {
+            const grid = document.getElementById('photo-preview-grid');
+            const addBtn = document.getElementById('add-photo-btn');
+            
+            const previews = grid.querySelectorAll('.preview-item');
+            previews.forEach(p => p.remove());
+
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'relative h-20 rounded-xl overflow-hidden border shadow-sm preview-item group';
+                    div.innerHTML = '<img src="' + e.target.result + '" class="w-full h-full object-cover">' +
+                        '<button type="button" onclick="removePhoto(' + index + ')" class="absolute top-1 right-1 bg-african-red text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold hover:scale-110 transition shadow">' +
+                            '&times;' +
+                        '</button>';
+                    grid.insertBefore(div, addBtn);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            if (selectedFiles.length >= 17) {
+                addBtn.classList.add('hidden');
+            } else {
+                addBtn.classList.remove('hidden');
+            }
+
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            document.getElementById('final-photos').files = dataTransfer.files;
+
+            if (selectedFiles.length > 0) {
+                document.getElementById('photo-error').classList.add('hidden');
+            }
+        }
+
+        function validatePhotos() {
+            if (selectedFiles.length === 0) {
+                document.getElementById('photo-error').classList.remove('hidden');
+                return false;
+            }
+            return true;
         }
     </script>
 </body>
