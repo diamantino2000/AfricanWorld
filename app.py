@@ -28,10 +28,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleusercontent.com"
+USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
 # --- INICIALIZAR FIREBASE REALTIME DATABASE ---
-# REEMPLAZA 'tu-archivo-de-firebase.json' POR EL NOMBRE REAL DE TU ARCHIVO JSON DE CREDENCIALES
 cred_path = os.path.join(basedir, 'tu-archivo-de-firebase.json')
 try:
     if os.path.exists(cred_path):
@@ -40,30 +40,48 @@ try:
             'databaseURL': 'https://africanworld-f9a89-default-rtdb.firebaseio.com/'
         })
     else:
-        print("Advertencia: No se encontró el archivo JSON de Firebase. Las funciones de nube pueden fallar.")
+        print("Advertencia: No se encontró el archivo JSON de Firebase. Usando almacenamiento local (cuentas.json).")
 except Exception as e:
     print(f"Error al inicializar Firebase: {e}")
 
 def load_json_users():
+    # Intenta cargar desde Firebase si está inicializado
     try:
-        ref = firebase_db.reference('users')
-        users_data = ref.get()
-        if not users_data:
-            return []
-        if isinstance(users_data, dict):
-            return list(users_data.values())
-        return users_data
+        if firebase_admin._apps:
+            ref = firebase_db.reference('users')
+            users_data = ref.get()
+            if users_data:
+                if isinstance(users_data, dict):
+                    return list(users_data.values())
+                return users_data
     except Exception as e:
-        print(f"Error cargando usuarios desde Firebase: {e}")
+        print(f"Usando respaldo local por error en Firebase: {e}")
+    
+    # Respaldo local si Firebase no está listo
+    if not os.path.exists(USERS_JSON_FILE):
+        return []
+    try:
+        with open(USERS_JSON_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
         return []
 
 def save_json_users(users_list):
+    # Guarda siempre en el archivo local como respaldo seguro
     try:
-        users_dict = {str(u.get('username', i)): u for i, u in enumerate(users_list)}
-        ref = firebase_db.reference('users')
-        ref.set(users_dict)
+        with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
+            json.dump(users_list, f, indent=4, ensure_ascii=False)
     except Exception as e:
-        print(f"Error guardando usuarios en Firebase: {e}")
+        print(f"Error guardando en cuentas.json: {e}")
+
+    # Intenta guardar en Firebase si está activo
+    try:
+        if firebase_admin._apps:
+            users_dict = {str(u.get('username', i)): u for i, u in enumerate(users_list)}
+            ref = firebase_db.reference('users')
+            ref.set(users_dict)
+    except Exception as e:
+        print(f"Error guardando en Firebase: {e}")
 
 def load_denuncias():
     if not os.path.exists(DENUNCIAS_JSON_FILE):
