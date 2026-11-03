@@ -341,5 +341,62 @@
             return true;
         }
     </script>
+    <script type="module">
+  import { guardarArticuloFirebase, obtenerArticulosFirebase } from './fire.js';
+
+  // Si tienes un formulario de publicación en cuenta.html, lo capturamos aquí:
+  const formPublicar = document.getElementById('form-publicar'); // Asegúrate que tu form tenga este id
+  if (formPublicar) {
+      formPublicar.addEventListener('submit', function(e) {
+          e.preventDefault();
+
+          const articulo = {
+              title: document.getElementById('titulo').value,
+              price: document.getElementById('precio').value,
+              country: document.getElementById('pais').value,
+              city: document.getElementById('ciudad').value,
+              description: document.getElementById('descripcion').value,
+              username: "{{ profile_user.username }}" // Pasado directamente desde Flask
+          };
+
+          guardarArticuloFirebase(articulo)
+              .then(() => {
+                  alert("¡Publicado en la nube con éxito!");
+                  formPublicar.reset();
+              })
+              .catch((error) => {
+                  console.error("Error al publicar:", error);
+              });
+      });
+  }
+
+  // Pintar o listar las publicaciones en tiempo real dentro de cuenta.html
+  const contenedorPerfil = document.getElementById('mis-articulos-firebase');
+  if (contenedorPerfil) {
+      obtenerArticulosFirebase((articulos) => {
+          // Filtramos solo los artículos de este usuario
+          const misArticulos = articulos.filter(art => art.username === "{{ profile_user.username }}");
+          
+          contenedorPerfil.innerHTML = '';
+          if (misArticulos.length === 0) {
+              contenedorPerfil.innerHTML = '<p>No tienes publicaciones activas en la nube.</p>';
+              return;
+          }
+
+          misArticulos.forEach(art => {
+              const div = document.createElement('div');
+              div.className = 'tarjeta-articulo-usuario';
+              div.innerHTML = `
+                  <h3>${art.title}</h3>
+                  <p>Precio: $${art.price}</p>
+                  <p>Ciudad: ${art.city}</p>
+                  <p>${art.description}</p>
+                  <hr>
+              `;
+              contenedorPerfil.appendChild(div);
+          });
+      });
+  }
+</script>
 </body>
 </html>
