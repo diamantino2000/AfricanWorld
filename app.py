@@ -34,7 +34,7 @@ DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 # --- INICIALIZAR FIREBASE REALTIME DATABASE ---
 # --- INICIALIZAR FIREBASE REALTIME DATABASE ---
 # --- INICIALIZAR FIREBASE REALTIME DATABASE ---
-cred_filename = 'afikanworld-firebase-adminsdk-xxxxx.json'  # <--- Coloca aquí el nombre exacto de tu nuevo archivo JSON descargado
+cred_filename = 'firebase-adminsdk-fbsvc@afikanworld.iam.gserviceaccount.com'  # <--- Coloca aquí el nombre exacto de tu nuevo archivo JSON descargado
 cred_path = os.path.join(basedir, cred_filename)
 
 try:
