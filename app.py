@@ -41,7 +41,7 @@ try:
     if os.path.exists(cred_path):
         cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred, {
-            'databaseURL': 'https://afikanworld-default-rtdb.firebaseio.com/'  # <--- URL exacta de tu base de datos en afikanworld
+            'databaseURL': 'https://afikanworld-default-rtdb.europe-west1.firebasedatabase.app'  # <--- URL exacta de tu base de datos en afikanworld
         })
         print("Firebase inicializado correctamente con el nuevo proyecto.")
     else:
