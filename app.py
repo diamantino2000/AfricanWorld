@@ -32,7 +32,6 @@ USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
 # --- INICIALIZAR FIREBASE REALTIME DATABASE (PROYECTO AFIKANWORLD) ---
-# Asegúrate de poner aquí el nombre exacto del archivo JSON que descargaste de tu nuevo proyecto
 cred_filename = 'afikanworld-firebase-adminsdk-xxxxx.json' 
 cred_path = os.path.join(basedir, cred_filename)
 
@@ -452,7 +451,7 @@ def profile(username):
             flash("El usuario no existe.", "error")
             return redirect(url_for('index'))
     
-    current_user = next((u for u in users if u.get('username'] == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
     user_articles = Article.query.filter_by(username=username).order_by(Article.id.desc()).all()
 
     return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
