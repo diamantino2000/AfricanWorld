@@ -164,6 +164,33 @@ def mark_notifications_read():
         return jsonify({"status": "success"})
     return jsonify({"status": "error"}), 401
 
+@app.route('/get-notifications-json')
+def get_notifications_json():
+    if 'username' not in session:
+        return jsonify({"status": "error", "unread_count": 0, "notifications": []}), 401
+    
+    users = load_json_users()
+    current_user = next((u for u in users if u.get('username') == session['username']), None)
+    notifications = current_user.get('notifications', []) if current_user else []
+    
+    unread_count = sum(1 for n in notifications if not n.get('read', False))
+    
+    # Formatear el tiempo relativo o fecha para el JSON
+    formatted_notifications = []
+    for noti in notifications:
+        formatted_notifications.append({
+            "message": noti.get("message"),
+            "link": noti.get("link"),
+            "read": noti.get("read", False),
+            "time_ago": noti.get("date", "")
+        })
+
+    return jsonify({
+        "status": "success",
+        "unread_count": unread_count,
+        "notifications": formatted_notifications
+    })
+
 @app.route('/report-article/<int:article_id>', methods=['POST'])
 def report_article(article_id):
     if 'username' not in session:
@@ -523,6 +550,25 @@ def publicar_page():
         flash('Debes iniciar sesión para publicar.', 'error')
         return redirect(url_for('index'))
     return redirect(url_for('profile', username=session['username'], publish='1'))
+
+@app.route('/eliminar-cuenta')
+def eliminar_cuenta():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    
+    username = session['username']
+    users = load_json_users()
+    users = [u for u in users if u.get('username') != username]
+    save_json_users(users)
+    
+    user_articles = Article.query.filter_by(username=username).all()
+    for art in user_articles:
+        db.session.delete(art)
+    db.session.commit()
+    
+    session.clear()
+    flash('Tu cuenta ha sido eliminada permanentemente.', 'success')
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
