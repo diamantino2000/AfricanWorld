@@ -114,26 +114,5 @@
             });
         });
     </script>
-    <script type="module">
-  // Importas las funciones desde tu archivo local
-  import { guardarArticulo, obtenerArticulos } from './fire.js';
-
-  // Ejemplo: Guardar un artículo cuando el usuario pulse un botón o envíe un formulario
-  window.enviarDatos = function() {
-      guardarArticulo("Zapatos de cuero", 45, "Lagos", "Zapatos artesanales de alta calidad")
-          .then(() => {
-              alert("¡Guardado en Firebase con éxito!");
-          })
-          .catch((error) => {
-              console.error("Hubo un error:", error);
-          });
-  };
-
-  // Ejemplo: Escuchar los datos en tiempo real para pintarlos en pantalla
-  obtenerArticulos((articulos) => {
-      console.log("Lista de artículos actualizada:", articulos);
-      // Aquí puedes actualizar el HTML de tu página web con la información de Firebase
-  });
-</script>
 </body>
 </html>
