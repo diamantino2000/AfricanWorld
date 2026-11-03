@@ -31,26 +31,24 @@ GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleus
 USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
-# --- INICIALIZAR FIREBASE REALTIME DATABASE ---
-# --- INICIALIZAR FIREBASE REALTIME DATABASE ---
-# --- INICIALIZAR FIREBASE REALTIME DATABASE ---
-cred_filename = 'firebase-adminsdk-fbsvc@afikanworld.iam.gserviceaccount.com'  # <--- Coloca aquí el nombre exacto de tu nuevo archivo JSON descargado
+# --- INICIALIZAR FIREBASE REALTIME DATABASE (PROYECTO AFIKANWORLD) ---
+# Asegúrate de poner aquí el nombre exacto del archivo JSON que descargaste de tu nuevo proyecto
+cred_filename = 'afikanworld-firebase-adminsdk-xxxxx.json' 
 cred_path = os.path.join(basedir, cred_filename)
 
 try:
     if os.path.exists(cred_path):
         cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred, {
-            'databaseURL': 'https://afikanworld-default-rtdb.europe-west1.firebasedatabase.app'  # <--- URL exacta de tu base de datos en afikanworld
+            'databaseURL': 'https://afikanworld-default-rtdb.europe-west1.firebasedatabase.app'
         })
-        print("Firebase inicializado correctamente con el nuevo proyecto.")
+        print("Firebase inicializado correctamente con el proyecto afikanworld en Europa.")
     else:
-        print(f"Advertencia: No se encontró el archivo {cred_filename}.")
+        print(f"Advertencia: No se encontró el archivo {cred_filename}. Usando almacenamiento local (cuentas.json).")
 except Exception as e:
     print(f"Error al inicializar Firebase: {e}")
 
 def load_json_users():
-    # Intenta cargar desde Firebase si está inicializado
     try:
         if firebase_admin._apps:
             ref = firebase_db.reference('users')
@@ -62,7 +60,6 @@ def load_json_users():
     except Exception as e:
         print(f"Usando respaldo local por error en Firebase: {e}")
     
-    # Respaldo local si Firebase no está listo
     if not os.path.exists(USERS_JSON_FILE):
         return []
     try:
@@ -72,14 +69,12 @@ def load_json_users():
         return []
 
 def save_json_users(users_list):
-    # Guarda siempre en el archivo local como respaldo seguro
     try:
         with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
             json.dump(users_list, f, indent=4, ensure_ascii=False)
     except Exception as e:
         print(f"Error guardando en cuentas.json: {e}")
 
-    # Intenta guardar en Firebase si está activo
     try:
         if firebase_admin._apps:
             users_dict = {str(u.get('username', i)): u for i, u in enumerate(users_list)}
@@ -457,7 +452,7 @@ def profile(username):
             flash("El usuario no existe.", "error")
             return redirect(url_for('index'))
     
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username'] == session.get('username')), None) if 'username' in session else None
     user_articles = Article.query.filter_by(username=username).order_by(Article.id.desc()).all()
 
     return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
@@ -569,7 +564,7 @@ def publish():
     db.session.add(new_article)
     db.session.commit()
 
-    # 2. Sincronizar en Firebase Realtime Database
+    # 2. Sincronizar el artículo en Firebase Realtime Database
     try:
         if firebase_admin._apps:
             article_ref = firebase_db.reference(f'articles/{new_article.id}')
