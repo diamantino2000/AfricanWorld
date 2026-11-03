@@ -9,16 +9,18 @@ import re
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 from sqlalchemy import text
-import firebase_admin
-from firebase_admin import credentials, db as firebase_db
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
 
-db_path = os.path.join(basedir, 'africanworld_v2.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', f'sqlite:///{db_path}')
+# Configuración automática: Lee la nube de PostgreSQL en Render o usa SQLite local si pruebas en tu PC
+db_url = os.environ.get('DATABASE_URL')
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)  # Corrección de compatibilidad para SQLAlchemy
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url or f'sqlite:///{os.path.join(basedir, "africanworld_v2.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
@@ -29,33 +31,7 @@ GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleus
 USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
-# --- INICIALIZAR FIREBASE MEDIANTE VARIABLE DE ENTORNO ---
-try:
-    firebase_creds_json = os.environ.get('firebase-adminsdk-fbsvc@afikanworld.iam.gserviceaccount.com')
-    if firebase_creds_json:
-        cred_dict = json.loads(firebase_creds_json)
-        cred = credentials.Certificate(cred_dict)
-        firebase_admin.initialize_app(cred, {
-            'databaseURL': 'https://afikanworld-default-rtdb.europe-west1.firebasedatabase.app'
-        })
-        print("Firebase inicializado correctamente mediante Variable de Entorno (Europa).")
-    else:
-        print("Advertencia: No se encontró la variable FIREBASE_CREDENTIALS_JSON en Render.")
-except Exception as e:
-    print(f"Error al inicializar Firebase: {e}")
-
 def load_json_users():
-    try:
-        if firebase_admin._apps:
-            ref = firebase_db.reference('users')
-            users_data = ref.get()
-            if users_data:
-                if isinstance(users_data, dict):
-                    return list(users_data.values())
-                return users_data
-    except Exception as e:
-        print(f"Usando respaldo local por error en Firebase: {e}")
-    
     if not os.path.exists(USERS_JSON_FILE):
         return []
     try:
@@ -70,14 +46,6 @@ def save_json_users(users_list):
             json.dump(users_list, f, indent=4, ensure_ascii=False)
     except Exception as e:
         print(f"Error guardando en cuentas.json: {e}")
-
-    try:
-        if firebase_admin._apps:
-            users_dict = {str(u.get('username', i)): u for i, u in enumerate(users_list)}
-            ref = firebase_db.reference('users')
-            ref.set(users_dict)
-    except Exception as e:
-        print(f"Error guardando en Firebase: {e}")
 
 def load_denuncias():
     if not os.path.exists(DENUNCIAS_JSON_FILE):
@@ -139,17 +107,6 @@ class Comment(db.Model):
 
 with app.app_context():
     db.create_all()
-    try:
-        db.session.execute(text("ALTER TABLE article ADD COLUMN is_sold BOOLEAN DEFAULT 0"))
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-
-    try:
-        db.session.execute(text("ALTER TABLE article ADD COLUMN price FLOAT DEFAULT 0.0"))
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
 
 def slugify(text_value):
     text_value = unicodedata.normalize('NFKD', text_value).encode('ascii', 'ignore').decode('utf-8')
@@ -558,27 +515,6 @@ def publish():
     )
     db.session.add(new_article)
     db.session.commit()
-
-    try:
-        if firebase_admin._apps:
-            article_ref = firebase_db.reference(f'articles/{new_article.id}')
-            article_ref.set({
-                "id": new_article.id,
-                "title": title,
-                "price": price,
-                "slug": slug,
-                "country": country,
-                "city": city,
-                "email": email,
-                "phone": phone,
-                "description": description,
-                "username": session['username'],
-                "images": ",".join(image_paths),
-                "is_sold": False,
-                "views": 0
-            })
-    except Exception as e:
-        print(f"Error al sincronizar artículo con Firebase: {e}")
 
     return redirect(url_for('view_article', slug=new_article.slug))
 
