@@ -15,7 +15,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
 
-# Configuración de base de datos SQLite local o PostgreSQL en la nube
 db_url = os.environ.get('DATABASE_URL')
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
@@ -527,4 +526,4 @@ def publicar_page():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
