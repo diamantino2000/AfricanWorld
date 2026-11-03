@@ -12,13 +12,11 @@ from sqlalchemy import text
 import firebase_admin
 from firebase_admin import credentials, db as firebase_db
 
-# Configurar rutas absolutas basadas en la ubicación de app.py
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
 
-# Configurar base de datos SQLite con ruta absoluta persistente (respaldo local)
 db_path = os.path.join(basedir, 'africanworld_v2.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', f'sqlite:///{db_path}')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -31,19 +29,18 @@ GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleus
 USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
-# --- INICIALIZAR FIREBASE REALTIME DATABASE (PROYECTO AFIKANWORLD) ---
-cred_filename = 'afikanworld-firebase-adminsdk-xxxxx.json' 
-cred_path = os.path.join(basedir, cred_filename)
-
+# --- INICIALIZAR FIREBASE MEDIANTE VARIABLE DE ENTORNO ---
 try:
-    if os.path.exists(cred_path):
-        cred = credentials.Certificate(cred_path)
+    firebase_creds_json = os.environ.get('firebase-adminsdk-fbsvc@afikanworld.iam.gserviceaccount.com')
+    if firebase_creds_json:
+        cred_dict = json.loads(firebase_creds_json)
+        cred = credentials.Certificate(cred_dict)
         firebase_admin.initialize_app(cred, {
             'databaseURL': 'https://afikanworld-default-rtdb.europe-west1.firebasedatabase.app'
         })
-        print("Firebase inicializado correctamente con el proyecto afikanworld en Europa.")
+        print("Firebase inicializado correctamente mediante Variable de Entorno (Europa).")
     else:
-        print(f"Advertencia: No se encontró el archivo {cred_filename}. Usando almacenamiento local (cuentas.json).")
+        print("Advertencia: No se encontró la variable FIREBASE_CREDENTIALS_JSON en Render.")
 except Exception as e:
     print(f"Error al inicializar Firebase: {e}")
 
@@ -547,7 +544,6 @@ def publish():
         slug = f"{base_slug}-{counter}"
         counter += 1
 
-    # 1. Guardar en SQLite local
     new_article = Article(
         title=title, 
         price=price, 
@@ -563,7 +559,6 @@ def publish():
     db.session.add(new_article)
     db.session.commit()
 
-    # 2. Sincronizar el artículo en Firebase Realtime Database
     try:
         if firebase_admin._apps:
             article_ref = firebase_db.reference(f'articles/{new_article.id}')
