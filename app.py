@@ -15,10 +15,10 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
 
-# Configuración automática: Lee la nube de PostgreSQL en Render o usa SQLite local si pruebas en tu PC
+# Configuración de base de datos SQLite local o PostgreSQL en la nube
 db_url = os.environ.get('DATABASE_URL')
 if db_url and db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)  # Corrección de compatibilidad para SQLAlchemy
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url or f'sqlite:///{os.path.join(basedir, "africanworld_v2.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
