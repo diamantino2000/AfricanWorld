@@ -30,9 +30,15 @@ GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleus
 USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
+if not os.path.exists(USERS_JSON_FILE):
+    with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
+        json.dump([], f)
+
+if not os.path.exists(DENUNCIAS_JSON_FILE):
+    with open(DENUNCIAS_JSON_FILE, 'w', encoding='utf-8') as f:
+        json.dump([], f)
+
 def load_json_users():
-    if not os.path.exists(USERS_JSON_FILE):
-        return []
     try:
         with open(USERS_JSON_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
@@ -47,8 +53,6 @@ def save_json_users(users_list):
         print(f"Error guardando en cuentas.json: {e}")
 
 def load_denuncias():
-    if not os.path.exists(DENUNCIAS_JSON_FILE):
-        return []
     try:
         with open(DENUNCIAS_JSON_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
@@ -114,9 +118,6 @@ def slugify(text_value):
 
 @app.route('/')
 def index():
-    if 'username' not in session:
-        return render_template('intro.html', google_client_id=GOOGLE_CLIENT_ID)
-    
     search = request.args.get('search', '')
     if search:
         articles = Article.query.filter(
@@ -128,8 +129,9 @@ def index():
         articles = Article.query.order_by(Article.id.desc()).all()
     
     users = load_json_users()
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
 
+    # PRUEBA: Carga directamente index.html sin requerir intro.html
     return render_template('index.html', articles=articles, search=search, current_user=current_user, google_client_id=GOOGLE_CLIENT_ID)
 
 @app.route('/buscar-usuarios')
@@ -175,7 +177,6 @@ def get_notifications_json():
     
     unread_count = sum(1 for n in notifications if not n.get('read', False))
     
-    # Formatear el tiempo relativo o fecha para el JSON
     formatted_notifications = []
     for noti in notifications:
         formatted_notifications.append({
