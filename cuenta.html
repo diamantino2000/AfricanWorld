@@ -340,32 +340,23 @@
         import { guardarArticuloFirebase, obtenerArticulosFirebase } from './static/fire.js';
 
         const formPublicar = document.getElementById('form-publicar');
-if (formPublicar) {
-    formPublicar.addEventListener('submit', function(e) {
-        // Evita que el formulario recargue la página inmediatamente
-        e.preventDefault(); 
+        if (formPublicar) {
+            formPublicar.addEventListener('submit', function(e) {
+                // Envía primero a Flask mediante submit normal, y de manera complementaria guarda en Firebase
+                const articulo = {
+                    title: document.getElementById('titulo').value,
+                    price: document.getElementById('precio').value,
+                    country: document.getElementById('pais').value,
+                    city: document.getElementById('ciudad').value,
+                    description: document.getElementById('descripcion').value,
+                    username: "{{ profile_user.username }}"
+                };
 
-        const articulo = {
-            title: document.getElementById('titulo').value,
-            price: document.getElementById('precio').value,
-            country: document.getElementById('pais').value,
-            city: document.getElementById('ciudad').value,
-            description: document.getElementById('descripcion').value,
-            username: "{{ profile_user.username }}"
-        };
-
-        guardarArticuloFirebase(articulo)
-            .then(() => {
-                alert("¡Publicado en Firebase con éxito!");
-                closeModal('publish-modal');
-                formPublicar.reset();
-            })
-            .catch((error) => {
-                console.error("Error al publicar en Firebase:", error);
-                alert("Error al guardar: " + error.message);
+                guardarArticuloFirebase(articulo).catch((error) => {
+                    console.error("Error al publicar en Firebase:", error);
+                });
             });
-    });
-}
+        }
 
         const contenedorPerfil = document.getElementById('mis-articulos-firebase');
         if (contenedorPerfil) {
