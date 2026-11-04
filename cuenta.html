@@ -137,7 +137,6 @@
                 <span>Publicar Artículo</span>
             </h2>
             
-            <!-- FORMULARIO CON IDs NECESARIOS PARA FIREBASE Y FLASK -->
             <form id="form-publicar" action="/publish" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="return validatePhotos()">
                 <div>
                     <label class="block text-sm font-bold text-gray-700">Título del Artículo</label>
@@ -335,14 +334,63 @@
         }
     </script>
 
-    <!-- SCRIPT DE FIREBASE -->
+    <!-- SCRIPT DE FIREBASE INTEGRADO DIRECTAMENTE -->
     <script type="module">
-        import { guardarArticuloFirebase, obtenerArticulosFirebase } from './static/fire.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfyEiqgB9G9OsgJpCqKa7MU8wJ2c-95EE",
+            authDomain: "afrikan-311da.firebaseapp.com",
+            projectId: "afrikan-311da",
+            storageBucket: "afrikan-311da.firebasestorage.app",
+            messagingSenderId: "755153282177",
+            appId: "1:755153282177:web:e925cdbb609cc1802cd980",
+            measurementId: "G-ESHC468CSB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        // Funciones auxiliares para Firestore
+        async function guardarArticuloFirebase(articulo) {
+            try {
+                const docRef = await addDoc(collection(db, "articulos"), {
+                    title: articulo.title,
+                    price: parseFloat(articulo.price),
+                    country: articulo.country,
+                    city: articulo.city,
+                    description: articulo.description,
+                    username: articulo.username,
+                    timestamp: serverTimestamp()
+                });
+                return true;
+            } catch (e) {
+                console.error("Error al guardar en Firebase: ", e);
+                throw e;
+            }
+        }
+
+        async function obtenerArticulosFirebase(callback) {
+            try {
+                const q = query(collection(db, "articulos"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                const articulos = [];
+                querySnapshot.forEach((doc) => {
+                    articulos.push({ id: doc.id, ...doc.data() });
+                });
+                callback(articulos);
+            } catch (e) {
+                console.error("Error al obtener artículos de Firebase:", e);
+                callback([]);
+            }
+        }
 
         const formPublicar = document.getElementById('form-publicar');
         if (formPublicar) {
             formPublicar.addEventListener('submit', function(e) {
-                // Envía primero a Flask mediante submit normal, y de manera complementaria guarda en Firebase
                 const articulo = {
                     title: document.getElementById('titulo').value,
                     price: document.getElementById('precio').value,
