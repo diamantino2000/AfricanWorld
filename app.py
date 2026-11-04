@@ -30,6 +30,7 @@ GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleus
 USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
+# Asegurar que los JSON existan para evitar errores 500 en Render
 if not os.path.exists(USERS_JSON_FILE):
     with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
         json.dump([], f)
@@ -131,7 +132,6 @@ def index():
     users = load_json_users()
     current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
 
-    # PRUEBA: Carga directamente index.html sin requerir intro.html
     return render_template('index.html', articles=articles, search=search, current_user=current_user, google_client_id=GOOGLE_CLIENT_ID)
 
 @app.route('/buscar-usuarios')
