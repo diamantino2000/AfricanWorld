@@ -340,30 +340,32 @@
         import { guardarArticuloFirebase, obtenerArticulosFirebase } from './fire.js';
 
         const formPublicar = document.getElementById('form-publicar');
-        if (formPublicar) {
-            formPublicar.addEventListener('submit', function(e) {
-                // Nota: Si quieres que además se guarde en Flask por HTTP, no pongas e.preventDefault().
-                // Si prefieres que Firebase maneje todo de forma asíncrona, descomenta la siguiente línea:
-                // e.preventDefault();
+if (formPublicar) {
+    formPublicar.addEventListener('submit', function(e) {
+        // Evita que el formulario recargue la página inmediatamente
+        e.preventDefault(); 
 
-                const articulo = {
-                    title: document.getElementById('titulo').value,
-                    price: document.getElementById('precio').value,
-                    country: document.getElementById('pais').value,
-                    city: document.getElementById('ciudad').value,
-                    description: document.getElementById('descripcion').value,
-                    username: "{{ profile_user.username }}"
-                };
+        const articulo = {
+            title: document.getElementById('titulo').value,
+            price: document.getElementById('precio').value,
+            country: document.getElementById('pais').value,
+            city: document.getElementById('ciudad').value,
+            description: document.getElementById('descripcion').value,
+            username: "{{ profile_user.username }}"
+        };
 
-                guardarArticuloFirebase(articulo)
-                    .then(() => {
-                        console.log("¡Publicado en Firebase con éxito!");
-                    })
-                    .catch((error) => {
-                        console.error("Error al publicar en Firebase:", error);
-                    });
+        guardarArticuloFirebase(articulo)
+            .then(() => {
+                alert("¡Publicado en Firebase con éxito!");
+                closeModal('publish-modal');
+                formPublicar.reset();
+            })
+            .catch((error) => {
+                console.error("Error al publicar en Firebase:", error);
+                alert("Error al guardar: " + error.message);
             });
-        }
+    });
+}
 
         const contenedorPerfil = document.getElementById('mis-articulos-firebase');
         if (contenedorPerfil) {
