@@ -36,7 +36,7 @@
                 </span>
             </a>
             <a href="/" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-gray-100 transition flex items-center gap-2">
-                <i class="fa-solid fa-house"></i> <span data-es="Volver" data-fr="Retour" data-en="Back" data-ar="عودة" data-pt="Voltar">Volver</span>
+                <i class="fa-solid fa-house"></i> <span>Volver</span>
             </a>
         </div>
     </header>
@@ -50,8 +50,8 @@
                     <h1 class="text-3xl font-black text-gray-900">@{{ profile_user.username }}</h1>
                     <p class="text-xs text-gray-500"><i class="fa-solid fa-envelope mr-1"></i>{{ profile_user.email }}</p>
                     <div class="flex gap-4 pt-2 justify-center md:justify-start text-xs font-bold text-gray-600">
-                        <span><strong id="followers-count" class="text-gray-900 text-sm">{{ profile_user.followers|length if profile_user.followers else 0 }}</strong> <span data-es="Seguidores" data-fr="Abonnés" data-en="Followers" data-ar="متابعون" data-pt="Seguidores">Seguidores</span></span>
-                        <span><strong class="text-gray-900 text-sm">{{ profile_user.following|length if profile_user.following else 0 }}</strong> <span data-es="Siguiendo" data-fr="Abonnements" data-en="Following" data-ar="يتابع" data-pt="Seguindo">Siguiendo</span></span>
+                        <span><strong id="followers-count" class="text-gray-900 text-sm">{{ profile_user.followers|length if profile_user.followers else 0 }}</strong> Seguidores</span>
+                        <span><strong class="text-gray-900 text-sm">{{ profile_user.following|length if profile_user.following else 0 }}</strong> Siguiendo</span>
                     </div>
                 </div>
             </div>
@@ -60,10 +60,10 @@
             <div class="flex items-center gap-3 flex-wrap justify-center">
                 {% if session.get('username') and session['username'] == profile_user.username %}
                     <button type="button" onclick="openModal('publish-modal')" class="bg-african-yellow text-gray-900 px-5 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-yellow-400 transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> <span data-es="Publicar Artículo" data-fr="Publier un Article" data-en="Publish Listing" data-ar="نشر إعلان" data-pt="Publicar Anúncio">Publicar Artículo</span>
+                        <i class="fa-solid fa-plus"></i> Publicar Artículo
                     </button>
                     <a href="/settings" class="bg-gray-100 text-gray-800 border px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-200 transition flex items-center gap-2">
-                        <i class="fa-solid fa-gear"></i> <span data-es="Editar Ajustes" data-fr="Modifier les Paramètres" data-en="Edit Settings" data-ar="تعديل الإعدادات" data-pt="Editar Configurações">Editar Ajustes</span>
+                        <i class="fa-solid fa-gear"></i> Editar Ajustes
                     </a>
                 {% elif session.get('username') %}
                     {% set is_following = session['username'] in (profile_user.followers or []) %}
@@ -74,11 +74,11 @@
             </div>
         </div>
 
-        <!-- PUBLICACIONES DEL USUARIO -->
+        <!-- PUBLICACIONES DEL USUARIO (BASE DE DATOS FLASK) -->
         <div class="space-y-4">
             <h2 class="text-xl font-black text-gray-900 flex items-center gap-2 border-b pb-2">
                 <i class="fa-solid fa-box text-african-yellow"></i>
-                <span><span data-es="Publicaciones de" data-fr="Publications de" data-en="Listings by" data-ar="منشورات" data-pt="Publicações de">Publicaciones de</span> {{ profile_user.username }}</span>
+                <span>Publicaciones de {{ profile_user.username }}</span>
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -100,19 +100,30 @@
                         </div>
 
                         <div class="p-5 pt-0 border-t mt-3 flex justify-between items-center text-xs">
-                            <a href="/articulo/{{ art.slug }}" class="text-african-green font-bold hover:underline" data-es="Ver Publicación &rarr;" data-fr="Voir la Publication &rarr;" data-en="View Listing &rarr;" data-ar="عرض الإعلان &rarr;" data-pt="Ver Anúncio &rarr;">Ver Publicación &rarr;</a>
+                            <a href="/articulo/{{ art.slug }}" class="text-african-green font-bold hover:underline">Ver Publicación &rarr;</a>
                             {% if session.get('username') == profile_user.username %}
                                 <form action="/articulo/{{ art.id }}/delete" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?')">
-                                    <button type="submit" class="text-african-red font-bold hover:underline"><i class="fa-solid fa-trash mr-1"></i><span data-es="Eliminar" data-fr="Supprimer" data-en="Delete" data-ar="حذف" data-pt="Excluir">Eliminar</span></button>
+                                    <button type="submit" class="text-african-red font-bold hover:underline"><i class="fa-solid fa-trash mr-1"></i>Eliminar</button>
                                 </form>
                             {% endif %}
                         </div>
                     </div>
                 {% else %}
                     <div class="col-span-full text-center py-12 text-gray-400 bg-white rounded-2xl border">
-                        <p data-es="Este usuario aún no ha publicado artículos." data-fr="Cet utilisateur n'a pas encore publié d'articles." data-en="This user hasn't published any listings yet." data-ar="لم ينشر هذا المستخدم أي إعلانات بعد." data-pt="Este usuário ainda não publicou anúncios.">Este usuario aún no ha publicado artículos.</p>
+                        <p>Este usuario aún no ha publicado artículos.</p>
                     </div>
                 {% endfor %}
+            </div>
+        </div>
+
+        <!-- PUBLICACIONES EN TIEMPO REAL DESDE FIREBASE -->
+        <div class="space-y-4 pt-6 border-t">
+            <h2 class="text-xl font-black text-gray-900 flex items-center gap-2 border-b pb-2">
+                <i class="fa-solid fa-cloud text-african-green"></i>
+                <span>Artículos en Firebase (Tiempo Real)</span>
+            </h2>
+            <div id="mis-articulos-firebase" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <p class="text-xs text-gray-400 italic col-span-full">Cargando desde Firebase...</p>
             </div>
         </div>
     </main>
@@ -123,44 +134,46 @@
             <button type="button" onclick="closeModal('publish-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
             <h2 class="text-2xl font-black text-gray-900 flex items-center space-x-2">
                 <i class="fa-solid fa-bullhorn text-african-yellow"></i>
-                <span data-es="Publicar Artículo" data-fr="Publier un Article" data-en="Publish Listing" data-ar="نشر إعلان" data-pt="Publicar Anúncio">Publicar Artículo</span>
+                <span>Publicar Artículo</span>
             </h2>
-            <form action="/publish" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="return validatePhotos()">
+            
+            <!-- FORMULARIO CON IDs NECESARIOS PARA FIREBASE Y FLASK -->
+            <form id="form-publicar" action="/publish" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="return validatePhotos()">
                 <div>
-                    <label class="block text-sm font-bold text-gray-700" data-es="Título del Artículo" data-fr="Titre de l'Article" data-en="Listing Title" data-ar="عنوان الإعلان" data-pt="Título do Anúncio">Título del Artículo</label>
-                    <input type="text" name="title" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                    <label class="block text-sm font-bold text-gray-700">Título del Artículo</label>
+                    <input type="text" id="titulo" name="title" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700" data-es="Precio ($ USD / Local)" data-fr="Prix ($ USD / Local)" data-en="Price ($ USD / Local)" data-ar="السعر ($ USD / محلي)" data-pt="Preço ($ USD / Local)">Precio ($ USD / Local)</label>
-                        <input type="number" step="0.01" min="0" name="price" placeholder="Ej: 25.00" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none font-bold">
+                        <label class="block text-sm font-bold text-gray-700">Precio ($ USD / Local)</label>
+                        <input type="number" step="0.01" min="0" id="precio" name="price" placeholder="Ej: 25.00" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none font-bold">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700" data-es="Teléfono" data-fr="Téléphone" data-en="Phone" data-ar="الهاتف" data-pt="Telefone">Teléfono</label>
-                        <input type="tel" name="phone" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                        <label class="block text-sm font-bold text-gray-700">Teléfono</label>
+                        <input type="tel" id="telefono" name="phone" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700" data-es="País" data-fr="Pays" data-en="Country" data-ar="الدولة" data-pt="País">País</label>
-                        <input type="text" name="country" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                        <label class="block text-sm font-bold text-gray-700">País</label>
+                        <input type="text" id="pais" name="country" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700" data-es="Ciudad" data-fr="Ville" data-en="City" data-ar="المدينة" data-pt="Cidade">Ciudad</label>
-                        <input type="text" name="city" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                        <label class="block text-sm font-bold text-gray-700">Ciudad</label>
+                        <input type="text" id="ciudad" name="city" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700" data-es="Correo de Contacto" data-fr="E-mail de Contact" data-en="Contact Email" data-ar="بريد التواصل" data-pt="E-mail de Contato">Correo de Contacto</label>
+                    <label class="block text-sm font-bold text-gray-700">Correo de Contacto</label>
                     <input type="email" name="email" value="{{ session.get('email', '') }}" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">
-                        <span data-es="Fotos del Artículo" data-fr="Photos de l'Article" data-en="Listing Photos" data-ar="صور الإعلان" data-pt="Fotos do Anúncio">Fotos del Artículo</span> <span class="text-xs text-gray-400 font-normal" data-es="(Máximo 17 fotos)" data-fr="(Maximum 17 photos)" data-en="(Maximum 17 photos)" data-ar="(الحد الأقصى 17 صورة)" data-pt="(Máximo 17 fotos)">(Máximo 17 fotos)</span>
+                        Fotos del Artículo <span class="text-xs text-gray-400 font-normal">(Máximo 17 fotos)</span>
                     </label>
                     
                     <input type="file" id="photo-picker" accept="image/*" multiple class="hidden" onchange="handleFileSelect(event)">
@@ -168,20 +181,20 @@
                     <div class="grid grid-cols-4 gap-3 p-3 bg-gray-50 border rounded-2xl" id="photo-preview-grid">
                         <button type="button" onclick="document.getElementById('photo-picker').click()" id="add-photo-btn" class="h-20 border-2 border-dashed border-african-yellow bg-yellow-50 hover:bg-yellow-100 rounded-xl flex flex-col items-center justify-center text-african-yellow transition shadow-sm group">
                             <i class="fa-solid fa-plus text-2xl group-hover:scale-125 transition-transform"></i>
-                            <span class="text-[10px] font-black text-gray-800 mt-1" data-es="Añadir Foto" data-fr="Ajouter" data-en="Add Photo" data-ar="إضافة صورة" data-pt="Adicionar Foto">Añadir Foto</span>
+                            <span class="text-[10px] font-black text-gray-800 mt-1">Añadir Foto</span>
                         </button>
                     </div>
                     
                     <input type="file" name="photos" id="final-photos" multiple class="hidden">
-                    <p class="text-xs text-red-500 hidden mt-1 font-bold" id="photo-error" data-es="Debes agregar al menos 1 foto válida." data-fr="Vous devez ajouter au moins 1 photo valide." data-en="You must add at least 1 valid photo." data-ar="يجب عليك إضافة صورة واحدة صحيحة على الأقل." data-pt="Você deve adicionar pelo menos 1 foto válida.">Debes agregar al menos 1 foto válida.</p>
+                    <p class="text-xs text-red-500 hidden mt-1 font-bold" id="photo-error">Debes agregar al menos 1 foto válida.</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700" data-es="Descripción" data-fr="Description" data-en="Description" data-ar="الوصف" data-pt="Descrição">Descripción</label>
-                    <textarea name="description" rows="3" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none"></textarea>
+                    <label class="block text-sm font-bold text-gray-700">Descripción</label>
+                    <textarea id="descripcion" name="description" rows="3" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none"></textarea>
                 </div>
 
-                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold hover:opacity-90 transition shadow" data-es="Publicar Anuncio" data-fr="Publier l'Annonce" data-en="Publish Ad" data-ar="نشر الإعلان" data-pt="Publicar Anúncio">Publicar Anuncio</button>
+                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold hover:opacity-90 transition shadow">Publicar Anuncio</button>
             </form>
         </div>
     </div>
@@ -192,51 +205,31 @@
             <div class="w-16 h-16 bg-red-100 text-african-red rounded-full flex items-center justify-center mx-auto text-3xl">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h3 class="text-2xl font-black text-gray-900" data-es="Foto no permitida" data-fr="Photo non autorisée" data-en="Photo not allowed" data-ar="صورة غير مسموح بها" data-pt="Foto não permitida">Foto no permitida</h3>
-            <p class="text-sm text-gray-600 leading-relaxed" data-es="Hemos detectado que la imagen que intentas subir puede contener elementos explícitos, sexuales u ofensivos no permitidos." data-fr="Nous avons détecté que l'image que vous essayez de télécharger..." data-en="We have detected that the image you are trying to upload..." data-ar="لقد اكتشفنا أن الصورة التي تحاول تحميلها قد تحتوي على عناصر صريحة..." data-pt="Detectamos que a imagem que você está tentando enviar pode conter elementos explícitos...">
+            <h3 class="text-2xl font-black text-gray-900">Foto no permitida</h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
                 Hemos detectado que la imagen que intentas subir puede contener elementos explícitos, sexuales u ofensivos no permitidos.
             </p>
-            <button type="button" onclick="closeModal('nsfw-warning-modal')" class="w-full bg-african-red text-white py-3 rounded-xl font-bold shadow hover:bg-red-700 transition" data-es="Entendido" data-fr="Compris" data-en="Understood" data-ar="حسناً" data-pt="Entendido">
+            <button type="button" onclick="closeModal('nsfw-warning-modal')" class="w-full bg-african-red text-white py-3 rounded-xl font-bold shadow hover:bg-red-700 transition">
                 Entendido
             </button>
         </div>
     </div>
 
     <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
-        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-ar="جميع الحقوق محفوظة." data-pt="Todos os direitos reservados.">Todos los derechos reservados.</span></p>
+        <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- SCRIPT DE MODALES, SEGUIR, NSFW E IDIOMA -->
+    <!-- SCRIPTS GENERALES -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const savedLang = localStorage.getItem("user_selected_language") || "es";
-            const htmlRoot = document.documentElement;
-            htmlRoot.setAttribute("lang", savedLang);
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-            if (savedLang === "ar") {
-                htmlRoot.setAttribute("dir", "rtl");
-            } else {
-                htmlRoot.removeAttribute("dir");
-            }
-
-            document.querySelectorAll("[data-es][data-fr]").forEach(function(el) {
-                const translation = el.getAttribute("data-" + savedLang);
-                if (translation) {
-                    el.textContent = translation;
-                } else {
-                    el.textContent = el.getAttribute("data-es");
-                }
-            });
-
-            // Abrir modal automáticamente si el URL contiene ?publish=1
+        window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('publish') === '1') {
                 openModal('publish-modal');
             }
         });
-
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function toggleFollow(username) {
             fetch('/follow/' + username, { method: 'POST' })
@@ -341,62 +334,60 @@
             return true;
         }
     </script>
+
+    <!-- SCRIPT DE FIREBASE -->
     <script type="module">
-  import { guardarArticuloFirebase, obtenerArticulosFirebase } from './fire.js';
+        import { guardarArticuloFirebase, obtenerArticulosFirebase } from './fire.js';
 
-  // Si tienes un formulario de publicación en cuenta.html, lo capturamos aquí:
-  const formPublicar = document.getElementById('form-publicar'); // Asegúrate que tu form tenga este id
-  if (formPublicar) {
-      formPublicar.addEventListener('submit', function(e) {
-          e.preventDefault();
+        const formPublicar = document.getElementById('form-publicar');
+        if (formPublicar) {
+            formPublicar.addEventListener('submit', function(e) {
+                // Nota: Si quieres que además se guarde en Flask por HTTP, no pongas e.preventDefault().
+                // Si prefieres que Firebase maneje todo de forma asíncrona, descomenta la siguiente línea:
+                // e.preventDefault();
 
-          const articulo = {
-              title: document.getElementById('titulo').value,
-              price: document.getElementById('precio').value,
-              country: document.getElementById('pais').value,
-              city: document.getElementById('ciudad').value,
-              description: document.getElementById('descripcion').value,
-              username: "{{ profile_user.username }}" // Pasado directamente desde Flask
-          };
+                const articulo = {
+                    title: document.getElementById('titulo').value,
+                    price: document.getElementById('precio').value,
+                    country: document.getElementById('pais').value,
+                    city: document.getElementById('ciudad').value,
+                    description: document.getElementById('descripcion').value,
+                    username: "{{ profile_user.username }}"
+                };
 
-          guardarArticuloFirebase(articulo)
-              .then(() => {
-                  alert("¡Publicado en la nube con éxito!");
-                  formPublicar.reset();
-              })
-              .catch((error) => {
-                  console.error("Error al publicar:", error);
-              });
-      });
-  }
+                guardarArticuloFirebase(articulo)
+                    .then(() => {
+                        console.log("¡Publicado en Firebase con éxito!");
+                    })
+                    .catch((error) => {
+                        console.error("Error al publicar en Firebase:", error);
+                    });
+            });
+        }
 
-  // Pintar o listar las publicaciones en tiempo real dentro de cuenta.html
-  const contenedorPerfil = document.getElementById('mis-articulos-firebase');
-  if (contenedorPerfil) {
-      obtenerArticulosFirebase((articulos) => {
-          // Filtramos solo los artículos de este usuario
-          const misArticulos = articulos.filter(art => art.username === "{{ profile_user.username }}");
-          
-          contenedorPerfil.innerHTML = '';
-          if (misArticulos.length === 0) {
-              contenedorPerfil.innerHTML = '<p>No tienes publicaciones activas en la nube.</p>';
-              return;
-          }
+        const contenedorPerfil = document.getElementById('mis-articulos-firebase');
+        if (contenedorPerfil) {
+            obtenerArticulosFirebase((articulos) => {
+                const misArticulos = articulos.filter(art => art.username === "{{ profile_user.username }}");
+                
+                contenedorPerfil.innerHTML = '';
+                if (misArticulos.length === 0) {
+                    contenedorPerfil.innerHTML = '<p class="text-xs text-gray-400 italic col-span-full">No tienes publicaciones en tiempo real en Firebase.</p>';
+                    return;
+                }
 
-          misArticulos.forEach(art => {
-              const div = document.createElement('div');
-              div.className = 'tarjeta-articulo-usuario';
-              div.innerHTML = `
-                  <h3>${art.title}</h3>
-                  <p>Precio: $${art.price}</p>
-                  <p>Ciudad: ${art.city}</p>
-                  <p>${art.description}</p>
-                  <hr>
-              `;
-              contenedorPerfil.appendChild(div);
-          });
-      });
-  }
-</script>
+                misArticulos.forEach(art => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white rounded-2xl shadow-sm border p-4 space-y-2';
+                    div.innerHTML = `
+                        <h3 class="font-bold text-gray-900">${art.title}</h3>
+                        <p class="text-xs bg-african-yellow text-gray-900 font-black px-2 py-0.5 rounded inline-block">$${art.price}</p>
+                        <p class="text-xs text-gray-500">${art.city} - ${art.description}</p>
+                    `;
+                    contenedorPerfil.appendChild(div);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
