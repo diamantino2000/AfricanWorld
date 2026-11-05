@@ -41,7 +41,7 @@ GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleus
 USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
-# Asegurar que los JSON existan para evitar errores 500 en Render
+# Asegurar que los archivos JSON existan para evitar errores 500 en Render
 if not os.path.exists(USERS_JSON_FILE):
     with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
         json.dump([], f)
