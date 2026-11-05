@@ -24,6 +24,10 @@ if db_url and db_url.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url or f'sqlite:///{os.path.join(basedir, "africanworld_v2.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 db = SQLAlchemy(app)
 
 # 2. CONFIGURACIÓN DE CLOUDINARY PARA FOTOS PERMANENTES
@@ -37,7 +41,7 @@ GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleus
 USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
-# Asegurar que los archivos JSON existan para evitar errores 500
+# Asegurar que los JSON existan para evitar errores 500 en Render
 if not os.path.exists(USERS_JSON_FILE):
     with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
         json.dump([], f)
@@ -479,7 +483,6 @@ def settings():
                 art.username = new_username
             db.session.commit()
 
-        # SUBIDA PERMANENTE DE FOTO DE PERFIL A CLOUDINARY
         if profile_file and profile_file.filename != '':
             upload_result = cloudinary.uploader.upload(profile_file)
             user['profile_pic'] = upload_result['secure_url']
@@ -515,7 +518,6 @@ def publish():
     except (ValueError, TypeError):
         price = 0.0
 
-    # SUBIDA PERMANENTE DE IMÁGENES DE ARTÍCULOS A CLOUDINARY
     image_urls = []
     for file in uploaded_files[:17]:
         if file and file.filename != '':
