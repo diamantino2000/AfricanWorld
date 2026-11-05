@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de @{{ profile_user.username }} - AfricanWorld</title>
+    <title>Perfil de @{{ profile_user.username if profile_user else 'Usuario' }} - AfricanWorld</title>
 
     <link rel="icon" type="image/png" sizes="32x32" href="/static/uploads/logo.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/static/uploads/logo.png">
@@ -42,6 +42,7 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
+        {% if profile_user %}
         <!-- TARJETA CABECERA DE PERFIL -->
         <div class="bg-white p-8 rounded-3xl border shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
@@ -115,17 +116,13 @@
                 {% endfor %}
             </div>
         </div>
-
-        <!-- PUBLICACIONES EN TIEMPO REAL DESDE FIREBASE -->
-        <div class="space-y-4 pt-6 border-t">
-            <h2 class="text-xl font-black text-gray-900 flex items-center gap-2 border-b pb-2">
-                <i class="fa-solid fa-cloud text-african-green"></i>
-                <span>Artículos en Firebase (Tiempo Real)</span>
-            </h2>
-            <div id="mis-articulos-firebase" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <p class="text-xs text-gray-400 italic col-span-full">Cargando desde Firebase...</p>
+        {% else %}
+            <div class="text-center py-16 bg-white rounded-3xl border shadow-sm">
+                <h2 class="text-2xl font-black text-gray-800">Usuario no encontrado</h2>
+                <p class="text-gray-500 mt-2">El perfil que buscas no existe o fue eliminado.</p>
+                <a href="/" class="mt-6 inline-block bg-african-green text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow">Volver al inicio</a>
             </div>
-        </div>
+        {% endif %}
     </main>
 
     <!-- MODAL PUBLICAR ARTÍCULO -->
@@ -331,103 +328,6 @@
                 return false;
             }
             return true;
-        }
-    </script>
-
-    <!-- SCRIPT DE FIREBASE INTEGRADO DIRECTAMENTE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAfyEiqgB9G9OsgJpCqKa7MU8wJ2c-95EE",
-            authDomain: "afrikan-311da.firebaseapp.com",
-            projectId: "afrikan-311da",
-            storageBucket: "afrikan-311da.firebasestorage.app",
-            messagingSenderId: "755153282177",
-            appId: "1:755153282177:web:e925cdbb609cc1802cd980",
-            measurementId: "G-ESHC468CSB"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getFirestore(app);
-
-        // Funciones auxiliares para Firestore
-        async function guardarArticuloFirebase(articulo) {
-            try {
-                const docRef = await addDoc(collection(db, "articulos"), {
-                    title: articulo.title,
-                    price: parseFloat(articulo.price),
-                    country: articulo.country,
-                    city: articulo.city,
-                    description: articulo.description,
-                    username: articulo.username,
-                    timestamp: serverTimestamp()
-                });
-                return true;
-            } catch (e) {
-                console.error("Error al guardar en Firebase: ", e);
-                throw e;
-            }
-        }
-
-        async function obtenerArticulosFirebase(callback) {
-            try {
-                const q = query(collection(db, "articulos"), orderBy("timestamp", "desc"));
-                const querySnapshot = await getDocs(q);
-                const articulos = [];
-                querySnapshot.forEach((doc) => {
-                    articulos.push({ id: doc.id, ...doc.data() });
-                });
-                callback(articulos);
-            } catch (e) {
-                console.error("Error al obtener artículos de Firebase:", e);
-                callback([]);
-            }
-        }
-
-        const formPublicar = document.getElementById('form-publicar');
-        if (formPublicar) {
-            formPublicar.addEventListener('submit', function(e) {
-                const articulo = {
-                    title: document.getElementById('titulo').value,
-                    price: document.getElementById('precio').value,
-                    country: document.getElementById('pais').value,
-                    city: document.getElementById('ciudad').value,
-                    description: document.getElementById('descripcion').value,
-                    username: "{{ profile_user.username }}"
-                };
-
-                guardarArticuloFirebase(articulo).catch((error) => {
-                    console.error("Error al publicar en Firebase:", error);
-                });
-            });
-        }
-
-        const contenedorPerfil = document.getElementById('mis-articulos-firebase');
-        if (contenedorPerfil) {
-            obtenerArticulosFirebase((articulos) => {
-                const misArticulos = articulos.filter(art => art.username === "{{ profile_user.username }}");
-                
-                contenedorPerfil.innerHTML = '';
-                if (misArticulos.length === 0) {
-                    contenedorPerfil.innerHTML = '<p class="text-xs text-gray-400 italic col-span-full">No tienes publicaciones en tiempo real en Firebase.</p>';
-                    return;
-                }
-
-                misArticulos.forEach(art => {
-                    const div = document.createElement('div');
-                    div.className = 'bg-white rounded-2xl shadow-sm border p-4 space-y-2';
-                    div.innerHTML = `
-                        <h3 class="font-bold text-gray-900">${art.title}</h3>
-                        <p class="text-xs bg-african-yellow text-gray-900 font-black px-2 py-0.5 rounded inline-block">$${art.price}</p>
-                        <p class="text-xs text-gray-500">${art.city} - ${art.description}</p>
-                    `;
-                    contenedorPerfil.appendChild(div);
-                });
-            });
         }
     </script>
 </body>
