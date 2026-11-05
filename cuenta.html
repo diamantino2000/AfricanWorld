@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+v<!DOCTYPE html>
 <html lang="es" id="html-root">
 <head>
     <meta charset="UTF-8">
@@ -357,7 +357,6 @@
         const analytics = getAnalytics(app);
         const db = getFirestore(app);
 
-        // Funciones auxiliares para Firestore
         async function guardarArticuloFirebase(articulo) {
             try {
                 const docRef = await addDoc(collection(db, "articulos"), {
