@@ -1,20 +1,22 @@
+import os
+import re
+import unicodedata
+from datetime import datetime, timezone
+from werkzeug.utils import secure_filename
+import json
+import cloudinary
+import cloudinary.uploader
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from google.oauth2 import id_token
 from google.auth.transport import requests
-import os
-import json
-import unicodedata
-import re
-from datetime import datetime, timezone
-from werkzeug.utils import secure_filename
-from sqlalchemy import text
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
 
+# 1. CONEXIÓN A POSTGRESQL (RENDER)
 db_url = os.environ.get('DATABASE_URL')
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
@@ -22,15 +24,20 @@ if db_url and db_url.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url or f'sqlite:///{os.path.join(basedir, "africanworld_v2.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+db = SQLAlchemy(app)
+
+# 2. CONFIGURACIÓN DE CLOUDINARY PARA FOTOS PERMANENTES
+cloudinary.config(
+    cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME', 'eana41nc'),
+    api_key = os.environ.get('CLOUDINARY_API_KEY', '446441543996627'),
+    api_secret = os.environ.get('CLOUDINARY_API_SECRET', '1Wj39EYfJd-7cP3iiYEcdR8bMW4')
+)
 
 GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleusercontent.com"
 USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
 DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
 
-# Asegurar que los JSON existan para evitar errores 500 en Render
+# Asegurar que los archivos JSON existan para evitar errores 500
 if not os.path.exists(USERS_JSON_FILE):
     with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
         json.dump([], f)
@@ -82,8 +89,6 @@ def add_notification(target_username, message, link="#"):
             })
             break
     save_json_users(users)
-
-db = SQLAlchemy(app)
 
 class Article(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -231,7 +236,7 @@ def google_login_real():
         id_info = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
         email = id_info['email']
         name = id_info.get('name', email.split('@')[0])
-        picture = id_info.get('picture', '/static/uploads/default_user.png')
+        picture = id_info.get('picture', 'https://res.cloudinary.com/demo/image/upload/sample.jpg')
 
         users = load_json_users()
         user = next((u for u in users if u.get('email') == email), None)
@@ -421,7 +426,7 @@ def profile(username):
                 "id": len(users) + 1,
                 "username": username,
                 "email": session.get('email', ''),
-                "profile_pic": session.get('profile_pic', '/static/uploads/default_user.png'),
+                "profile_pic": session.get('profile_pic', 'https://res.cloudinary.com/demo/image/upload/sample.jpg'),
                 "followers": [],
                 "following": [],
                 "notifications": []
@@ -474,12 +479,10 @@ def settings():
                 art.username = new_username
             db.session.commit()
 
+        # SUBIDA PERMANENTE DE FOTO DE PERFIL A CLOUDINARY
         if profile_file and profile_file.filename != '':
-            filename = secure_filename(profile_file.filename)
-            filepath_rel = f"static/uploads/profile_{user.get('id', 1)}_{filename}"
-            filepath_abs = os.path.join(basedir, filepath_rel)
-            profile_file.save(filepath_abs)
-            user['profile_pic'] = f"/{filepath_rel}"
+            upload_result = cloudinary.uploader.upload(profile_file)
+            user['profile_pic'] = upload_result['secure_url']
 
         save_json_users(users)
         flash('¡Ajustes actualizados con éxito!', 'success')
@@ -512,14 +515,12 @@ def publish():
     except (ValueError, TypeError):
         price = 0.0
 
-    image_paths = []
+    # SUBIDA PERMANENTE DE IMÁGENES DE ARTÍCULOS A CLOUDINARY
+    image_urls = []
     for file in uploaded_files[:17]:
         if file and file.filename != '':
-            filename = secure_filename(file.filename)
-            filepath_rel = f"static/uploads/{filename}"
-            filepath_abs = os.path.join(basedir, filepath_rel)
-            file.save(filepath_abs)
-            image_paths.append(f"/{filepath_rel}")
+            upload_result = cloudinary.uploader.upload(file)
+            image_urls.append(upload_result['secure_url'])
 
     base_slug = slugify(title)
     slug = base_slug
@@ -538,7 +539,7 @@ def publish():
         phone=phone, 
         description=description, 
         username=session['username'], 
-        images=",".join(image_paths)
+        images=",".join(image_urls)
     )
     db.session.add(new_article)
     db.session.commit()
