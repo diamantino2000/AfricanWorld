@@ -283,8 +283,8 @@
             </p>
 
             <div class="flex items-start gap-2 bg-gray-50 p-3 rounded-xl border">
-                <input type="checkbox" id="accept-terms-check" class="mt-1 rounded border-gray-300 text-african-green focus:ring-african-green">
-                <label for="accept-terms-check" class="text-xs text-gray-700">
+                <input type="checkbox" id="accept-terms-check" class="mt-1 rounded border-gray-300 text-african-green focus:ring-african-green cursor-pointer">
+                <label for="accept-terms-check" class="text-xs text-gray-700 cursor-pointer select-none">
                     <span data-es="Acepto los" data-fr="J'accepte les" data-en="I accept the" data-ar="أوافق على" data-pt="Aceito os">Acepto los</span> <a href="/terminos" target="_blank" class="text-african-green font-bold hover:underline" data-es="Términos y Condiciones" data-fr="Termes et Conditions" data-en="Terms & Conditions" data-ar="الشروط والأحكام" data-pt="Termos e Condições">Términos y Condiciones</a> (<span data-es="reconozco que los vendedores gestionan directamente sus ventas" data-fr="je reconnais que les vendeurs gèrent directement leurs ventes" data-en="I acknowledge sellers manage their sales directly" data-ar="أقر بأن البائعين يديرون مبيعاتهم مباشرة" data-pt="reconheço que os vendedores gerenciam diretamente suas vendas">reconozco que los vendedores gestionan directamente sus ventas</span>).
                 </label>
             </div>
@@ -450,17 +450,29 @@
 
         let pendingGoogleCredential = null;
 
+        // Abrir modal de términos de forma limpia y rápida al recibir credencial de Google
         function handleCredentialResponse(response) {
             pendingGoogleCredential = response.credential;
+            const checkbox = document.getElementById('accept-terms-check');
+            const errorMsg = document.getElementById('terms-error-msg');
+            
+            if (checkbox) checkbox.checked = false;
+            if (errorMsg) errorMsg.classList.add('hidden');
+            
             openModal('terms-modal');
         }
 
+        // Confirmar login con Google instantáneamente
         function confirmGoogleLogin() {
             const check = document.getElementById('accept-terms-check');
-            if (!check.checked) {
-                document.getElementById('terms-error-msg').classList.remove('hidden');
+            const errorMsg = document.getElementById('terms-error-msg');
+
+            if (!check || !check.checked) {
+                if (errorMsg) errorMsg.classList.remove('hidden');
                 return;
             }
+
+            if (errorMsg) errorMsg.classList.add('hidden');
 
             fetch('/google-login-real', {
                 method: 'POST',
@@ -472,10 +484,12 @@
                 if (data.status === 'success') {
                     window.location.href = data.redirect;
                 } else {
-                    alert('Error: ' + data.message);
+                    alert('Error: ' + (data.message || 'No se pudo iniciar sesión'));
                 }
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error("Error en login:", err);
+            });
         }
     </script>
 
