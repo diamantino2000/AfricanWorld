@@ -75,7 +75,7 @@
             </div>
         </div>
 
-        <!-- PUBLICACIONES DEL USUARIO (BASE DE DATOS POSTGRESQL) -->
+        <!-- PUBLICACIONES DEL USUARIO -->
         <div class="space-y-4">
             <h2 class="text-xl font-black text-gray-900 flex items-center gap-2 border-b pb-2">
                 <i class="fa-solid fa-box text-african-yellow"></i>
@@ -215,7 +215,7 @@
         <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- SCRIPTS GENERALES -->
+    <!-- SCRIPTS GENERALES Y FIREBASE -->
     <script>
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -329,6 +329,26 @@
             }
             return true;
         }
+    </script>
+
+    <!-- INICIALIZACIÓN DE FIREBASE (MÓDULO) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBf7PCXXve8D4D8F2JO9NxDnKrKRZ3K8Og",
+            authDomain: "african-movies-8568b.firebaseapp.com",
+            databaseURL: "https://african-movies-8568b-default-rtdb.firebaseio.com",
+            projectId: "african-movies-8568b",
+            storageBucket: "african-movies-8568b.firebasestorage.app",
+            messagingSenderId: "276039181448",
+            appId: "1:276039181448:web:1ccb0b07968756cdb66b3d",
+            measurementId: "G-8N4ZCSYHQ9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
     </script>
 </body>
 </html>
