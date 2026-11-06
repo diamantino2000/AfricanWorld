@@ -30,63 +30,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleusercontent.com"
-USERS_JSON_FILE = os.path.join(basedir, 'cuentas.json')
-DENUNCIAS_JSON_FILE = os.path.join(basedir, 'denuncias.json')
-
-# Asegurar que los JSON existan para evitar errores 500 en despliegue
-if not os.path.exists(USERS_JSON_FILE):
-    with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
-        json.dump([], f)
-
-if not os.path.exists(DENUNCIAS_JSON_FILE):
-    with open(DENUNCIAS_JSON_FILE, 'w', encoding='utf-8') as f:
-        json.dump([], f)
-
-def load_json_users():
-    try:
-        with open(USERS_JSON_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return []
-
-def save_json_users(users_list):
-    try:
-        with open(USERS_JSON_FILE, 'w', encoding='utf-8') as f:
-            json.dump(users_list, f, indent=4, ensure_ascii=False)
-    except Exception as e:
-        print(f"Error guardando en cuentas.json: {e}")
-
-def load_denuncias():
-    try:
-        with open(DENUNCIAS_JSON_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return []
-
-def save_denuncias(denuncias_list):
-    try:
-        with open(DENUNCIAS_JSON_FILE, 'w', encoding='utf-8') as f:
-            json.dump(denuncias_list, f, indent=4, ensure_ascii=False)
-    except Exception as e:
-        print(f"Error guardando denuncias: {e}")
-
-def add_notification(target_username, message, link="#"):
-    users = load_json_users()
-    for u in users:
-        if u.get('username') == target_username:
-            if 'notifications' not in u:
-                u['notifications'] = []
-            u['notifications'].insert(0, {
-                "id": len(u['notifications']) + 1,
-                "message": message,
-                "link": link,
-                "read": False,
-                "date": datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M")
-            })
-            break
-    save_json_users(users)
 
 db = SQLAlchemy(app)
+
+# --- MODELOS DE BASE DE DATOS (PERSISTENTES) ---
 
 class Article(db.Model):
     __tablename__ = 'article'
@@ -114,13 +61,137 @@ class Comment(db.Model):
     rating = db.Column(db.Integer, default=5)
     date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
+class UserAccount(db.Model):
+    __tablename__ = 'user_account'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    profile_pic = db.Column(db.String(255), default='/static/uploads/default_user.png')
+    followers = db.Column(db.JSON, default=list)
+    following = db.Column(db.JSON, default=list)
+    notifications = db.Column(db.JSON, default=list)
+    last_username_change = db.Column(db.String(50), nullable=True)
+
+class DenunciaModel(db.Model):
+    __tablename__ = 'denuncia_model'
+    id = db.Column(db.Integer, primary_key=True)
+    article_id = db.Column(db.Integer, nullable=False)
+    article_title = db.Column(db.String(150), nullable=False)
+    article_slug = db.Column(db.String(200), nullable=False)
+    article_owner = db.Column(db.String(80), nullable=False)
+    reported_by = db.Column(db.String(80), nullable=False)
+    reason = db.Column(db.Text, nullable=False)
+    date = db.Column(db.String(50), nullable=False)
+
 with app.app_context():
     db.create_all()
+
+# --- FUNCIONES ADAPTADAS A POSTGRESQL (REEMPLAZAN LOS ARCHIVOS JSON) ---
+
+def load_json_users():
+    try:
+        users = UserAccount.query.all()
+        return [{
+            "id": u.id,
+            "username": u.username,
+            "email": u.email,
+            "profile_pic": u.profile_pic,
+            "followers": u.followers or [],
+            "following": u.following or [],
+            "notifications": u.notifications or [],
+            "last_username_change": u.last_username_change
+        } for u in users]
+    except Exception:
+        return []
+
+def save_json_users(users_list):
+    try:
+        for u_data in users_list:
+            user = UserAccount.query.filter_by(username=u_data['username']).first()
+            if not user:
+                user = UserAccount.query.filter_by(email=u_data['email']).first()
+            
+            if user:
+                user.username = u_data['username']
+                user.email = u_data['email']
+                user.profile_pic = u_data.get('profile_pic', user.profile_pic)
+                user.followers = u_data.get('followers', [])
+                user.following = u_data.get('following', [])
+                user.notifications = u_data.get('notifications', [])
+                user.last_username_change = u_data.get('last_username_change')
+            else:
+                new_user = UserAccount(
+                    username=u_data['username'],
+                    email=u_data['email'],
+                    profile_pic=u_data.get('profile_pic', '/static/uploads/default_user.png'),
+                    followers=u_data.get('followers', []),
+                    following=u_data.get('following', []),
+                    notifications=u_data.get('notifications', []),
+                    last_username_change=u_data.get('last_username_change')
+                )
+                db.session.add(new_user)
+        db.session.commit()
+    except Exception as e:
+        print(f"Error guardando usuarios en DB: {e}")
+
+def load_denuncias():
+    try:
+        denuncias = DenunciaModel.query.all()
+        return [{
+            "id": d.id,
+            "article_id": d.article_id,
+            "article_title": d.article_title,
+            "article_slug": d.article_slug,
+            "article_owner": d.article_owner,
+            "reported_by": d.reported_by,
+            "reason": d.reason,
+            "date": d.date
+        } for d in denuncias]
+    except Exception:
+        return []
+
+def save_denuncias(denuncias_list):
+    try:
+        if denuncias_list:
+            last_d = denuncias_list[-1]
+            existing = DenunciaModel.query.filter_by(article_id=last_d['article_id'], reported_by=last_d['reported_by'], date=last_d['date']).first()
+            if not existing:
+                new_d = DenunciaModel(
+                    article_id=last_d['article_id'],
+                    article_title=last_d['article_title'],
+                    article_slug=last_d['article_slug'],
+                    article_owner=last_d['article_owner'],
+                    reported_by=last_d['reported_by'],
+                    reason=last_d['reason'],
+                    date=last_d['date']
+                )
+                db.session.add(new_d)
+                db.session.commit()
+    except Exception as e:
+        print(f"Error guardando denuncias en DB: {e}")
+
+def add_notification(target_username, message, link="#"):
+    users = load_json_users()
+    for u in users:
+        if u.get('username') == target_username:
+            if 'notifications' not in u:
+                u['notifications'] = []
+            u['notifications'].insert(0, {
+                "id": len(u['notifications']) + 1,
+                "message": message,
+                "link": link,
+                "read": False,
+                "date": datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M")
+            })
+            break
+    save_json_users(users)
 
 def slugify(text_value):
     text_value = unicodedata.normalize('NFKD', text_value).encode('ascii', 'ignore').decode('utf-8')
     text_value = re.sub(r'[^\w\s-]', '', text_value).strip().lower()
     return re.sub(r'[-\s]+', '-', text_value)
+
+# --- RUTAS DE LA APLICACIÓN ---
 
 @app.route('/')
 def index():
@@ -563,10 +634,14 @@ def eliminar_cuenta():
         return redirect(url_for('index'))
     
     username = session['username']
-    users = load_json_users()
-    users = [u for u in users if u.get('username') != username]
-    save_json_users(users)
     
+    # Eliminar de la tabla persistente UserAccount en PostgreSQL
+    user_record = UserAccount.query.filter_by(username=username).first()
+    if user_record:
+        db.session.delete(user_record)
+        db.session.commit()
+    
+    # Eliminar artículos del usuario
     user_articles = Article.query.filter_by(username=username).all()
     for art in user_articles:
         db.session.delete(art)
