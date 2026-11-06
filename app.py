@@ -9,27 +9,28 @@ import re
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 from sqlalchemy import text
+import requests as r_external
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
 
-# Configuración segura y limpia de la URL de PostgreSQL
+# Configuración segura y estricta de PostgreSQL para Render
 db_url = os.environ.get('DATABASE_URL')
 if db_url:
     db_url = db_url.strip()
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url or f'sqlite:///{os.path.join(basedir, "africanworld_v2.db")}'
+if not db_url:
+    raise RuntimeError("¡ERROR CRÍTICO! La variable DATABASE_URL no está configurada en Render. Configura la base de datos PostgreSQL.")
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleusercontent.com"
+IMGBB_API_KEY = os.environ.get('IMGBB_API_KEY', '3ca96164517ba9751a3ef0e3032206ef')
 
 db = SQLAlchemy(app)
 
@@ -86,7 +87,7 @@ class DenunciaModel(db.Model):
 with app.app_context():
     db.create_all()
 
-# --- FUNCIONES ADAPTADAS A POSTGRESQL (REEMPLAZAN LOS ARCHIVOS JSON) ---
+# --- FUNCIONES ADAPTADAS A POSTGRESQL ---
 
 def load_json_users():
     try:
@@ -479,7 +480,7 @@ def remove_from_cart(article_id):
 @app.route('/carrito')
 def view_cart():
     users = load_json_users()
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username'] == session.get('username')), None) if 'username' in session else None
     
     cart_ids = session.get('cart', [])
     cart_articles = Article.query.filter(Article.id.in_(cart_ids)).all() if cart_ids else []
@@ -519,7 +520,7 @@ def settings():
         return redirect(url_for('index'))
 
     users = load_json_users()
-    user = next((u for u in users if u.get('username') == session['username']), None)
+    user = next((u for u in users if u.get('username'] == session['username']), None)
     if not user:
         return redirect(url_for('index'))
 
@@ -591,11 +592,19 @@ def publish():
     image_paths = []
     for file in uploaded_files[:17]:
         if file and file.filename != '':
-            filename = secure_filename(file.filename)
-            filepath_rel = f"static/uploads/{filename}"
-            filepath_abs = os.path.join(basedir, filepath_rel)
-            file.save(filepath_abs)
-            image_paths.append(f"/{filepath_rel}")
+            try:
+                file_bytes = file.read()
+                response = r_external.post(
+                    "https://api.imgbb.com/1/upload",
+                    data={"key": IMGBB_API_KEY},
+                    files={"image": file_bytes}
+                )
+                result = response.json()
+                if result.get("success"):
+                    image_url = result["data"]["url"]
+                    image_paths.append(image_url)
+            except Exception as e:
+                print(f"Error subiendo imagen a ImgBB: {e}")
 
     base_slug = slugify(title)
     slug = base_slug
@@ -635,13 +644,11 @@ def eliminar_cuenta():
     
     username = session['username']
     
-    # Eliminar de la tabla persistente UserAccount en PostgreSQL
     user_record = UserAccount.query.filter_by(username=username).first()
     if user_record:
         db.session.delete(user_record)
         db.session.commit()
     
-    # Eliminar artículos del usuario
     user_articles = Article.query.filter_by(username=username).all()
     for art in user_articles:
         db.session.delete(art)
