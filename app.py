@@ -5,6 +5,7 @@ import os
 import requests
 import unicodedata
 import re
+import base64
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 
@@ -45,7 +46,7 @@ def fb_post(path, data):
     try:
         response = requests.post(f"{FIREBASE_DB_URL}/{path}.json", json=data)
         if response.status_code == 200:
-            return response.json().get('name') # Retorna el ID único generado por Firebase
+            return response.json().get('name')
     except Exception as e:
         print(f"Error agregando en Firebase ({path}): {e}")
     return None
@@ -58,7 +59,7 @@ def fb_delete(path):
         print(f"Error borrando en Firebase ({path}): {e}")
     return False
 
-# --- ADAPTADORES DE DATOS (REEMPLAZAN SQLALCHEMY) ---
+# --- ADAPTADORES DE DATOS ---
 
 def load_json_users():
     data = fb_get("users")
@@ -75,7 +76,6 @@ def save_json_users(users_list):
     for u_data in users_list:
         username = u_data.get('username')
         if username:
-            # Limpiar clave para la ruta de Firebase
             safe_key = username.replace(".", "_").replace("#", "_").replace("$", "_").replace("[", "_").replace("]", "_")
             fb_put(f"users/{safe_key}", u_data)
 
@@ -105,7 +105,6 @@ def load_articles():
             a_data['id'] = a_data.get('numeric_id', hash(a_id) % 100000)
             a_data['firebase_id'] = a_id
             articles_list.append(a_data)
-    # Ordenar por más recientes primero
     articles_list.sort(key=lambda x: x.get('id', 0), reverse=True)
     return articles_list
 
@@ -148,6 +147,10 @@ def slugify(text_value):
 
 @app.route('/')
 def index():
+    # Si el usuario NO tiene cuenta / sesión activa, va directo a intro.html
+    if 'username' not in session:
+        return render_template('intro.html', google_client_id=GOOGLE_CLIENT_ID)
+
     search = request.args.get('search', '').lower()
     articles = load_articles()
     
@@ -159,12 +162,15 @@ def index():
         articles = filtered
     
     users = load_json_users()
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
 
     return render_template('index.html', articles=articles, search=search, current_user=current_user, google_client_id=GOOGLE_CLIENT_ID)
 
 @app.route('/buscar-usuarios')
 def search_users():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
     query = request.args.get('q', '').strip().lower()
     users = load_json_users()
     matched_users = []
@@ -174,7 +180,7 @@ def search_users():
             if query in u.get('username', '').lower() or query in u.get('email', '').lower():
                 matched_users.append(u)
 
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
 
     return render_template('Busca_user.html', query=query, users=matched_users, current_user=current_user)
 
@@ -290,12 +296,16 @@ def google_login_real():
 
         session['username'] = user['username']
         session['email'] = user['email']
+        session['profile_pic'] = user.get('profile_pic', picture)
         return jsonify({"status": "success", "redirect": url_for('index')})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
 
 @app.route('/articulo/<slug>')
 def view_article(slug):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
     article = get_article_by_slug(slug)
     if not article:
         return "Artículo no encontrado", 404
@@ -310,7 +320,7 @@ def view_article(slug):
         session.modified = True
     
     users = load_json_users()
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
     author = next((u for u in users if u.get('username') == article.get('username')), None)
     
     comments = article.get('comments', [])
@@ -448,8 +458,11 @@ def remove_from_cart(article_id):
 
 @app.route('/carrito')
 def view_cart():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
     users = load_json_users()
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
     
     cart_ids = session.get('cart', [])
     all_articles = load_articles()
@@ -459,6 +472,9 @@ def view_cart():
 
 @app.route('/perfil/<username>')
 def profile(username):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
     users = load_json_users()
     profile_user = next((u for u in users if u.get('username') == username), None)
     
@@ -479,7 +495,7 @@ def profile(username):
             flash("El usuario no existe.", "error")
             return redirect(url_for('index'))
     
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None) if 'username' in session else None
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
     all_articles = load_articles()
     user_articles = [art for art in all_articles if art.get('username') == username]
 
@@ -517,19 +533,25 @@ def settings():
             user['last_username_change'] = datetime.now(timezone.utc).isoformat()
             session['username'] = new_username
 
-            # Actualizar artículos del usuario
             articles = load_articles()
             for art in articles:
                 if art.get('username') == old_username:
                     art['username'] = new_username
                     fb_put(f"articles/{art.get('firebase_id')}", art)
 
+        # FOTO DE PERFIL GUARDADA EN FIREBASE COMO BASE64 (PERSISTENTE)
         if profile_file and profile_file.filename != '':
-            filename = secure_filename(profile_file.filename)
-            filepath_rel = f"static/uploads/profile_{user.get('id', 1)}_{filename}"
-            filepath_abs = os.path.join(basedir, filepath_rel)
-            profile_file.save(filepath_abs)
-            user['profile_pic'] = f"/{filepath_rel}"
+            try:
+                file_bytes = profile_file.read()
+                encoded_image = base64.b64encode(file_bytes).decode('utf-8')
+                mimetype = profile_file.mimetype or 'image/jpeg'
+                base64_url = f"data:{mimetype};base64,{encoded_image}"
+                
+                user['profile_pic'] = base64_url
+                session['profile_pic'] = base64_url
+            except Exception as e:
+                print(f"Error procesando la foto para Firebase: {e}")
+                flash('No se pudo procesar la imagen de perfil.', 'error')
 
         save_json_users(users)
         flash('¡Ajustes actualizados con éxito!', 'success')
@@ -625,14 +647,12 @@ def eliminar_cuenta():
     
     username = session['username']
     
-    # Eliminar usuario de Firebase
     users = load_json_users()
     for u in users:
         if u.get('username') == username and 'firebase_id' in u:
             fb_delete(f"users/{u.get('firebase_id')}")
             break
             
-    # Eliminar artículos del usuario en Firebase
     articles = load_articles()
     for art in articles:
         if art.get('username') == username and 'firebase_id' in art:
