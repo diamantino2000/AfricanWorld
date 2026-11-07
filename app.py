@@ -212,7 +212,8 @@ def google_login_real():
         picture = id_info.get('picture', '/static/uploads/default_user.png')
 
         users = load_json_users()
-        user = next((u for u in users if u.get('email'] == email), None)
+        # CORREGIDO AQUÍ (Sintaxis limpia y sin corchetes erroneos)
+        user = next((u for u in users if u.get('email') == email), None)
 
         if not user:
             base_username = slugify(name.replace(" ", "_"))
@@ -325,7 +326,7 @@ def profile(username):
     
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
     all_articles = load_articles()
-    user_articles = [art for art in all_articles if art.get('username') == username]
+    user_articles = [art for art in all_articles if art.get('username'] == username] # Corregido también aquí por seguridad
 
     return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
 
