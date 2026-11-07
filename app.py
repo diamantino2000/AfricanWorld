@@ -78,22 +78,6 @@ def save_json_users(users_list):
             safe_key = username.replace(".", "_").replace("#", "_").replace("$", "_").replace("[", "_").replace("]", "_")
             fb_put(f"users/{safe_key}", u_data)
 
-def load_denuncias():
-    data = fb_get("denuncias")
-    if not data:
-        return []
-    denuncias_list = []
-    for d_id, d_data in data.items():
-        if isinstance(d_data, dict):
-            d_data['firebase_id'] = d_id
-            denuncias_list.append(d_data)
-    return denuncias_list
-
-def save_denuncias(denuncias_list):
-    if denuncias_list:
-        last_d = denuncias_list[-1]
-        fb_post("denuncias", last_d)
-
 def load_articles():
     data = fb_get("articles")
     if not data:
@@ -106,36 +90,6 @@ def load_articles():
             articles_list.append(a_data)
     articles_list.sort(key=lambda x: x.get('id', 0), reverse=True)
     return articles_list
-
-def get_article_by_slug(slug):
-    articles = load_articles()
-    for art in articles:
-        if art.get('slug') == slug:
-            return art
-    return None
-
-def get_article_by_id(art_id):
-    articles = load_articles()
-    for art in articles:
-        if art.get('id') == int(art_id) or art.get('firebase_id') == str(art_id):
-            return art
-    return None
-
-def add_notification(target_username, message, link="#"):
-    users = load_json_users()
-    for u in users:
-        if u.get('username') == target_username:
-            if 'notifications' not in u:
-                u['notifications'] = []
-            u['notifications'].insert(0, {
-                "id": len(u['notifications']) + 1,
-                "message": message,
-                "link": link,
-                "read": False,
-                "date": datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M")
-            })
-            save_json_users(users)
-            break
 
 def slugify(text_value):
     text_value = unicodedata.normalize('NFKD', text_value).encode('ascii', 'ignore').decode('utf-8')
@@ -173,6 +127,7 @@ def complete_onboarding():
     country = data.get('country', '').strip()
     city = data.get('city', '').strip()
     phone = data.get('phone', '').strip()
+    language = data.get('language', 'es').strip()
 
     if not country or not city or not phone:
         return jsonify({"status": "error", "message": "Todos los campos son obligatorios"}), 400
@@ -184,6 +139,7 @@ def complete_onboarding():
         user['country'] = country
         user['city'] = city
         user['phone'] = phone
+        user['language'] = language
         save_json_users(users)
         return jsonify({"status": "success", "redirect": url_for('index')})
 
@@ -220,6 +176,7 @@ def google_login_real():
                 "country": "",
                 "city": "",
                 "phone": "",
+                "language": "es",
                 "followers": [],
                 "following": [],
                 "notifications": []
@@ -298,6 +255,7 @@ def settings():
         return redirect(url_for('profile', username=user['username']))
 
     return render_template('settings.html', user=user)
+
 @app.route('/perfil/<username>')
 def profile(username):
     if 'username' not in session:
@@ -316,32 +274,11 @@ def profile(username):
 
     return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
 
-@app.route('/complete-onboarding', methods=['POST'])
-def complete_onboarding():
-    if 'username' not in session:
-        return jsonify({"status": "error", "message": "No hay sesión activa"}), 401
-
-    data = request.get_json() or {}
-    country = data.get('country', '').strip()
-    city = data.get('city', '').strip()
-    phone = data.get('phone', '').strip()
-    language = data.get('language', 'es').strip()
-
-    if not country or not city or not phone:
-        return jsonify({"status": "error", "message": "Todos los campos son obligatorios"}), 400
-
-    users = load_json_users()
-    user = next((u for u in users if u.get('username') == session['username']), None)
-    
-    if user:
-        user['country'] = country
-        user['city'] = city
-        user['phone'] = phone
-        user['language'] = language
-        save_json_users(users)
-        return jsonify({"status": "success", "redirect": url_for('index')})
-
-    return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('Has cerrado sesión.', 'info')
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
