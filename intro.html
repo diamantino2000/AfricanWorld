@@ -79,18 +79,23 @@
                 </div>
                 <div class="space-y-2">
                     <h3 class="text-2xl font-black text-white">Accede a la plataforma</h3>
-                    <p class="text-xs text-gray-400">Ingresa con tu cuenta corporativa de Google para publicar o navegar en el catálogo global.</p>
+                    <p class="text-xs text-gray-400">Ingresa con tu cuenta de Google para publicar o navegar en el catálogo global.</p>
                 </div>
 
-                <div class="py-4 flex justify-center">
+                <!-- CASILLA DE TÉRMINOS DIRECTA Y FLUIDA -->
+                <div class="bg-gray-900/60 p-3 rounded-xl border border-gray-700 flex items-start gap-2.5 text-left">
+                    <input type="checkbox" id="accept-terms-direct" class="mt-0.5 rounded border-gray-600 text-african-green focus:ring-african-green cursor-pointer">
+                    <label for="accept-terms-direct" class="text-xs text-gray-300 cursor-pointer select-none leading-snug">
+                        Acepto los <a href="/terminos" target="_blank" class="text-african-yellow font-bold hover:underline">Términos y Condiciones</a> (los vendedores gestionan sus ventas directamente).
+                    </label>
+                </div>
+                <p id="terms-error-direct" class="text-xs text-red-400 font-bold hidden">Debes marcar la casilla de términos para iniciar sesión.</p>
+
+                <!-- BOTÓN DE GOOGLE SIGN-IN -->
+                <div class="py-2 flex justify-center">
                     <div id="g_id_onload" data-client_id="{{ google_client_id }}" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
                     <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="continue_with" data-size="large"></div>
                 </div>
-
-                <p class="text-[11px] text-gray-500 leading-normal">
-                    Al ingresar, declaras haber leído y aceptado nuestros 
-                    <a href="/terminos" target="_blank" class="text-african-yellow hover:underline">Términos y Condiciones</a>.
-                </p>
             </div>
         </div>
     </header>
@@ -137,33 +142,6 @@
         </div>
     </section>
 
-    <!-- MODAL DE CONFIRMACIÓN DE TÉRMINOS PARA REGISTRO -->
-    <div id="terms-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-gray-800 max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4 border-t-8 border-african-yellow text-white">
-            <h3 class="text-xl font-black text-white flex items-center gap-2">
-                <i class="fa-solid fa-file-contract text-african-green"></i>
-                <span>Registro en AfricanWorld</span>
-            </h3>
-            <p class="text-xs text-gray-300 leading-relaxed">
-                Para completar el registro y acceder a la plataforma, debes aceptar nuestras políticas de servicio.
-            </p>
-
-            <div class="flex items-start gap-2 bg-gray-900 p-3 rounded-xl border border-gray-700">
-                <input type="checkbox" id="accept-terms-check" class="mt-1 rounded border-gray-600 text-african-green focus:ring-african-green">
-                <label for="accept-terms-check" class="text-xs text-gray-300">
-                    Acepto los <a href="/terminos" target="_blank" class="text-african-yellow font-bold hover:underline">Términos y Condiciones</a> (reconozco que los vendedores gestionan sus ventas y la web se exime de responsabilidad en transacciones).
-                </label>
-            </div>
-
-            <p id="terms-error-msg" class="text-xs text-red-400 font-bold hidden">Debes marcar la casilla para poder completar el registro.</p>
-
-            <div class="flex justify-end gap-2 pt-2">
-                <button type="button" onclick="closeModal('terms-modal')" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl text-xs font-bold">Cancelar</button>
-                <button type="button" onclick="confirmGoogleLogin()" class="bg-african-green text-white px-5 py-2 rounded-xl text-xs font-bold shadow hover:opacity-90">Continuar con Google</button>
-            </div>
-        </div>
-    </div>
-
     <!-- FOOTER -->
     <footer class="bg-gray-950 border-t border-gray-800 py-8 text-center text-xs text-gray-500">
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -173,7 +151,7 @@
     </footer>
 
     <script>
-        // OCULTAR LA INTRO TAN PRONTO LA PÁGINA COMPLETE SU CARGA
+        // OCULTAR INTRO VERDE AL CARGAR
         window.addEventListener('load', function() {
             const cover = document.getElementById('render-cover-intro');
             if (cover) {
@@ -185,30 +163,32 @@
             }
         });
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        let pendingGoogleCredential = null;
-
+        // RESPUESTA INSTANTÁNEA Y DIRECTA AL INICIAR SESIÓN CON GOOGLE
         function handleCredentialResponse(response) {
-            pendingGoogleCredential = response.credential;
-            openModal('terms-modal');
-        }
+            const termsCheck = document.getElementById('accept-terms-direct');
+            const errorMsg = document.getElementById('terms-error-direct');
 
-        function confirmGoogleLogin() {
-            const check = document.getElementById('accept-terms-check');
-            if (!check.checked) {
-                document.getElementById('terms-error-msg').classList.remove('hidden');
+            if (!termsCheck.checked) {
+                errorMsg.classList.remove('hidden');
                 return;
             }
+
+            errorMsg.classList.add('hidden');
 
             fetch('/google-login-real', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ credential: pendingGoogleCredential })
-            }).then(res => res.json()).then(data => {
-                if (data.status === 'success') window.location.href = data.redirect;
-            });
+                body: JSON.stringify({ credential: response.credential })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = data.redirect;
+                } else {
+                    alert('Error: ' + (data.message || 'No se pudo iniciar sesión'));
+                }
+            })
+            .catch(err => console.error("Error en login:", err));
         }
     </script>
 </body>
