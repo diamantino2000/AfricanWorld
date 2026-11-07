@@ -370,6 +370,47 @@ def logout():
     flash('Has cerrado sesión.', 'info')
     return redirect(url_for('index'))
 
+@app.route('/carrito')
+def view_cart():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    
+    cart_ids = session.get('cart', [])
+    articles = load_articles()
+    
+    # Filtrar los artículos que están guardados en la sesión del carrito
+    cart_articles = [art for art in articles if art.get('id') in cart_ids or str(art.get('id')) in [str(i) for i in cart_ids]]
+    
+    return render_template('carrito.html', articles=cart_articles)
+
+@app.route('/carrito/add/<int:article_id>', methods=['POST'])
+def add_to_cart(article_id):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    
+    cart = session.get('cart', [])
+    if article_id not in cart:
+        cart.append(article_id)
+        session['cart'] = cart
+        flash('Artículo añadido al carrito.', 'success')
+    else:
+        flash('El artículo ya está en tu carrito.', 'info')
+        
+    return redirect(request.referrer or url_for('index'))
+
+@app.route('/carrito/remove/<int:article_id>', methods=['POST'])
+def remove_from_cart(article_id):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    
+    cart = session.get('cart', [])
+    if article_id in cart:
+        cart.remove(article_id)
+        session['cart'] = cart
+        flash('Artículo eliminado del carrito.', 'info')
+        
+    return redirect(url_for('view_cart'))
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
