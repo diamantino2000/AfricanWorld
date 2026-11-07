@@ -337,11 +337,8 @@ def publish_article():
     title = request.form.get('title', '').strip()
     price_val = request.form.get('price', '0').strip()
     description = request.form.get('description', '').strip()
-    
-    # Obtener archivos de forma segura
     uploaded_files = request.files.getlist('photos')
 
-    # Obtener automáticamente del usuario conectado
     users = load_json_users()
     current_user = next((u for u in users if u.get('username') == session['username']), None)
 
@@ -370,7 +367,7 @@ def publish_article():
             except Exception as e:
                 print(f"Error guardando foto de artículo: {e}")
 
-    # SI NO SE CAPTURÓ NINGUNA FOTO, ASIGNAR LA IMAGEN POR DEFECTO PARA EVITAR ROMPER EL DISEÑO
+    # Respaldo predeterminado si no se cargaron imágenes válidas
     if not image_urls:
         image_urls.append("/static/uploads/default_item.png")
 
