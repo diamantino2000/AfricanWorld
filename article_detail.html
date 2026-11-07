@@ -41,11 +41,11 @@
         <!-- DETALLE DEL ARTÍCULO -->
         <div class="bg-white rounded-3xl border shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
             
-            <!-- GALERÍA DE IMÁGENES -->
+            <!-- GALERÍA DE IMÁGENES CORREGIDA -->
             {% set img_list = article.images.split(',') if article.images else [] %}
             <div class="space-y-4">
-                <div class="h-80 md:h-96 rounded-2xl overflow-hidden bg-gray-100 border relative">
-                    <img id="main-image" src="{{ img_list[0] if img_list else '/static/uploads/default_item.png' }}" alt="{{ article.title }}" class="w-full h-full object-cover">
+                <div class="h-80 md:h-96 rounded-2xl overflow-hidden bg-gray-100 border relative flex items-center justify-center">
+                    <img id="main-image" src="{{ img_list[0].strip() if img_list and img_list[0].strip() != '' else '/static/uploads/default_item.png' }}" alt="{{ article.title }}" class="w-full h-full object-cover">
                     {% if article.is_sold %}
                         <div class="absolute top-4 left-4 bg-african-red text-white text-xs font-black px-4 py-1.5 rounded-full shadow tracking-wider uppercase" data-es="Comprado" data-fr="Acheté" data-en="Sold" data-ar="مُباع" data-pt="Vendido">
                             Comprado
@@ -53,10 +53,13 @@
                     {% endif %}
                 </div>
 
-                {% if img_list|length > 1 %}
+                {% if img_list|length > 0 %}
                     <div class="flex gap-2 overflow-x-auto pb-2">
                         {% for img in img_list %}
-                            <img src="{{ img }}" onclick="document.getElementById('main-image').src = this.src" class="w-16 h-16 rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-african-yellow transition shrink-0">
+                            {% set clean_img = img.strip() %}
+                            {% if clean_img != '' %}
+                                <img src="{{ clean_img }}" onclick="document.getElementById('main-image').src = this.src" class="w-16 h-16 rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-african-yellow transition shrink-0 shadow-sm">
+                            {% endif %}
                         {% endfor %}
                     </div>
                 {% endif %}
