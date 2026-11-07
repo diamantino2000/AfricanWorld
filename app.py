@@ -116,11 +116,11 @@ def index():
     users = load_json_users()
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
 
-    return render_template('index (7).html', articles=articles, search=search, current_user=current_user, google_client_id=GOOGLE_CLIENT_ID)
+    return render_template('index.html', articles=articles, search=search, current_user=current_user, google_client_id=GOOGLE_CLIENT_ID)
 
 @app.route('/terminos')
 def terminos():
-    return render_template('terminos (2).html')
+    return render_template('terminos.html')
 
 @app.route('/buscar-usuarios')
 def buscar_usuarios():
@@ -133,7 +133,7 @@ def buscar_usuarios():
                 filtered_users.append(u)
     else:
         filtered_users = users
-    return render_template('Busca_user (2).html', users=filtered_users, query=query)
+    return render_template('Busca_user.html', users=filtered_users, query=query)
 
 @app.route('/articulo/<slug>')
 def article_detail(slug):
@@ -153,7 +153,7 @@ def article_detail(slug):
     comments = article.get('comments', [])
     avg_rating = sum(c.get('rating', 0) for c in comments) / len(comments) if comments else 0
 
-    return render_template('article_detail (2).html', article=article, author=author, avg_rating=round(avg_rating, 1))
+    return render_template('article_detail.html', article=article, author=author, avg_rating=round(avg_rating, 1))
 
 @app.route('/complete-onboarding', methods=['POST'])
 def complete_onboarding():
@@ -308,9 +308,9 @@ def profile(username):
     
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
     all_articles = load_articles()
-    user_articles = [art for art in all_articles if art.get('username'] == username]
+    user_articles = [art for art in all_articles if art.get('username') == username]
 
-    return render_template('cuenta (2).html', profile_user=profile_user, current_user=current_user, articles=user_articles)
+    return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
 
 @app.route('/publish', methods=['POST'])
 def publish_article():
