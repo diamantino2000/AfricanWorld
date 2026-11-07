@@ -287,6 +287,9 @@ def google_login_real():
                 "username": username,
                 "email": email,
                 "profile_pic": picture,
+                "country": "",
+                "city": "",
+                "phone": "",
                 "followers": [],
                 "following": [],
                 "notifications": []
@@ -297,6 +300,11 @@ def google_login_real():
         session['username'] = user['username']
         session['email'] = user['email']
         session['profile_pic'] = user.get('profile_pic', picture)
+
+        # Si el usuario nuevo no ha llenado su país o teléfono, lo mandamos a completarlo obligatoriamente
+        if not user.get('country') or not user.get('phone'):
+            return jsonify({"status": "success", "redirect": url_for('complete_profile')})
+
         return jsonify({"status": "success", "redirect": url_for('index')})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
