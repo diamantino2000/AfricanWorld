@@ -337,6 +337,8 @@ def publish_article():
     title = request.form.get('title', '').strip()
     price_val = request.form.get('price', '0').strip()
     description = request.form.get('description', '').strip()
+    
+    # Obtener archivos de forma segura
     uploaded_files = request.files.getlist('photos')
 
     # Obtener automáticamente del usuario conectado
@@ -361,11 +363,16 @@ def publish_article():
         if file and file.filename != '':
             try:
                 file_bytes = file.read()
-                encoded = base64.b64encode(file_bytes).decode('utf-8')
-                mimetype = file.mimetype or 'image/jpeg'
-                image_urls.append(f"data:{mimetype};base64,{encoded}")
+                if len(file_bytes) > 0:
+                    encoded = base64.b64encode(file_bytes).decode('utf-8')
+                    mimetype = file.mimetype or 'image/jpeg'
+                    image_urls.append(f"data:{mimetype};base64,{encoded}")
             except Exception as e:
                 print(f"Error guardando foto de artículo: {e}")
+
+    # SI NO SE CAPTURÓ NINGUNA FOTO, ASIGNAR LA IMAGEN POR DEFECTO PARA EVITAR ROMPER EL DISEÑO
+    if not image_urls:
+        image_urls.append("/static/uploads/default_item.png")
 
     article_data = {
         "numeric_id": int(datetime.now().timestamp()),
