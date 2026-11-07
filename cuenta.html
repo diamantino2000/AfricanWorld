@@ -12,7 +12,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- TENSORFLOW Y NSFWJS PARA MODERACIÓN DE IMÁGENES AUTOMÁTICA -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nsfwjs@2.4.1/dist/nsfwjs.min.js"></script>
 
@@ -43,7 +42,6 @@
 
     <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
         {% if profile_user %}
-        <!-- TARJETA CABECERA DE PERFIL -->
         <div class="bg-white p-8 rounded-3xl border shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
                 <img src="{{ profile_user.profile_pic if profile_user.profile_pic else '/static/uploads/default_user.png' }}" alt="Foto" class="w-24 h-24 rounded-full object-cover border-4 border-african-yellow shadow-lg">
@@ -57,7 +55,6 @@
                 </div>
             </div>
 
-            <!-- BOTONES DE ACCIÓN: PUBLICAR + AJUSTES -->
             <div class="flex items-center gap-3 flex-wrap justify-center">
                 {% if session.get('username') and session['username'] == profile_user.username %}
                     <button type="button" onclick="openModal('publish-modal')" class="bg-african-yellow text-gray-900 px-5 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-yellow-400 transition flex items-center gap-2">
@@ -75,7 +72,6 @@
             </div>
         </div>
 
-        <!-- PUBLICACIONES DEL USUARIO -->
         <div class="space-y-4">
             <h2 class="text-xl font-black text-gray-900 flex items-center gap-2 border-b pb-2">
                 <i class="fa-solid fa-box text-african-yellow"></i>
@@ -86,11 +82,10 @@
                 {% for art in articles %}
                     <div class="bg-white rounded-2xl shadow-sm border overflow-hidden flex flex-col justify-between hover:shadow-md transition">
                         <div>
-                            {% if art.images %}
-                                <div class="h-44 bg-gray-200 overflow-hidden relative">
-                                    <img src="{{ art.images.split(',')[0] }}" alt="{{ art.title }}" class="w-full h-full object-cover">
-                                </div>
-                            {% endif %}
+                            {% set img_list = art.images.split(',') if art.images else [] %}
+                            <div class="h-44 bg-gray-200 overflow-hidden relative">
+                                <img src="{{ img_list[0] if img_list and img_list[0] != '' else '/static/uploads/default_item.png' }}" alt="{{ art.title }}" class="w-full h-full object-cover">
+                            </div>
                             <div class="p-5 space-y-2">
                                 <div class="flex justify-between items-start">
                                     <h3 class="font-bold text-gray-900 text-base"><a href="/articulo/{{ art.slug }}">{{ art.title }}</a></h3>
@@ -125,7 +120,7 @@
         {% endif %}
     </main>
 
-    <!-- MODAL PUBLICAR ARTÍCULO (SIN PAÍS, CIUDAD NI TELÉFONO) -->
+    <!-- MODAL PUBLICAR ARTÍCULO -->
     <div id="publish-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-lg w-full p-8 rounded-2xl shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto border-t-8 border-african-yellow">
             <button type="button" onclick="closeModal('publish-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
@@ -173,7 +168,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE ADVERTENCIA NSFW -->
+    <!-- MODAL NSFW -->
     <div id="nsfw-warning-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4 border-t-8 border-african-red text-center">
             <div class="w-16 h-16 bg-red-100 text-african-red rounded-full flex items-center justify-center mx-auto text-3xl">
@@ -193,7 +188,6 @@
         <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- SCRIPTS GENERALES -->
     <script>
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
