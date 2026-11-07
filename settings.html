@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-es="Ajustes de Cuenta - AfricanWorld">Ajustes de Cuenta - AfricanWorld</title>
+    <title data-es="Ajustes de Cuenta - AfricanWorld" data-fr="Paramètres du Compte - AfricanWorld" data-en="Account Settings - AfricanWorld" data-ar="إعدادات الحساب - AfricanWorld" data-pt="Configurações da Conta - AfricanWorld">Ajustes de Cuenta - AfricanWorld</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -21,34 +21,38 @@
                 <img src="/static/uploads/logo.png" alt="Logo" class="h-14 w-auto object-contain">
                 <span class="text-2xl font-black text-white">African<span class="text-african-yellow">World</span></span>
             </a>
-            <a href="/perfil/{{ user.username }}" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold">Volver al Perfil</a>
+            <a href="/perfil/{{ user.username }}" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold" data-es="Volver al Perfil" data-fr="Retour au Profil" data-en="Back to Profile" data-ar="العودة إلى الملف الشخصي" data-pt="Voltar ao Perfil">Volver al Perfil</a>
         </div>
     </header>
 
     <main class="max-w-2xl mx-auto px-4 py-10 flex-grow w-full space-y-6">
         <div class="bg-white p-8 rounded-3xl border shadow-sm space-y-6">
             <h1 class="text-2xl font-black text-gray-900 flex items-center gap-2">
-                <i class="fa-solid fa-gear text-african-green"></i> Configuración de la Cuenta
+                <i class="fa-solid fa-gear text-african-green"></i> 
+                <span data-es="Configuración de la Cuenta" data-fr="Paramètres du Compte" data-en="Account Settings" data-ar="إعدادات الحساب" data-pt="Configurações da Conta">Configuración de la Cuenta</span>
             </h1>
 
-            <!-- IDIOMA -->
-            <div class="bg-gray-50 p-4 rounded-2xl border space-y-2">
-                <label class="block text-xs font-bold text-gray-700">Idioma de la Plataforma</label>
-                <select id="settings-lang-select" onchange="changeLanguage(this.value)" class="w-full border px-4 py-2.5 rounded-xl text-sm font-bold bg-white">
-                    <option value="es">🇪🇸 Español</option>
-                    <option value="fr">🇫🇷 Français</option>
-                    <option value="en">🇬🇧 English</option>
-                </select>
-            </div>
-
             <form action="/settings" method="POST" enctype="multipart/form-data" class="space-y-6">
+                
+                <!-- IDIOMA DE LA PLATAFORMA (DENTRO DEL FORMULARIO PARA QUE SE GUARDE) -->
+                <div class="bg-gray-50 p-4 rounded-2xl border space-y-2">
+                    <label class="block text-xs font-bold text-gray-700" data-es="Idioma de la Plataforma" data-fr="Langue de la Plateforme" data-en="Platform Language" data-ar="لغة المنصة" data-pt="Idioma da Plataforma">Idioma de la Plataforma</label>
+                    <select name="language" id="settings-lang-select" class="w-full border px-4 py-2.5 rounded-xl text-sm font-bold bg-white focus:ring-2 focus:ring-african-green focus:outline-none">
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="en">🇬🇧 English</option>
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="pt">🇵🇹 Português</option>
+                    </select>
+                </div>
+
                 <!-- FOTO DE PERFIL PERSISTENTE -->
                 <div class="space-y-2">
-                    <label class="block text-xs font-bold text-gray-700">Foto de Perfil</label>
+                    <label class="block text-xs font-bold text-gray-700" data-es="Foto de Perfil" data-fr="Photo de Profil" data-en="Profile Picture" data-ar="صورة الملف الشخصي" data-pt="Foto de Perfil">Foto de Perfil</label>
                     <div class="flex items-center gap-4">
                         <img id="avatar-preview" src="{{ user.profile_pic if user.profile_pic else '/static/uploads/default_user.png' }}" class="w-20 h-20 rounded-full object-cover border-4 border-african-yellow shadow">
                         <label class="bg-emerald-50 text-african-green border px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
-                            Elegir Foto
+                            <span data-es="Elegir Foto" data-fr="Choisir une Photo" data-en="Choose Photo" data-ar="اختر صورة" data-pt="Escolher Foto">Elegir Foto</span>
                             <input type="file" name="profile_pic" accept="image/*" class="hidden" onchange="previewAndCompressProfilePic(event)">
                         </label>
                     </div>
@@ -56,27 +60,27 @@
 
                 <!-- USUARIO Y CONTACTO GUARDADO -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Nombre de Usuario</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Nombre de Usuario" data-fr="Nom d'utilisateur" data-en="Username" data-ar="اسم المستخدم" data-pt="Nome de Usuário">Nombre de Usuario</label>
                     <input type="text" name="username" value="{{ user.username }}" required class="w-full border px-4 py-2.5 rounded-xl text-sm font-bold bg-gray-50">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">País</label>
+                        <label class="block text-xs font-bold text-gray-700 mb-1" data-es="País" data-fr="Pays" data-en="Country" data-ar="الدولة" data-pt="País">País</label>
                         <input type="text" name="country" value="{{ user.country if user.country else '' }}" required class="w-full border px-4 py-2.5 rounded-xl text-sm font-bold bg-gray-50">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Ciudad</label>
+                        <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Ciudad" data-fr="Ville" data-en="City" data-ar="المدينة" data-pt="Cidade">Ciudad</label>
                         <input type="text" name="city" value="{{ user.city if user.city else '' }}" required class="w-full border px-4 py-2.5 rounded-xl text-sm font-bold bg-gray-50">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Número de Teléfono</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Número de Teléfono" data-fr="Numéro de téléphone" data-en="Phone number" data-ar="رقم الهاتف" data-pt="Número de telefone">Número de Teléfono</label>
                     <input type="text" name="phone" value="{{ user.phone if user.phone else '' }}" required class="w-full border px-4 py-2.5 rounded-xl text-sm font-bold bg-gray-50">
                 </div>
 
-                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold text-sm shadow hover:opacity-90">
+                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold text-sm shadow hover:opacity-90" data-es="Guardar Cambios" data-fr="Enregistrer les Modifications" data-en="Save Changes" data-ar="حفظ التغييرات" data-pt="Salvar Alterações">
                     Guardar Cambios
                 </button>
             </form>
@@ -85,13 +89,35 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const savedLang = localStorage.getItem("user_selected_language") || "es";
-            document.getElementById("settings-lang-select").value = savedLang;
+            // Cargar idioma guardado en el usuario (desde Flask/Firebase) o respaldo en localStorage
+            const userLang = "{{ user.language if user and user.language else '' }}";
+            const savedLang = userLang || localStorage.getItem("user_selected_language") || "es";
+            
+            const selectEl = document.getElementById("settings-lang-select");
+            if (selectEl) selectEl.value = savedLang;
+            
+            applyPlatformLanguage(savedLang);
         });
 
-        function changeLanguage(langCode) {
+        function applyPlatformLanguage(langCode) {
             localStorage.setItem("user_selected_language", langCode);
-            location.reload();
+            const htmlRoot = document.getElementById("html-root");
+            htmlRoot.setAttribute("lang", langCode);
+
+            if (langCode === "ar") {
+                htmlRoot.setAttribute("dir", "rtl");
+            } else {
+                htmlRoot.removeAttribute("dir");
+            }
+
+            document.querySelectorAll("[data-es]").forEach(function(el) {
+                const translation = el.getAttribute("data-" + langCode);
+                if (translation) {
+                    el.textContent = translation;
+                } else {
+                    el.textContent = el.getAttribute("data-es");
+                }
+            });
         }
 
         function previewAndCompressProfilePic(event) {
