@@ -116,7 +116,44 @@ def index():
     users = load_json_users()
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
 
-    return render_template('index.html', articles=articles, search=search, current_user=current_user, google_client_id=GOOGLE_CLIENT_ID)
+    return render_template('index (7).html', articles=articles, search=search, current_user=current_user, google_client_id=GOOGLE_CLIENT_ID)
+
+@app.route('/terminos')
+def terminos():
+    return render_template('terminos (2).html')
+
+@app.route('/buscar-usuarios')
+def buscar_usuarios():
+    query = request.args.get('q', '').lower()
+    users = load_json_users()
+    filtered_users = []
+    if query:
+        for u in users:
+            if query in u.get('username', '').lower() or query in u.get('email', '').lower():
+                filtered_users.append(u)
+    else:
+        filtered_users = users
+    return render_template('Busca_user (2).html', users=filtered_users, query=query)
+
+@app.route('/articulo/<slug>')
+def article_detail(slug):
+    articles = load_articles()
+    article = next((art for art in articles if art.get('slug') == slug), None)
+    if not article:
+        flash("El artículo no existe.", "error")
+        return redirect(url_for('index'))
+    
+    # Incrementar vistas
+    article['views'] = article.get('views', 0) + 1
+    fb_put(f"articles/{article['firebase_id']}", article)
+
+    users = load_json_users()
+    author = next((u for u in users if u.get('username') == article.get('username')), None)
+    
+    comments = article.get('comments', [])
+    avg_rating = sum(c.get('rating', 0) for c in comments) / len(comments) if comments else 0
+
+    return render_template('article_detail (2).html', article=article, author=author, avg_rating=round(avg_rating, 1))
 
 @app.route('/complete-onboarding', methods=['POST'])
 def complete_onboarding():
@@ -271,9 +308,61 @@ def profile(username):
     
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
     all_articles = load_articles()
-    user_articles = [art for art in all_articles if art.get('username') == username]
+    user_articles = [art for art in all_articles if art.get('username'] == username]
 
-    return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
+    return render_template('cuenta (2).html', profile_user=profile_user, current_user=current_user, articles=user_articles)
+
+@app.route('/publish', methods=['POST'])
+def publish_article():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    title = request.form.get('title', '').strip()
+    price_val = request.form.get('price', '0').strip()
+    phone = request.form.get('phone', '').strip()
+    country = request.form.get('country', '').strip()
+    city = request.form.get('city', '').strip()
+    description = request.form.get('description', '').strip()
+    uploaded_files = request.files.getlist('photos')
+
+    try:
+        price = float(price_val)
+    except ValueError:
+        price = 0.0
+
+    image_urls = []
+    for file in uploaded_files:
+        if file and file.filename != '':
+            try:
+                file_bytes = file.read()
+                encoded = base64.b64encode(file_bytes).decode('utf-8')
+                mimetype = file.mimetype or 'image/jpeg'
+                image_urls.append(f"data:{mimetype};base64,{encoded}")
+            except Exception as e:
+                print(f"Error guardando foto de artículo: {e}")
+
+    article_data = {
+        "numeric_id": int(datetime.now().timestamp()),
+        "title": title,
+        "price": price,
+        "phone": phone,
+        "country": country,
+        "city": city,
+        "description": description,
+        "username": session['username'],
+        "images": ",".join(image_urls),
+        "views": 0,
+        "is_sold": False,
+        "comments": []
+    }
+
+    slug_base = slugify(title)
+    slug = f"{slug_base}-{article_data['numeric_id']}"
+    article_data['slug'] = slug
+
+    fb_put(f"articles/{slug}", article_data)
+    flash('¡Artículo publicado con éxito!', 'success')
+    return redirect(url_for('profile', username=session['username']))
 
 @app.route('/logout')
 def logout():
