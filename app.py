@@ -411,6 +411,27 @@ def remove_from_cart(article_id):
         
     return redirect(url_for('view_cart'))
 
+@app.route('/articulo/<path:article_id>/delete', methods=['POST'])
+def delete_article(article_id):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    
+    articles = load_articles()
+    # Buscar el artículo por su id numérico, firebase_id o slug
+    article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id or art.get('slug') == article_id), None)
+    
+    if article:
+        # Verificar que el usuario actual sea el dueño del artículo
+        if article.get('username') == session['username']:
+            fb_delete(f"articles/{article['firebase_id']}")
+            flash('¡Publicación eliminada con éxito!', 'success')
+        else:
+            flash('No tienes permiso para eliminar esta publicación.', 'error')
+    else:
+        flash('El artículo no existe.', 'error')
+        
+    return redirect(url_for('profile', username=session['username']))
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
