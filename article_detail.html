@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ current_lang }}" id="html-root">
+<html lang="es" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -73,7 +73,9 @@
                     </div>
 
                     <div class="flex items-center gap-4 text-xs font-bold text-gray-500">
-                        <span class="text-african-green"><i class="fa-solid fa-location-dot mr-1"></i>{{ article.country }}, {{ article.city }}</span>
+                        <span class="text-african-green">
+                            <i class="fa-solid fa-location-dot mr-1"></i>{{ author.country if author and author.country else 'País no especificado' }}, {{ author.city if author and author.city else 'Ciudad no especificada' }}
+                        </span>
                         <span><i class="fa-solid fa-eye mr-1"></i>{{ article.views }} <span data-es="Visualizaciones" data-fr="Vues" data-en="Views" data-ar="مشاهدات" data-pt="Visualizações">Visualizaciones</span></span>
                         {% if avg_rating > 0 %}
                             <span class="text-african-yellow"><i class="fa-solid fa-star mr-1"></i>{{ avg_rating }} / 5</span>
@@ -94,9 +96,11 @@
                                 <a href="/perfil/{{ article.username }}" class="font-bold text-sm text-gray-900 hover:text-african-green">@{{ article.username }}</a>
                             </div>
                         </div>
-                        <a href="https://wa.me/{{ article.phone }}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-emerald-700 transition flex items-center gap-1.5">
-                            <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
-                        </a>
+                        {% if author and author.phone %}
+                            <a href="https://wa.me/{{ author.phone }}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-emerald-700 transition flex items-center gap-1.5">
+                                <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -111,7 +115,7 @@
                     {% endif %}
 
                     {% if session.get('username') == article.username %}
-                        <form action="/articulo/{{ article.id }}/mark-sold" method="POST">
+                        <form action="/articulo/{{ article.firebase_id }}/mark-sold" method="POST">
                             <button type="submit" class="bg-gray-800 text-white px-4 py-3 rounded-xl text-xs font-bold shadow hover:bg-black transition">
                                 {{ 'Marcar Disponible' if article.is_sold else 'Marcar Comprado' }}
                             </button>
@@ -162,10 +166,10 @@
     </main>
 
     <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
-        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-ar="جميع الحقوق محفوظة." data-pt="Todos os direitos reservados.">Todos los derechos reservados.</span></p>
+        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-ar="جميع الحقوق محفوظة." data-pt="Todos os direitos reservados.">Todos os direitos reservados.</span></p>
     </footer>
 
-    <!-- SCRIPT DE IDIOMA Y NAVEGACIÓN -->
+    <!-- SCRIPT DE IDIOMA -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const savedLang = localStorage.getItem("user_selected_language") || "es";
@@ -178,21 +182,12 @@
                 htmlRoot.removeAttribute("dir");
             }
 
-            document.querySelectorAll("[data-es][data-fr]").forEach(function(el) {
+            document.querySelectorAll("[data-es]").forEach(function(el) {
                 const translation = el.getAttribute("data-" + savedLang);
                 if (translation) {
                     el.textContent = translation;
                 } else {
                     el.textContent = el.getAttribute("data-es");
-                }
-            });
-
-            document.querySelectorAll("[data-es-placeholder]").forEach(function(el) {
-                const placeholderTranslation = el.getAttribute("data-" + savedLang + "-placeholder");
-                if (placeholderTranslation) {
-                    el.setAttribute("placeholder", placeholderTranslation);
-                } else {
-                    el.setAttribute("placeholder", el.getAttribute("data-es-placeholder"));
                 }
             });
         });
