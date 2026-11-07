@@ -13,7 +13,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
 
-# URL de tu Firebase Realtime Database
 FIREBASE_DB_URL = "https://african-movies-8568b-default-rtdb.firebaseio.com"
 
 UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
@@ -143,7 +142,6 @@ def article_detail(slug):
         flash("El artículo no existe.", "error")
         return redirect(url_for('index'))
     
-    # Incrementar vistas
     article['views'] = article.get('views', 0) + 1
     fb_put(f"articles/{article['firebase_id']}", article)
 
@@ -154,6 +152,25 @@ def article_detail(slug):
     avg_rating = sum(c.get('rating', 0) for c in comments) / len(comments) if comments else 0
 
     return render_template('article_detail.html', article=article, author=author, avg_rating=round(avg_rating, 1))
+
+@app.route('/articulo/<path:article_id>/delete', methods=['POST'])
+def delete_article(article_id):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    
+    articles = load_articles()
+    article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id or art.get('slug') == article_id), None)
+    
+    if article:
+        if article.get('username') == session['username']:
+            fb_delete(f"articles/{article['firebase_id']}")
+            flash('¡Publicación eliminada con éxito!', 'success')
+        else:
+            flash('No tienes permiso para eliminar esta publicación.', 'error')
+    else:
+        flash('El artículo no existe.', 'error')
+        
+    return redirect(url_for('profile', username=session['username']))
 
 @app.route('/complete-onboarding', methods=['POST'])
 def complete_onboarding():
@@ -319,11 +336,20 @@ def publish_article():
 
     title = request.form.get('title', '').strip()
     price_val = request.form.get('price', '0').strip()
-    phone = request.form.get('phone', '').strip()
-    country = request.form.get('country', '').strip()
-    city = request.form.get('city', '').strip()
     description = request.form.get('description', '').strip()
     uploaded_files = request.files.getlist('photos')
+
+    # Obtener automáticamente del usuario conectado
+    users = load_json_users()
+    current_user = next((u for u in users if u.get('username') == session['username']), None)
+
+    if not current_user:
+        flash('Usuario no encontrado.', 'error')
+        return redirect(url_for('index'))
+
+    country = current_user.get('country', '')
+    city = current_user.get('city', '')
+    phone = current_user.get('phone', '')
 
     try:
         price = float(price_val)
@@ -369,68 +395,6 @@ def logout():
     session.clear()
     flash('Has cerrado sesión.', 'info')
     return redirect(url_for('index'))
-
-@app.route('/carrito')
-def view_cart():
-    if 'username' not in session:
-        return redirect(url_for('index'))
-    
-    cart_ids = session.get('cart', [])
-    articles = load_articles()
-    
-    # Filtrar los artículos que están guardados en la sesión del carrito
-    cart_articles = [art for art in articles if art.get('id') in cart_ids or str(art.get('id')) in [str(i) for i in cart_ids]]
-    
-    return render_template('carrito.html', articles=cart_articles)
-
-@app.route('/carrito/add/<int:article_id>', methods=['POST'])
-def add_to_cart(article_id):
-    if 'username' not in session:
-        return redirect(url_for('index'))
-    
-    cart = session.get('cart', [])
-    if article_id not in cart:
-        cart.append(article_id)
-        session['cart'] = cart
-        flash('Artículo añadido al carrito.', 'success')
-    else:
-        flash('El artículo ya está en tu carrito.', 'info')
-        
-    return redirect(request.referrer or url_for('index'))
-
-@app.route('/carrito/remove/<int:article_id>', methods=['POST'])
-def remove_from_cart(article_id):
-    if 'username' not in session:
-        return redirect(url_for('index'))
-    
-    cart = session.get('cart', [])
-    if article_id in cart:
-        cart.remove(article_id)
-        session['cart'] = cart
-        flash('Artículo eliminado del carrito.', 'info')
-        
-    return redirect(url_for('view_cart'))
-
-@app.route('/articulo/<path:article_id>/delete', methods=['POST'])
-def delete_article(article_id):
-    if 'username' not in session:
-        return redirect(url_for('index'))
-    
-    articles = load_articles()
-    # Buscar el artículo por su id numérico, firebase_id o slug
-    article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id or art.get('slug') == article_id), None)
-    
-    if article:
-        # Verificar que el usuario actual sea el dueño del artículo
-        if article.get('username') == session['username']:
-            fb_delete(f"articles/{article['firebase_id']}")
-            flash('¡Publicación eliminada con éxito!', 'success')
-        else:
-            flash('No tienes permiso para eliminar esta publicación.', 'error')
-    else:
-        flash('El artículo no existe.', 'error')
-        
-    return redirect(url_for('profile', username=session['username']))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
