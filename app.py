@@ -23,7 +23,9 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleusercontent.com"
 
-# --- FUNCIONES DE COMUNICACIÓN CON FIREBASE REST API ---
+# ==========================================
+# FUNCIONES DE COMUNICACIÓN CON FIREBASE REST API
+# ==========================================
 
 def fb_get(path):
     try:
@@ -59,7 +61,9 @@ def fb_delete(path):
         print(f"Error borrando en Firebase ({path}): {e}")
     return False
 
-# --- ADAPTADORES DE DATOS ---
+# ==========================================
+# ADAPTADORES DE DATOS
+# ==========================================
 
 def load_json_users():
     data = fb_get("users")
@@ -109,15 +113,13 @@ def load_articles():
     return articles_list
 
 def get_article_by_slug(slug):
-    articles = load_articles()
-    for art in articles:
+    for art in load_articles():
         if art.get('slug') == slug:
             return art
     return None
 
 def get_article_by_id(art_id):
-    articles = load_articles()
-    for art in articles:
+    for art in load_articles():
         if art.get('id') == int(art_id) or art.get('firebase_id') == str(art_id):
             return art
     return None
@@ -143,11 +145,12 @@ def slugify(text_value):
     text_value = re.sub(r'[^\w\s-]', '', text_value).strip().lower()
     return re.sub(r'[-\s]+', '-', text_value)
 
-# --- RUTAS DE LA APLICACIÓN ---
+# ==========================================
+# RUTAS DE LA APLICACIÓN
+# ==========================================
 
 @app.route('/')
 def index():
-    # Si el usuario NO tiene cuenta / sesión activa, va directo a intro.html
     if 'username' not in session:
         return render_template('intro.html', google_client_id=GOOGLE_CLIENT_ID)
 
@@ -155,11 +158,12 @@ def index():
     articles = load_articles()
     
     if search:
-        filtered = []
-        for art in articles:
-            if search in art.get('title', '').lower() or search in art.get('country', '').lower() or search in art.get('city', '').lower():
-                filtered.append(art)
-        articles = filtered
+        articles = [
+            art for art in articles 
+            if search in art.get('title', '').lower() 
+            or search in art.get('country', '').lower() 
+            or search in art.get('city', '').lower()
+        ]
     
     users = load_json_users()
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
@@ -176,12 +180,13 @@ def search_users():
     matched_users = []
 
     if query:
-        for u in users:
-            if query in u.get('username', '').lower() or query in u.get('email', '').lower():
-                matched_users.append(u)
+        matched_users = [
+            u for u in users 
+            if query in u.get('username', '').lower() 
+            or query in u.get('email', '').lower()
+        ]
 
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
-
     return render_template('Busca_user.html', query=query, users=matched_users, current_user=current_user)
 
 @app.route('/terminos')
@@ -212,14 +217,12 @@ def get_notifications_json():
     
     unread_count = sum(1 for n in notifications if not n.get('read', False))
     
-    formatted_notifications = []
-    for noti in notifications:
-        formatted_notifications.append({
-            "message": noti.get("message"),
-            "link": noti.get("link"),
-            "read": noti.get("read", False),
-            "time_ago": noti.get("date", "")
-        })
+    formatted_notifications = [{
+        "message": noti.get("message"),
+        "link": noti.get("link"),
+        "read": noti.get("read", False),
+        "time_ago": noti.get("date", "")
+    } for noti in notifications]
 
     return jsonify({
         "status": "success",
@@ -287,9 +290,6 @@ def google_login_real():
                 "username": username,
                 "email": email,
                 "profile_pic": picture,
-                "country": "",
-                "city": "",
-                "phone": "",
                 "followers": [],
                 "following": [],
                 "notifications": []
@@ -300,11 +300,6 @@ def google_login_real():
         session['username'] = user['username']
         session['email'] = user['email']
         session['profile_pic'] = user.get('profile_pic', picture)
-
-        # Si el usuario nuevo no ha llenado su país o teléfono, lo mandamos a completarlo obligatoriamente
-        if not user.get('country') or not user.get('phone'):
-            return jsonify({"status": "success", "redirect": url_for('complete_profile')})
-
         return jsonify({"status": "success", "redirect": url_for('index')})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
@@ -332,9 +327,7 @@ def view_article(slug):
     author = next((u for u in users if u.get('username') == article.get('username')), None)
     
     comments = article.get('comments', [])
-    avg_rating = 0
-    if comments:
-        avg_rating = round(sum(c.get('rating', 5) for c in comments) / len(comments), 1)
+    avg_rating = round(sum(c.get('rating', 5) for c in comments) / len(comments), 1) if comments else 0
 
     return render_template('article_detail.html', article=article, current_user=current_user, author=author, avg_rating=avg_rating, comments=comments)
 
@@ -386,8 +379,8 @@ def follow_user(username):
     target_u = next((u for u in users if u.get('username') == username), None)
 
     if current_u and target_u:
-        if 'following' not in current_u: current_u['following'] = []
-        if 'followers' not in target_u: target_u['followers'] = []
+        current_u.setdefault('following', [])
+        target_u.setdefault('followers', [])
 
         if username in current_u['following']:
             current_u['following'].remove(username)
@@ -444,8 +437,7 @@ def add_to_cart(article_id):
         flash('Inicia sesión para usar el carrito.', 'error')
         return redirect(url_for('index'))
     
-    if 'cart' not in session:
-        session['cart'] = []
+    session.setdefault('cart', [])
     
     if article_id not in session['cart']:
         session['cart'].append(article_id)
@@ -473,8 +465,7 @@ def view_cart():
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
     
     cart_ids = session.get('cart', [])
-    all_articles = load_articles()
-    cart_articles = [art for art in all_articles if art.get('id') in cart_ids]
+    cart_articles = [art for art in load_articles() if art.get('id') in cart_ids]
     
     return render_template('carrito.html', articles=cart_articles, current_user=current_user)
 
@@ -504,8 +495,7 @@ def profile(username):
             return redirect(url_for('index'))
     
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
-    all_articles = load_articles()
-    user_articles = [art for art in all_articles if art.get('username') == username]
+    user_articles = [art for art in load_articles() if art.get('username') == username]
 
     return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
 
@@ -541,13 +531,11 @@ def settings():
             user['last_username_change'] = datetime.now(timezone.utc).isoformat()
             session['username'] = new_username
 
-            articles = load_articles()
-            for art in articles:
+            for art in load_articles():
                 if art.get('username') == old_username:
                     art['username'] = new_username
                     fb_put(f"articles/{art.get('firebase_id')}", art)
 
-        # FOTO DE PERFIL GUARDADA EN FIREBASE COMO BASE64 (PERSISTENTE)
         if profile_file and profile_file.filename != '':
             try:
                 file_bytes = profile_file.read()
@@ -598,11 +586,10 @@ def publish():
     for file in uploaded_files[:17]:
         if file and file.filename != '':
             try:
-                file_bytes = file.read()
                 response = requests.post(
                     "https://api.imgbb.com/1/upload",
                     data={"key": imgbb_api_key},
-                    files={"image": file_bytes}
+                    files={"image": file.read()}
                 )
                 result = response.json()
                 if result.get("success"):
@@ -613,15 +600,13 @@ def publish():
     base_slug = slugify(title)
     slug = base_slug
     counter = 1
-    articles = load_articles()
-    existing_slugs = [a.get('slug') for a in articles]
+    existing_slugs = [a.get('slug') for a in load_articles()]
     while slug in existing_slugs:
         slug = f"{base_slug}-{counter}"
         counter += 1
 
-    numeric_id = int(datetime.now(timezone.utc).timestamp())
     new_article = {
-        "numeric_id": numeric_id,
+        "numeric_id": int(datetime.now(timezone.utc).timestamp()),
         "title": title, 
         "price": price, 
         "slug": slug, 
@@ -638,7 +623,6 @@ def publish():
     }
     
     fb_post("articles", new_article)
-
     return redirect(url_for('view_article', slug=slug))
 
 @app.route('/publicar')
@@ -655,14 +639,12 @@ def eliminar_cuenta():
     
     username = session['username']
     
-    users = load_json_users()
-    for u in users:
+    for u in load_json_users():
         if u.get('username') == username and 'firebase_id' in u:
             fb_delete(f"users/{u.get('firebase_id')}")
             break
             
-    articles = load_articles()
-    for art in articles:
+    for art in load_articles():
         if art.get('username') == username and 'firebase_id' in art:
             fb_delete(f"articles/{art.get('firebase_id')}")
     
