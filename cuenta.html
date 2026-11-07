@@ -350,5 +350,27 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
     </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const savedLang = localStorage.getItem("user_selected_language") || "es";
+        const htmlRoot = document.documentElement;
+        htmlRoot.setAttribute("lang", savedLang);
+
+        if (savedLang === "ar") {
+            htmlRoot.setAttribute("dir", "rtl");
+        } else {
+            htmlRoot.removeAttribute("dir");
+        }
+
+        document.querySelectorAll("[data-es]").forEach(function(el) {
+            const translation = el.getAttribute("data-" + savedLang);
+            if (translation) {
+                el.textContent = translation;
+            } else {
+                el.textContent = el.getAttribute("data-es");
+            }
+        });
+    });
+</script>
 </body>
 </html>
