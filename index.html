@@ -248,6 +248,67 @@
         </div>
     </main>
 
+    <!-- MODAL DE ONBOARDING OBLIGATORIO (PAÍS, CIUDAD, TELÉFONO, IDIOMA Y TÉRMINOS) -->
+    <div id="onboarding-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-[99999]">
+        <div class="bg-white max-w-md w-full p-6 sm:p-8 rounded-3xl shadow-2xl space-y-4 border-t-8 border-african-green relative">
+            <div class="text-center space-y-1">
+                <h3 class="text-xl font-black text-gray-900 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-id-card text-african-green"></i>
+                    <span data-es="Configura tu Cuenta" data-fr="Configurez votre compte" data-en="Set up your account" data-ar="إعداد حسابك" data-pt="Configure sua conta">Configura tu Cuenta</span>
+                </h3>
+                <p class="text-xs text-gray-500" data-es="Por favor ingresa tu ubicación, teléfono e idioma preferido para continuar." data-fr="Veuillez entrer votre emplacement, votre téléphone et votre langue préférée." data-en="Please enter your location, phone and preferred language." data-ar="يرجى إدخال موقعك ورقم هاتفك واللغة المفضلة." data-pt="Por favor, insira sua localização, telefone e idioma preferido.">
+                    Por favor ingresa tu ubicación, teléfono e idioma preferido para continuar.
+                </p>
+            </div>
+
+            <form id="onboarding-form" onsubmit="submitOnboarding(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1" data-es="País" data-fr="Pays" data-en="Country" data-ar="الدولة" data-pt="País">País</label>
+                        <input type="text" id="onb-country" required placeholder="Ej: Marruecos, Senegal..." class="w-full border px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 focus:ring-2 focus:ring-african-green focus:outline-none font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Ciudad" data-fr="Ville" data-en="City" data-ar="المدينة" data-pt="Cidade">Ciudad</label>
+                        <input type="text" id="onb-city" required placeholder="Ej: Casablanca, Dakar..." class="w-full border px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 focus:ring-2 focus:ring-african-green focus:outline-none font-medium">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Número de Teléfono" data-fr="Numéro de téléphone" data-en="Phone number" data-ar="رقم الهاتف" data-pt="Número de telefone">Número de Teléfono</label>
+                    <input type="text" id="onb-phone" required placeholder="Ej: +212 600000000" class="w-full border px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 focus:ring-2 focus:ring-african-green focus:outline-none font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-language text-african-green"></i>
+                        <span data-es="Idioma de Navegación" data-fr="Langue de Navigation" data-en="Browsing Language" data-ar="لغة التصفح" data-pt="Idioma de Navegação">Idioma de Navegación</span>
+                    </label>
+                    <select id="onb-language" class="w-full border px-3.5 py-2.5 rounded-xl text-xs font-bold bg-gray-50 focus:ring-2 focus:ring-african-green focus:outline-none cursor-pointer">
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="en">🇬🇧 English</option>
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="pt">🇵🇹 Português</option>
+                    </select>
+                </div>
+
+                <div class="flex items-start gap-2 bg-gray-50 p-3 rounded-xl border mt-2">
+                    <input type="checkbox" id="onb-terms-check" class="mt-0.5 rounded border-gray-300 text-african-green focus:ring-african-green cursor-pointer" required>
+                    <label for="onb-terms-check" class="text-xs text-gray-700 cursor-pointer select-none leading-snug">
+                        <span data-es="Acepto los" data-fr="J'accepte les" data-en="I accept the" data-ar="أوافق على" data-pt="Aceito os">Acepto los</span> 
+                        <a href="/terminos" target="_blank" class="text-african-green font-bold hover:underline" data-es="Términos y Condiciones" data-fr="Termes et Conditions" data-en="Terms & Conditions" data-ar="الشروط والأحكام" data-pt="Termos e Condições">Términos y Condiciones</a>.
+                    </label>
+                </div>
+
+                <p id="onb-error-msg" class="text-xs text-red-500 font-bold hidden text-center" data-es="Completa todos los campos y acepta los términos.">Completa todos los campos y acepta los términos.</p>
+
+                <button type="submit" id="btn-onb-submit" class="w-full bg-african-green text-white py-3 rounded-xl text-xs font-bold shadow hover:opacity-90 transition mt-2" data-es="Guardar e Iniciar" data-fr="Enregistrer et Démarrer" data-en="Save and Start" data-ar="حفظ وبدء" data-pt="Salvar e Iniciar">
+                    Guardar e Iniciar
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL DE DENUNCIA -->
     <div id="report-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl relative space-y-4 border-t-8 border-african-red">
@@ -274,18 +335,30 @@
     <!-- FOOTER -->
     <footer class="bg-white border-t mt-12 py-6 text-center text-sm text-gray-500 border-t-4 border-african-red">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-ar="جميع الحقوق محفوظة." data-pt="Todos os direitos reservados.">Todos los derechos reservados.</span></p>
+            <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-ar="جميع الحقوق محفوظة." data-pt="Todos os direitos reservados.">Todos os direitos reservados.</span></p>
             <a href="/terminos" class="text-xs font-bold text-african-green hover:underline flex items-center gap-1">
                 <i class="fa-solid fa-scale-balanced"></i> <span data-es="Términos y Condiciones" data-fr="Termes et Conditions" data-en="Terms & Conditions" data-ar="الشروط والأحكام" data-pt="Termos e Condições">Términos y Condiciones</span>
             </a>
         </div>
     </footer>
 
-    <!-- SCRIPT DE IDIOMA Y LOGIN DIRECTO -->
+    <!-- SCRIPT DE IDIOMA Y ONBOARDING -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const savedLang = localStorage.getItem("user_selected_language") || "es";
             applyLanguage(savedLang);
+
+            // Verificar si el usuario ha iniciado sesión y si le falta país o teléfono
+            var isLoggedIn = "{{ session.get('username', '') }}";
+            if (isLoggedIn !== "") {
+                var userCountry = "{{ current_user.country if current_user and current_user.country else '' }}";
+                var userPhone = "{{ current_user.phone if current_user and current_user.phone else '' }}";
+                
+                if (!userCountry || !userPhone) {
+                    const modal = document.getElementById('onboarding-modal');
+                    if (modal) modal.classList.remove('hidden');
+                }
+            }
         });
 
         function applyLanguage(langCode) {
@@ -421,7 +494,7 @@
 
         setInterval(checkNotificationsRealtime, 5000);
 
-        // LOGIN DE GOOGLE DIRECTO E INSTANTÁNEO (SIN MODAL DE TÉRMINOS)
+        // LOGIN DE GOOGLE DIRECTO
         function handleCredentialResponse(response) {
             fetch('/google-login-real', {
                 method: 'POST',
@@ -438,6 +511,57 @@
             })
             .catch(err => {
                 console.error("Error en login:", err);
+            });
+        }
+
+        // ENVÍO DE DATOS DE ONBOARDING
+        function submitOnboarding(event) {
+            event.preventDefault();
+            const country = document.getElementById('onb-country').value.trim();
+            const city = document.getElementById('onb-city').value.trim();
+            const phone = document.getElementById('onb-phone').value.trim();
+            const language = document.getElementById('onb-language').value;
+            const termsCheck = document.getElementById('onb-terms-check').checked;
+            const errorMsg = document.getElementById('onb-error-msg');
+
+            if (!country || !city || !phone || !termsCheck) {
+                if (errorMsg) errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (errorMsg) errorMsg.classList.add('hidden');
+
+            const btn = document.getElementById('btn-onb-submit');
+            btn.disabled = true;
+            btn.textContent = "Guardando...";
+
+            // Guardar preferencia de idioma en localStorage
+            localStorage.setItem("user_selected_language", language);
+
+            fetch('/complete-onboarding', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    country: country,
+                    city: city,
+                    phone: phone,
+                    language: language
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.reload();
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = "Guardar e Iniciar";
+                    alert(data.message || 'Error al guardar los datos');
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.textContent = "Guardar e Iniciar";
+                console.error("Error en onboarding:", err);
             });
         }
     </script>
