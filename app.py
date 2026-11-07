@@ -20,8 +20,31 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleusercontent.com"
+IMGBB_API_KEY = os.environ.get('IMGBB_API_KEY', '3ca96164517ba9751a3ef0e3032206ef')
 
-# --- FUNCIONES DE COMUNICACIÓN CON FIREBASE REST API ---
+# --- FUNCIONES DE IMGBB Y FIREBASE ---
+
+def upload_to_imgbb(file_bytes):
+    if not IMGBB_API_KEY:
+        encoded = base64.b64encode(file_bytes).decode('utf-8')
+        return f"data:image/jpeg;base64,{encoded}"
+    try:
+        url = "https://api.imgbb.com/1/upload"
+        payload = {
+            "key": IMGBB_API_KEY,
+            "image": base64.b64encode(file_bytes).decode('utf-8')
+        }
+        response = requests.post(url, data=payload)
+        if response.status_code == 200:
+            res_data = response.json()
+            if res_data.get('success'):
+                return res_data['data']['url']
+    except Exception as e:
+        print(f"Error subiendo a ImgBB: {e}")
+    
+    # Fallback seguro a base64 si falla la API
+    encoded = base64.b64encode(file_bytes).decode('utf-8')
+    return f"data:image/jpeg;base64,{encoded}"
 
 def fb_get(path):
     try:
@@ -39,15 +62,6 @@ def fb_put(path, data):
     except Exception as e:
         print(f"Error escribiendo en Firebase ({path}): {e}")
     return False
-
-def fb_post(path, data):
-    try:
-        response = requests.post(f"{FIREBASE_DB_URL}/{path}.json", json=data)
-        if response.status_code == 200:
-            return response.json().get('name')
-    except Exception as e:
-        print(f"Error agregando en Firebase ({path}): {e}")
-    return None
 
 def fb_delete(path):
     try:
@@ -159,7 +173,7 @@ def delete_article(article_id):
         return redirect(url_for('index'))
     
     articles = load_articles()
-    article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id or art.get('slug') == article_id), None)
+    article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id'] == article_id or art.get('slug') == article_id), None)
     
     if article:
         if article.get('username') == session['username']:
@@ -295,14 +309,12 @@ def settings():
         if profile_file and profile_file.filename != '':
             try:
                 file_bytes = profile_file.read()
-                encoded_image = base64.b64encode(file_bytes).decode('utf-8')
-                mimetype = profile_file.mimetype or 'image/jpeg'
-                base64_url = f"data:{mimetype};base64,{encoded_image}"
-                
-                user['profile_pic'] = base64_url
-                session['profile_pic'] = base64_url
+                if len(file_bytes) > 0:
+                    img_url = upload_to_imgbb(file_bytes)
+                    user['profile_pic'] = img_url
+                    session['profile_pic'] = img_url
             except Exception as e:
-                print(f"Error procesando la foto para Firebase: {e}")
+                print(f"Error procesando la foto de perfil: {e}")
                 flash('No se pudo procesar la imagen de perfil.', 'error')
 
         save_json_users(users)
@@ -361,13 +373,11 @@ def publish_article():
             try:
                 file_bytes = file.read()
                 if len(file_bytes) > 0:
-                    encoded = base64.b64encode(file_bytes).decode('utf-8')
-                    mimetype = file.mimetype or 'image/jpeg'
-                    image_urls.append(f"data:{mimetype};base64,{encoded}")
+                    img_url = upload_to_imgbb(file_bytes)
+                    image_urls.append(img_url)
             except Exception as e:
-                print(f"Error guardando foto de artículo: {e}")
+                print(f"Error subiendo foto de artículo a ImgBB: {e}")
 
-    # Respaldo predeterminado si no se cargaron imágenes válidas
     if not image_urls:
         image_urls.append("/static/uploads/default_item.png")
 
