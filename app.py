@@ -652,6 +652,31 @@ def eliminar_cuenta():
     flash('Tu cuenta ha sido eliminada permanentemente.', 'success')
     return redirect(url_for('index'))
 
+@app.route('/complete-onboarding', methods=['POST'])
+def complete_onboarding():
+    if 'username' not in session:
+        return jsonify({"status": "error", "message": "No hay sesión activa"}), 401
+
+    data = request.get_json() or {}
+    country = data.get('country', '').strip()
+    city = data.get('city', '').strip()
+    phone = data.get('phone', '').strip()
+
+    if not country or not city or not phone:
+        return jsonify({"status": "error", "message": "Todos los campos son obligatorios"}), 400
+
+    users = load_json_users()
+    user = next((u for u in users if u.get('username') == session['username']), None)
+    
+    if user:
+        user['country'] = country
+        user['city'] = city
+        user['phone'] = phone
+        save_json_users(users)
+        return jsonify({"status": "success", "redirect": url_for('index')})
+
+    return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
