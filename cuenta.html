@@ -86,11 +86,10 @@
                 {% for art in articles %}
                     <div class="bg-white rounded-2xl shadow-sm border overflow-hidden flex flex-col justify-between hover:shadow-md transition">
                         <div>
-                            {% if art.images %}
-                                <div class="h-44 bg-gray-200 overflow-hidden relative">
-                                    <img src="{{ art.images.split(',')[0] }}" alt="{{ art.title }}" class="w-full h-full object-cover">
-                                </div>
-                            {% endif %}
+                            {% set img_list = art.images.split(',') if art.images else [] %}
+                            <div class="h-44 bg-gray-200 overflow-hidden relative">
+                                <img src="{{ img_list[0].strip() if img_list and img_list[0].strip() != '' else '/static/uploads/default_item.png' }}" alt="{{ art.title }}" class="w-full h-full object-cover">
+                            </div>
                             <div class="p-5 space-y-2">
                                 <div class="flex justify-between items-start">
                                     <h3 class="font-bold text-gray-900 text-base"><a href="/articulo/{{ art.slug }}">{{ art.title }}</a></h3>
@@ -125,7 +124,7 @@
         {% endif %}
     </main>
 
-    <!-- MODAL PUBLICAR ARTÍCULO (SIN PAÍS, CIUDAD NI TELÉFONO) -->
+    <!-- MODAL PUBLICAR ARTÍCULO -->
     <div id="publish-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-lg w-full p-8 rounded-2xl shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto border-t-8 border-african-yellow">
             <button type="button" onclick="closeModal('publish-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
