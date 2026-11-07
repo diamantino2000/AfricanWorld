@@ -103,7 +103,7 @@
                         <div class="p-5 pt-0 border-t mt-3 flex justify-between items-center text-xs">
                             <a href="/articulo/{{ art.slug }}" class="text-african-green font-bold hover:underline">Ver Publicación &rarr;</a>
                             {% if session.get('username') == profile_user.username %}
-                                <form action="/articulo/{{ art.id }}/delete" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?')">
+                                <form action="/articulo/{{ art.firebase_id }}/delete" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?')">
                                     <button type="submit" class="text-african-red font-bold hover:underline"><i class="fa-solid fa-trash mr-1"></i>Eliminar</button>
                                 </form>
                             {% endif %}
