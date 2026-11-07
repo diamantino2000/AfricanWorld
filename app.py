@@ -206,13 +206,13 @@ def settings():
         country = request.form.get('country', '').strip()
         city = request.form.get('city', '').strip()
         phone = request.form.get('phone', '').strip()
-        language = request.form.get('language', 'es').strip()  # Capturar idioma seleccionado
+        language = request.form.get('language', 'es').strip()
         profile_file = request.files.get('profile_pic')
 
         user['country'] = country
         user['city'] = city
         user['phone'] = phone
-        user['language'] = language  # Guardar idioma en el usuario
+        user['language'] = language
 
         if new_username and new_username != user['username']:
             if any(u.get('username') == new_username for u in users):
@@ -238,7 +238,6 @@ def settings():
                     art['username'] = new_username
                     fb_put(f"articles/{art.get('firebase_id')}", art)
 
-        # COMPRESIÓN DE FOTO A BASE64 PARA PERSISTENCIA EN FIREBASE
         if profile_file and profile_file.filename != '':
             try:
                 file_bytes = profile_file.read()
