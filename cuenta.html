@@ -125,7 +125,7 @@
         {% endif %}
     </main>
 
-    <!-- MODAL PUBLICAR ARTÍCULO -->
+    <!-- MODAL PUBLICAR ARTÍCULO (SIN PAÍS, CIUDAD NI TELÉFONO) -->
     <div id="publish-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-lg w-full p-8 rounded-2xl shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto border-t-8 border-african-yellow">
             <button type="button" onclick="closeModal('publish-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
@@ -140,31 +140,9 @@
                     <input type="text" id="titulo" name="title" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">Precio ($ USD / Local)</label>
-                        <input type="number" step="0.01" min="0" id="precio" name="price" placeholder="Ej: 25.00" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none font-bold">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">Teléfono</label>
-                        <input type="tel" id="telefono" name="phone" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">País</label>
-                        <input type="text" id="pais" name="country" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">Ciudad</label>
-                        <input type="text" id="ciudad" name="city" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
-                    </div>
-                </div>
-
                 <div>
-                    <label class="block text-sm font-bold text-gray-700">Correo de Contacto</label>
-                    <input type="email" name="email" value="{{ session.get('email', '') }}" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
+                    <label class="block text-sm font-bold text-gray-700">Precio ($ USD / Local)</label>
+                    <input type="number" step="0.01" min="0" id="precio" name="price" placeholder="Ej: 25.00" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none font-bold">
                 </div>
 
                 <div>
@@ -215,7 +193,7 @@
         <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- SCRIPTS GENERALES Y FIREBASE -->
+    <!-- SCRIPTS GENERALES -->
     <script>
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -247,7 +225,6 @@
             });
         }
 
-        /* LÓGICA DE DETECCIÓN Y SUBIDA DE IMÁGENES */
         let nsfwModel = null;
         if (typeof nsfwjs !== 'undefined') {
             nsfwjs.load().then(model => { nsfwModel = model; });
@@ -330,47 +307,27 @@
             return true;
         }
     </script>
-
-    <!-- INICIALIZACIÓN DE FIREBASE (MÓDULO) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBf7PCXXve8D4D8F2JO9NxDnKrKRZ3K8Og",
-            authDomain: "african-movies-8568b.firebaseapp.com",
-            databaseURL: "https://african-movies-8568b-default-rtdb.firebaseio.com",
-            projectId: "african-movies-8568b",
-            storageBucket: "african-movies-8568b.firebasestorage.app",
-            messagingSenderId: "276039181448",
-            appId: "1:276039181448:web:1ccb0b07968756cdb66b3d",
-            measurementId: "G-8N4ZCSYHQ9"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-    </script>
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const savedLang = localStorage.getItem("user_selected_language") || "es";
-        const htmlRoot = document.documentElement;
-        htmlRoot.setAttribute("lang", savedLang);
+        document.addEventListener("DOMContentLoaded", function() {
+            const savedLang = localStorage.getItem("user_selected_language") || "es";
+            const htmlRoot = document.documentElement;
+            htmlRoot.setAttribute("lang", savedLang);
 
-        if (savedLang === "ar") {
-            htmlRoot.setAttribute("dir", "rtl");
-        } else {
-            htmlRoot.removeAttribute("dir");
-        }
-
-        document.querySelectorAll("[data-es]").forEach(function(el) {
-            const translation = el.getAttribute("data-" + savedLang);
-            if (translation) {
-                el.textContent = translation;
+            if (savedLang === "ar") {
+                htmlRoot.setAttribute("dir", "rtl");
             } else {
-                el.textContent = el.getAttribute("data-es");
+                htmlRoot.removeAttribute("dir");
             }
+
+            document.querySelectorAll("[data-es]").forEach(function(el) {
+                const translation = el.getAttribute("data-" + savedLang);
+                if (translation) {
+                    el.textContent = translation;
+                } else {
+                    el.textContent = el.getAttribute("data-es");
+                }
+            });
         });
-    });
-</script>
+    </script>
 </body>
 </html>
