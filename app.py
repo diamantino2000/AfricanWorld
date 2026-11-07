@@ -212,7 +212,7 @@ def google_login_real():
         picture = id_info.get('picture', '/static/uploads/default_user.png')
 
         users = load_json_users()
-        user = next((u for u in users if u.get('email'] == email), None)
+        user = next((u for u in users if u.get('email') == email), None)
 
         if not user:
             base_username = slugify(name.replace(" ", "_"))
@@ -339,6 +339,7 @@ def publish_article():
     description = request.form.get('description', '').strip()
     uploaded_files = request.files.getlist('photos')
 
+    # Obtener automáticamente del usuario conectado
     users = load_json_users()
     current_user = next((u for u in users if u.get('username') == session['username']), None)
 
