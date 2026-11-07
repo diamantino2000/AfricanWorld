@@ -206,11 +206,13 @@ def settings():
         country = request.form.get('country', '').strip()
         city = request.form.get('city', '').strip()
         phone = request.form.get('phone', '').strip()
+        language = request.form.get('language', 'es').strip()  # Capturar idioma seleccionado
         profile_file = request.files.get('profile_pic')
 
         user['country'] = country
         user['city'] = city
         user['phone'] = phone
+        user['language'] = language  # Guardar idioma en el usuario
 
         if new_username and new_username != user['username']:
             if any(u.get('username') == new_username for u in users):
