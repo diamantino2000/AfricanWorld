@@ -298,12 +298,25 @@ def settings():
         return redirect(url_for('profile', username=user['username']))
 
     return render_template('settings.html', user=user)
+@app.route('/perfil/<username>')
+def profile(username):
+    if 'username' not in session:
+        return redirect(url_for('index'))
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash('Has cerrado sesión.', 'info')
-    return redirect(url_for('index'))
+    users = load_json_users()
+    profile_user = next((u for u in users if u.get('username') == username), None)
+    
+    if not profile_user:
+        flash("El usuario no existe.", "error")
+        return redirect(url_for('index'))
+    
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
+    all_articles = load_articles()
+    user_articles = [art for art in all_articles if art.get('username') == username]
+
+    return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
+
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
