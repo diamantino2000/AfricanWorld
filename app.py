@@ -42,7 +42,6 @@ def upload_to_imgbb(file_bytes):
     except Exception as e:
         print(f"Error subiendo a ImgBB: {e}")
     
-    # Fallback seguro a base64 si falla la API
     encoded = base64.b64encode(file_bytes).decode('utf-8')
     return f"data:image/jpeg;base64,{encoded}"
 
@@ -173,7 +172,8 @@ def delete_article(article_id):
         return redirect(url_for('index'))
     
     articles = load_articles()
-    article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id'] == article_id or art.get('slug') == article_id), None)
+    # CORREGIDO AQUÍ (Uso correcto de paréntesis)
+    article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id or art.get('slug') == article_id), None)
     
     if article:
         if article.get('username') == session['username']:
