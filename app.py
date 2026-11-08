@@ -409,6 +409,34 @@ def logout():
     session.clear()
     flash('Has cerrado sesión.', 'info')
     return redirect(url_for('index'))
+
+@app.route('/account/delete', methods=['POST'])
+def delete_account():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    current_username = session['username']
+    users = load_json_users()
+    user = next((u for u in users if u.get('username') == current_username), None)
+
+    if user:
+        # 1. Eliminar todas las publicaciones creadas por el usuario en Firebase
+        articles = load_articles()
+        for art in articles:
+            if art.get('username') == current_username:
+                fb_delete(f"articles/{art.get('firebase_id')}")
+
+        # 2. Eliminar al usuario de Firebase
+        safe_key = current_username.replace(".", "_").replace("#", "_").replace("$", "_").replace("[", "_").replace("]", "_")
+        fb_delete(f"users/{safe_key}")
+
+        # 3. Limpiar sesión actual
+        session.clear()
+        flash('Tu cuenta y todas tus publicaciones han sido eliminadas correctamente.', 'info')
+        return redirect(url_for('index'))
+
+    flash('Usuario no encontrado.', 'error')
+    return redirect(url_for('index'))
     
 @app.route('/carrito')
 def view_cart():
