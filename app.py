@@ -155,16 +155,34 @@ def article_detail(slug):
         flash("El artículo no existe.", "error")
         return redirect(url_for('index'))
     
-    article['views'] = article.get('views', 0) + 1
-    fb_put(f"articles/{article['firebase_id']}", article)
+    # --- CONTROL DE VISUALIZACIONES ÚNICAS POR SESIÓN ---
+    if 'viewed_articles' not in session:
+        session['viewed_articles'] = []
+
+    # Solo incrementa las visitas si el usuario no ha visto este artículo en su sesión actual
+    if article['firebase_id'] not in session['viewed_articles']:
+        article['views'] = article.get('views', 0) + 1
+        fb_put(f"articles/{article['firebase_id']}", article)
+        session['viewed_articles'].append(article['firebase_id'])
+        session.modified = True
 
     users = load_json_users()
     author = next((u for u in users if u.get('username') == article.get('username')), None)
     
+    # --- CÁLCULO PROMEDIO DE CALIFICACIÓN ---
     comments = article.get('comments', [])
-    avg_rating = sum(c.get('rating', 0) for c in comments) / len(comments) if comments else 0
+    ratings = [c.get('rating', 0) for c in comments if isinstance(c.get('rating'), (int, float)) and c.get('rating', 0) > 0]
+    
+    total_reviews = len(ratings)
+    avg_rating = sum(ratings) / total_reviews if total_reviews > 0 else 0.0
 
-    return render_template('article_detail.html', article=article, author=author, avg_rating=round(avg_rating, 1))
+    return render_template(
+        'article_detail.html', 
+        article=article, 
+        author=author, 
+        avg_rating=round(avg_rating, 1),
+        total_reviews=total_reviews
+    )
 
 @app.route('/articulo/<path:article_id>/delete', methods=['POST'])
 def delete_article(article_id):
