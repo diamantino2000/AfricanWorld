@@ -111,7 +111,8 @@ def slugify(text_value):
 # --- RUTAS DE LA APLICACIÓN ---
 
 @app.route('/')
-def index():
+@app.route('/page-<int:page>')
+def index(page=1):
     if 'username' not in session:
         return render_template('intro.html', google_client_id=GOOGLE_CLIENT_ID)
 
@@ -125,10 +126,35 @@ def index():
                 filtered.append(art)
         articles = filtered
     
+    # --- LÓGICA DE PAGINACIÓN (20 artículos por página) ---
+    per_page = 20
+    total_articles = len(articles)
+    total_pages = (total_articles + per_page - 1) // per_page
+    
+    if total_pages < 1:
+        total_pages = 1
+        
+    if page < 1:
+        return redirect(url_for('index'))
+    if page > total_pages and total_pages > 0:
+        return redirect(url_for('index', page=total_pages) if total_pages > 1 else url_for('index'))
+
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_articles = articles[start:end]
+
     users = load_json_users()
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
 
-    return render_template('index.html', articles=articles, search=search, current_user=current_user, google_client_id=GOOGLE_CLIENT_ID)
+    return render_template(
+        'index.html', 
+        articles=paginated_articles, 
+        search=search, 
+        current_user=current_user, 
+        google_client_id=GOOGLE_CLIENT_ID,
+        current_page=page,
+        total_pages=total_pages
+    )
 
 @app.route('/terminos')
 def terminos():
@@ -159,7 +185,6 @@ def article_detail(slug):
     if 'viewed_articles' not in session:
         session['viewed_articles'] = []
 
-    # Solo incrementa las visitas si el usuario no ha visto este artículo en su sesión actual
     if article['firebase_id'] not in session['viewed_articles']:
         article['views'] = article.get('views', 0) + 1
         fb_put(f"articles/{article['firebase_id']}", article)
@@ -190,7 +215,6 @@ def delete_article(article_id):
         return redirect(url_for('index'))
     
     articles = load_articles()
-    # CORREGIDO AQUÍ (Uso correcto de paréntesis)
     article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id or art.get('slug') == article_id), None)
     
     if article:
@@ -438,17 +462,14 @@ def delete_account():
     user = next((u for u in users if u.get('username') == current_username), None)
 
     if user:
-        # 1. Eliminar todas las publicaciones creadas por el usuario en Firebase
         articles = load_articles()
         for art in articles:
             if art.get('username') == current_username:
                 fb_delete(f"articles/{art.get('firebase_id')}")
 
-        # 2. Eliminar al usuario de Firebase
         safe_key = current_username.replace(".", "_").replace("#", "_").replace("$", "_").replace("[", "_").replace("]", "_")
         fb_delete(f"users/{safe_key}")
 
-        # 3. Limpiar sesión actual
         session.clear()
         flash('Tu cuenta y todas tus publicaciones han sido eliminadas correctamente.', 'info')
         return redirect(url_for('index'))
@@ -464,7 +485,6 @@ def view_cart():
     cart_ids = session.get('cart', [])
     all_articles = load_articles()
     
-    # Filtrar los artículos que están en el carrito del usuario
     cart_articles = [art for art in all_articles if art.get('id') in cart_ids or str(art.get('id')) in [str(x) for x in cart_ids]]
     
     return render_template('carrito.html', articles=cart_articles)
@@ -497,6 +517,7 @@ def remove_from_cart(article_id):
         flash('Artículo eliminado del carrito.', 'success')
         
     return redirect(url_for('view_cart'))
+
 @app.route('/articulo/<slug>/comment', methods=['POST'])
 def add_comment(slug):
     if 'username' not in session:
@@ -528,7 +549,6 @@ def add_comment(slug):
         comments.append(new_comment)
         article['comments'] = comments
 
-        # Guardar en Firebase
         fb_put(f"articles/{article['firebase_id']}", article)
         flash('¡Comentario publicado con éxito!', 'success')
     else:
