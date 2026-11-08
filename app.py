@@ -479,6 +479,44 @@ def remove_from_cart(article_id):
         flash('Artículo eliminado del carrito.', 'success')
         
     return redirect(url_for('view_cart'))
+@app.route('/articulo/<slug>/comment', methods=['POST'])
+def add_comment(slug):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    content = request.form.get('content', '').strip()
+    rating = request.form.get('rating', '5')
+
+    try:
+        rating_val = int(rating)
+    except ValueError:
+        rating_val = 5
+
+    if not content:
+        flash('El comentario no puede estar vacío.', 'error')
+        return redirect(url_for('article_detail', slug=slug))
+
+    articles = load_articles()
+    article = next((art for art in articles if art.get('slug') == slug), None)
+
+    if article:
+        comments = article.get('comments', [])
+        new_comment = {
+            "username": session['username'],
+            "content": content,
+            "rating": rating_val,
+            "date": datetime.now(timezone.utc).isoformat()
+        }
+        comments.append(new_comment)
+        article['comments'] = comments
+
+        # Guardar en Firebase
+        fb_put(f"articles/{article['firebase_id']}", article)
+        flash('¡Comentario publicado con éxito!', 'success')
+    else:
+        flash('El artículo no existe.', 'error')
+
+    return redirect(url_for('article_detail', slug=slug))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
