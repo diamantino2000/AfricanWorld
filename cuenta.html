@@ -22,6 +22,7 @@
         .bg-african-yellow { background-color: #FCD116; }
         .text-african-yellow { color: #D4AC0D; }
         .bg-african-red { background-color: #CE1126; }
+        .text-african-red { color: #CE1126; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between">
@@ -99,12 +100,25 @@
                             </div>
                         </div>
 
-                        <div class="p-5 pt-0 border-t mt-3 flex justify-between items-center text-xs">
+                        <!-- PIE DE TARJETA CON MENÚ DE TRES PUNTOS -->
+                        <div class="p-5 pt-0 border-t mt-3 flex justify-between items-center text-xs relative">
                             <a href="/articulo/{{ art.slug }}" class="text-african-green font-bold hover:underline">Ver Publicación &rarr;</a>
+                            
                             {% if session.get('username') == profile_user.username %}
-                                <form action="/articulo/{{ art.firebase_id }}/delete" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?')">
-                                    <button type="submit" class="text-african-red font-bold hover:underline"><i class="fa-solid fa-trash mr-1"></i>Eliminar</button>
-                                </form>
+                                <div class="relative">
+                                    <button onclick="toggleMenu('menu-{{ art.id }}')" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition font-black">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
+                                    
+                                    <!-- MENÚ FLOTANTE -->
+                                    <div id="menu-{{ art.id }}" class="absolute right-0 bottom-full mb-2 w-36 bg-white border rounded-2xl shadow-xl hidden z-20 py-2">
+                                        <form action="/articulo/{{ art.firebase_id }}/delete" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?')">
+                                            <button type="submit" class="w-full text-left px-4 py-2 text-african-red font-bold hover:bg-red-50 transition flex items-center gap-2 text-xs">
+                                                <i class="fa-solid fa-trash"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
@@ -192,10 +206,29 @@
         <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- SCRIPTS GENERALES -->
+    <!-- SCRIPTS GENERALES Y DE MENÚ -->
     <script>
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Control del menú de tres puntos
+        function toggleMenu(menuId) {
+            document.querySelectorAll('[id^="menu-"]').forEach(el => {
+                if (el.id !== menuId) el.classList.add('hidden');
+            });
+            const menu = document.getElementById(menuId);
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('button[onclick^="toggleMenu"]')) {
+                document.querySelectorAll('[id^="menu-"]').forEach(el => {
+                    el.classList.add('hidden');
+                });
+            }
+        });
 
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
