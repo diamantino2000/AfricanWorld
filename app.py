@@ -172,6 +172,7 @@ def delete_article(article_id):
         return redirect(url_for('index'))
     
     articles = load_articles()
+    # CORREGIDO AQUÍ (Uso correcto de paréntesis)
     article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id or art.get('slug') == article_id), None)
     
     if article:
@@ -184,54 +185,6 @@ def delete_article(article_id):
         flash('El artículo no existe.', 'error')
         
     return redirect(url_for('profile', username=session['username']))
-
-# --- RUTas DEL CARRITO ---
-
-@app.route('/carrito')
-def carrito():
-    if 'username' not in session:
-        return redirect(url_for('index'))
-    
-    # Obtener los IDs guardados en la sesión del carrito
-    cart_ids = session.get('cart', [])
-    articles = load_articles()
-    
-    cart_items = [art for art in articles if art.get('id') in cart_ids or str(art.get('id')) in [str(i) for i in cart_ids]]
-    total_price = sum(float(item.get('price', 0)) for item in cart_items)
-    
-    users = load_json_users()
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
-
-    return render_template('carrito.html', cart_items=cart_items, total_price=total_price, current_user=current_user)
-
-@app.route('/carrito/add/<path:article_id>', methods=['POST'])
-def add_to_cart(article_id):
-    if 'username' not in session:
-        return redirect(url_for('index'))
-    
-    if 'cart' not in session:
-        session['cart'] = []
-    
-    if article_id not in session['cart']:
-        session['cart'].append(article_id)
-        session.modified = True
-        flash('¡Artículo añadido al carrito!', 'success')
-    else:
-        flash('El artículo ya está en tu carrito.', 'info')
-        
-    return redirect(request.referrer or url_for('index'))
-
-@app.route('/carrito/remove/<path:article_id>', methods=['POST'])
-def remove_from_cart(article_id):
-    if 'username' not in session:
-        return redirect(url_for('index'))
-    
-    if 'cart' in session:
-        session['cart'] = [i for i in session['cart'] if str(i) != str(article_id)]
-        session.modified = True
-        flash('Artículo eliminado del carrito.', 'success')
-        
-    return redirect(url_for('carrito'))
 
 @app.route('/complete-onboarding', methods=['POST'])
 def complete_onboarding():
@@ -273,7 +226,7 @@ def google_login_real():
         picture = id_info.get('picture', '/static/uploads/default_user.png')
 
         users = load_json_users()
-        user = next((u for u in users if u.get('email'] == email), None)
+        user = next((u for u in users if u.get('email') == email), None)
 
         if not user:
             base_username = slugify(name.replace(" ", "_"))
@@ -459,4 +412,4 @@ def logout():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port)s
