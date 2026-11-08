@@ -41,7 +41,7 @@
         <!-- DETALLE DEL ARTÍCULO -->
         <div class="bg-white rounded-3xl border shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
             
-            <!-- GALERÍA DE IMÁGENES CORREGIDA -->
+            <!-- GALERÍA DE IMÁGENES -->
             {% set img_list = article.images.split(',') if article.images else [] %}
             <div class="space-y-4">
                 <div class="h-80 md:h-96 rounded-2xl overflow-hidden bg-gray-100 border relative flex items-center justify-center">
@@ -90,8 +90,8 @@
                         <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{{ article.description }}</p>
                     </div>
 
-                    <!-- VENDEDOR -->
-                    <div class="bg-gray-50 p-4 rounded-2xl border flex items-center justify-between">
+                    <!-- VENDEDOR Y TELÉFONO COPIABLE -->
+                    <div class="bg-gray-50 p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div class="flex items-center space-x-3">
                             <img src="{{ author.profile_pic if author and author.profile_pic else '/static/uploads/default_user.png' }}" class="w-10 h-10 rounded-full object-cover border">
                             <div>
@@ -99,10 +99,18 @@
                                 <a href="/perfil/{{ article.username }}" class="font-bold text-sm text-gray-900 hover:text-african-green">@{{ article.username }}</a>
                             </div>
                         </div>
+
                         {% if author and author.phone %}
-                            <a href="https://wa.me/{{ author.phone }}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-emerald-700 transition flex items-center gap-1.5">
-                                <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
-                            </a>
+                            <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border shadow-sm w-full sm:w-auto justify-between">
+                                <div class="flex items-center gap-2 text-xs font-bold text-gray-700">
+                                    <i class="fa-solid fa-phone text-african-green"></i>
+                                    <span id="phone-number">{{ author.phone }}</span>
+                                </div>
+                                <button type="button" onclick="copyPhone()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0" title="Copiar número">
+                                    <i class="fa-regular fa-copy"></i>
+                                    <span id="copy-text" data-es="Copiar" data-fr="Copier" data-en="Copy" data-pt="Copiar">Copiar</span>
+                                </button>
+                            </div>
                         {% endif %}
                     </div>
                 </div>
@@ -172,8 +180,22 @@
         <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-ar="جميع الحقوق محفوظة." data-pt="Todos os direitos reservados.">Todos os direitos reservados.</span></p>
     </footer>
 
-    <!-- SCRIPT DE IDIOMA -->
+    <!-- SCRIPTS DE IDIOMA Y PORTAPAPELES -->
     <script>
+        function copyPhone() {
+            const phoneText = document.getElementById('phone-number').innerText;
+            navigator.clipboard.writeText(phoneText).then(() => {
+                const copySpan = document.getElementById('copy-text');
+                const originalText = copySpan.innerText;
+                copySpan.innerText = "¡Copiado!";
+                setTimeout(() => {
+                    copySpan.innerText = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar el teléfono: ', err);
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const savedLang = localStorage.getItem("user_selected_language") || "es";
             const htmlRoot = document.documentElement;
