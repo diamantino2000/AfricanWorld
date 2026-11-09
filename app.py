@@ -268,7 +268,7 @@ def delete_article(article_id):
         
     return redirect(url_for('profile', username=session['username']))
 
-# --- RUTA GENERAL DE DETALLE ---
+# --- RUTA GENERAL DE DETALLE (DEBE IR DESPUÉS DE LAS RUTAS ESPECÍFICAS) ---
 
 @app.route('/articulo/<slug>')
 def article_detail(slug):
@@ -597,42 +597,6 @@ def remove_from_cart(article_id):
         flash('Artículo eliminado del carrito.', 'success')
         
     return redirect(url_for('view_cart'))
-
-@app.route('/articulo/<slug>/report', methods=['POST'])
-def report_article(slug):
-    if 'username' not in session:
-        return redirect(url_for('index'))
-
-    reason = request.form.get('reason', '').strip()
-    if not reason:
-        flash('El motivo de la denuncia no puede estar vacío.', 'error')
-        return redirect(url_for('article_detail', slug=slug))
-
-    articles = load_articles()
-    article = next((art for art in articles if art.get('slug') == slug), None)
-
-    if not article:
-        flash('El artículo no existe.', 'error')
-        return redirect(url_for('index'))
-
-    report_data = {
-        "article_slug": slug,
-        "article_title": article.get('title', ''),
-        "seller_username": article.get('username', ''),
-        "reporter_username": session['username'],
-        "reason": reason,
-        "date": datetime.now(timezone.utc).isoformat()
-    }
-
-    report_id = int(datetime.now().timestamp())
-    success = fb_put(f"reports/{article['firebase_id']}_{report_id}", report_data)
-
-    if success:
-        flash('Tu denuncia ha sido enviada y registrada correctamente.', 'success')
-    else:
-        flash('Hubo un error al enviar la denuncia. Inténtalo de nuevo.', 'error')
-
-    return redirect(url_for('article_detail', slug=slug))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
