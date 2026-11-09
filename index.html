@@ -512,5 +512,67 @@
             .catch(err => console.error(err));
         }
     </script>
+    <!-- VENTANA FLOTANTE OBLIGATORIA PARA DATOS NUEVOS -->
+{% if needs_onboarding %}
+<div id="onboarding-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+    <div class="bg-white max-w-md w-full p-8 rounded-3xl shadow-2xl relative space-y-6 border-t-8 border-african-green">
+        <div class="text-center space-y-2">
+            <h2 class="text-2xl font-black text-gray-900" data-es="¡Bienvenido a AfricanWorld!" data-fr="Bienvenue sur AfricanWorld !" data-en="Welcome to AfricanWorld!" data-pt="Bem-vindo ao AfricanWorld!">¡Bienvenido a AfricanWorld!</h2>
+            <p class="text-xs text-gray-600 leading-relaxed" data-es="Por favor, completa tus datos de ubicación y contacto para continuar navegando y publicando." data-fr="Veuillez remplir vos coordonnées pour continuer." data-en="Please fill in your details to continue." data-pt="Por favor, preencha seus dados para continuar.">
+                Por favor, completa tus datos de ubicación y contacto para continuar navegando y publicando.
+            </p>
+        </div>
+
+        <form id="onboarding-form" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">País</label>
+                <input type="text" name="country" required placeholder="Ej: Nigeria, Kenia, España..." class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Ciudad</label>
+                <input type="text" name="city" required placeholder="Ej: Lagos, Nairobi, Madrid..." class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Teléfono</label>
+                <input type="text" name="phone" required placeholder="Ej: +234 800 123 4567" class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
+            </div>
+            <input type="hidden" name="language" id="hidden-lang" value="es">
+
+            <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl text-xs font-bold shadow hover:opacity-90 transition">
+                Guardar y Continuar
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = {
+            country: this.country.value.trim(),
+            city: this.city.value.trim(),
+            phone: this.phone.value.trim(),
+            language: localStorage.getItem("user_selected_language") || "es"
+        };
+
+        try {
+            const response = await fetch('/complete-onboarding', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                window.location.href = result.redirect;
+            } else {
+                alert(result.message || 'Error al guardar los datos.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error de conexión.');
+        }
+    });
+</script>
+{% endif %}
 </body>
 </html>
