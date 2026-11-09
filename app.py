@@ -126,7 +126,6 @@ def index(page=1):
                 filtered.append(art)
         articles = filtered
     
-    # --- LÓGICA DE PAGINACIÓN (20 artículos por página) ---
     per_page = 20
     total_articles = len(articles)
     total_pages = (total_articles + per_page - 1) // per_page
@@ -173,27 +172,34 @@ def buscar_usuarios():
         filtered_users = users
     return render_template('Busca_user.html', users=filtered_users, query=query)
 
-# --- RUTAS ESPECÍFICAS DE ARTÍCULOS (DEBEN IR ANTES DE /articulo/<slug>) ---
+# --- RUTAS DE ACCIONES EN ARTÍCULOS ---
 
+@app.route('/report-article/<article_id>', methods=['POST'])
 @app.route('/articulo/<slug>/report', methods=['POST'])
-def report_article(slug):
+def report_article(article_id=None, slug=None):
     if 'username' not in session:
         return redirect(url_for('index'))
 
     reason = request.form.get('reason', '').strip()
-    if not reason:
-        flash('El motivo de la denuncia no puede estar vacío.', 'error')
-        return redirect(url_for('article_detail', slug=slug))
-
     articles = load_articles()
-    article = next((art for art in articles if art.get('slug') == slug), None)
+    
+    article = None
+    if slug:
+        article = next((art for art in articles if art.get('slug') == slug), None)
+    elif article_id:
+        article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id), None)
 
     if not article:
         flash('El artículo no existe.', 'error')
         return redirect(url_for('index'))
 
+    if not reason:
+        flash('El motivo de la denuncia no puede estar vacío.', 'error')
+        return redirect(url_for('article_detail', slug=article.get('slug')) if article.get('slug') else url_for('index'))
+
     report_data = {
-        "article_slug": slug,
+        "article_id": article.get('firebase_id'),
+        "article_slug": article.get('slug', ''),
         "article_title": article.get('title', ''),
         "seller_username": article.get('username', ''),
         "reporter_username": session['username'],
@@ -201,15 +207,17 @@ def report_article(slug):
         "date": datetime.now(timezone.utc).isoformat()
     }
 
-    report_id = int(datetime.now().timestamp())
-    success = fb_put(f"reports/{article['firebase_id']}_{report_id}", report_data)
+    report_key = f"rep_{int(datetime.now().timestamp())}"
+    success = fb_put(f"reports/{report_key}", report_data)
 
     if success:
         flash('Tu denuncia ha sido enviada y registrada correctamente.', 'success')
     else:
         flash('Hubo un error al enviar la denuncia. Inténtalo de nuevo.', 'error')
 
-    return redirect(url_for('article_detail', slug=slug))
+    if slug or article.get('slug'):
+        return redirect(url_for('article_detail', slug=article.get('slug')))
+    return redirect(url_for('index'))
 
 @app.route('/articulo/<slug>/comment', methods=['POST'])
 def add_comment(slug):
@@ -268,8 +276,6 @@ def delete_article(article_id):
         
     return redirect(url_for('profile', username=session['username']))
 
-# --- RUTA GENERAL DE DETALLE (DEBE IR DESPUÉS DE LAS RUTAS ESPECÍFICAS) ---
-
 @app.route('/articulo/<slug>')
 def article_detail(slug):
     articles = load_articles()
@@ -278,7 +284,6 @@ def article_detail(slug):
         flash("El artículo no existe.", "error")
         return redirect(url_for('index'))
     
-    # --- CONTROL DE VISUALIZACIONES ÚNICAS POR SESIÓN ---
     if 'viewed_articles' not in session:
         session['viewed_articles'] = []
 
@@ -291,7 +296,6 @@ def article_detail(slug):
     users = load_json_users()
     author = next((u for u in users if u.get('username') == article.get('username')), None)
     
-    # --- CÁLCULO PROMEDIO DE CALIFICACIÓN ---
     comments = article.get('comments', [])
     ratings = [c.get('rating', 0) for c in comments if isinstance(c.get('rating'), (int, float)) and c.get('rating', 0) > 0]
     
@@ -306,7 +310,7 @@ def article_detail(slug):
         total_reviews=total_reviews
     )
 
-# --- OTRAS RUTAS DE LA APLICACIÓN ---
+# --- RUTAS DE USUARIO Y CONFIGURACIÓN ---
 
 @app.route('/complete-onboarding', methods=['POST'])
 def complete_onboarding():
