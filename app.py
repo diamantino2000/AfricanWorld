@@ -119,6 +119,11 @@ def index(page=1):
     users = load_json_users()
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
 
+    # Detectamos si le falta país, ciudad o teléfono para mostrar la ventana flotante en index.html
+    needs_onboarding = False
+    if current_user and (not current_user.get('country') or not current_user.get('city') or not current_user.get('phone')):
+        needs_onboarding = True
+
     search = request.args.get('search', '').lower()
     articles = load_articles()
     
@@ -152,7 +157,8 @@ def index(page=1):
         current_user=current_user, 
         google_client_id=GOOGLE_CLIENT_ID,
         current_page=page,
-        total_pages=total_pages
+        total_pages=total_pages,
+        needs_onboarding=needs_onboarding
     )
 
 @app.route('/terminos')
@@ -381,6 +387,8 @@ def google_login_real():
         session['username'] = user['username']
         session['email'] = user['email']
         session['profile_pic'] = user.get('profile_pic', picture)
+        
+        # Redirige directo a index sin mandar a settings
         return jsonify({"status": "success", "redirect": url_for('index')})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
@@ -511,7 +519,7 @@ def publish_article():
     current_timestamp = int(datetime.now().timestamp())
     existing_articles = load_articles()
     
-    user_articles = [art for art in existing_articles if art.get('username'] == session['username']]
+    user_articles = [art for art in existing_articles if art.get('username') == session['username']]
     
     if len(user_articles) == 0:
         numeric_id = current_timestamp
