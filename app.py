@@ -507,8 +507,22 @@ def publish_article():
     if not image_urls:
         image_urls.append("/static/uploads/default_item.png")
 
+    # --- NUEVA LÓGICA DE ORDENAMIENTO ---
+    current_timestamp = int(datetime.now().timestamp())
+    existing_articles = load_articles()
+    
+    # Contamos cuántas publicaciones ya tiene este usuario
+    user_articles = [art for art in existing_articles if art.get('username') == session['username']]
+    
+    if len(user_articles) == 0:
+        # Primera vez que publica: va adelante (timestamp normal alto)
+        numeric_id = current_timestamp
+    else:
+        # Segunda vez en adelante: va atrás de todos los que publicaron (numeric_id en 0)
+        numeric_id = 0
+
     article_data = {
-        "numeric_id": int(datetime.now().timestamp()),
+        "numeric_id": numeric_id,
         "title": title,
         "price": price,
         "phone": phone,
@@ -523,7 +537,8 @@ def publish_article():
     }
 
     slug_base = slugify(title)
-    slug = f"{slug_base}-{article_data['numeric_id']}"
+    # Usamos el timestamp actual en el slug para garantizar que la URL sea única
+    slug = f"{slug_base}-{current_timestamp}"
     article_data['slug'] = slug
 
     fb_put(f"articles/{slug}", article_data)
