@@ -124,13 +124,20 @@
                 </div>
 
                 <!-- ACCIONES -->
-                <div class="flex items-center gap-3 pt-4 border-t">
+                <div class="flex items-center gap-3 pt-4 border-t flex-wrap">
                     {% if session.get('username') %}
                         <form action="/carrito/add/{{ article.id }}" method="POST" class="flex-grow">
                             <button type="submit" class="w-full bg-african-yellow text-gray-900 py-3 rounded-xl font-black text-sm shadow hover:bg-yellow-400 transition">
                                 <i class="fa-solid fa-cart-plus mr-1"></i> <span data-es="Añadir al Carrito" data-fr="Ajouter au Panier" data-en="Add to Cart" data-pt="Adicionar ao Carrinho">Añadir al Carrito</span>
                             </button>
                         </form>
+
+                        <!-- NUEVO BOTÓN DE DENUNCIAR -->
+                        {% if session.get('username') != article.username %}
+                            <button type="button" onclick="openReportModal()" class="bg-gray-100 text-african-red hover:bg-african-red hover:text-white px-4 py-3 rounded-xl text-xs font-bold shadow transition border border-gray-200 flex items-center gap-1.5" title="Denunciar publicación">
+                                <i class="fa-solid fa-flag"></i> <span data-es="Denunciar" data-fr="Signaler" data-en="Report" data-pt="Denunciar">Denunciar</span>
+                            </button>
+                        {% endif %}
                     {% endif %}
 
                     {% if session.get('username') == article.username %}
@@ -184,8 +191,28 @@
         </div>
     </main>
 
+    <!-- MODAL DE DENUNCIA -->
+    <div id="report-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl relative space-y-4 border-t-8 border-african-red">
+            <button type="button" onclick="closeReportModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+            <h3 class="text-xl font-black text-gray-900 flex items-center gap-2">
+                <i class="fa-solid fa-flag text-african-red"></i>
+                <span data-es="Denunciar Publicación" data-fr="Signaler la Publication" data-en="Report Listing" data-pt="Denunciar Publicação">Denunciar Publicación</span>
+            </h3>
+            <p class="text-xs text-gray-600 leading-relaxed">
+                <span data-es="Explica el motivo por el cual deseas denunciar el artículo:" data-fr="Expliquez la raison pour laquelle vous souhaitez signaler l'article :" data-en="Explain the reason why you want to report this item:" data-pt="Explique o motivo pelo qual deseja denunicar este item:">Explica el motivo por el cual deseas denunciar el artículo:</span>
+            </p>
+            <form action="/articulo/{{ article.slug }}/report" method="POST" class="space-y-4">
+                <textarea name="reason" rows="4" required placeholder="Escribe aquí los detalles de tu denuncia..." class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-red focus:outline-none bg-gray-50"></textarea>
+                <button type="submit" class="w-full bg-african-red text-white py-3 rounded-xl text-xs font-bold shadow hover:bg-red-700 transition" data-es="Enviar Denuncia" data-fr="Envoyer le Signalement" data-en="Submit Report" data-pt="Enviar Denúncia">
+                    Enviar Denuncia
+                </button>
+            </form>
+        </div>
+    </div>
+
     <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
-        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-pt="Todos os direitos reservados.">Todos los derechos reservados.</span></p>
+        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-pt="Todos os direitos reservados.">Todos os direitos reservados.</span></p>
     </footer>
 
     <!-- SCRIPTS DE IDIOMA Y PORTAPAPELES -->
@@ -202,6 +229,14 @@
             }).catch(err => {
                 console.error('Error al copiar el teléfono: ', err);
             });
+        }
+
+        function openReportModal() {
+            document.getElementById('report-modal').classList.remove('hidden');
+        }
+
+        function closeReportModal() {
+            document.getElementById('report-modal').classList.add('hidden');
         }
 
         document.addEventListener("DOMContentLoaded", function() {
