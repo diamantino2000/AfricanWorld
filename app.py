@@ -556,6 +556,44 @@ def add_comment(slug):
 
     return redirect(url_for('article_detail', slug=slug))
 
+@app.route('/articulo/<slug>/report', methods=['POST'])
+def report_article(slug):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    reason = request.form.get('reason', '').strip()
+    if not reason:
+        flash('El motivo de la denuncia no puede estar vacío.', 'error')
+        return redirect(url_for('article_detail', slug=slug))
+
+    articles = load_articles()
+    article = next((art for art in articles if art.get('slug') == slug), None)
+
+    if not article:
+        flash('El artículo no existe.', 'error')
+        return redirect(url_for('index'))
+
+    # Crear la estructura de datos de la denuncia
+    report_data = {
+        "article_slug": slug,
+        "article_title": article.get('title', ''),
+        "seller_username": article.get('username', ''),
+        "reporter_username": session['username'],
+        "reason": reason,
+        "date": datetime.now(timezone.utc).isoformat()
+    }
+
+    # Guardar en una nueva variable/nodo "reports" en Firebase
+    report_id = int(datetime.now().timestamp())
+    success = fb_put(f"reports/{article['firebase_id']}_{report_id}", report_data)
+
+    if success:
+        flash('Tu denuncia ha sido enviada y registrada correctamente.', 'success')
+    else:
+        flash('Hubo un error al enviar la denuncia. Inténtalo de nuevo.', 'error')
+
+    return redirect(url_for('article_detail', slug=slug))
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
