@@ -116,6 +116,14 @@ def index(page=1):
     if 'username' not in session:
         return render_template('intro.html', google_client_id=GOOGLE_CLIENT_ID)
 
+    users = load_json_users()
+    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
+
+    # Si falta país, ciudad o teléfono, redirigir obligatoriamente a ajustes (settings.html)
+    if current_user and (not current_user.get('country') or not current_user.get('city') or not current_user.get('phone')):
+        flash('Por favor, completa tu país, ciudad, teléfono e idioma en tus ajustes antes de continuar.', 'info')
+        return redirect(url_for('settings'))
+
     search = request.args.get('search', '').lower()
     articles = load_articles()
     
@@ -141,9 +149,6 @@ def index(page=1):
     start = (page - 1) * per_page
     end = start + per_page
     paginated_articles = articles[start:end]
-
-    users = load_json_users()
-    current_user = next((u for u in users if u.get('username') == session.get('username')), None)
 
     return render_template(
         'index.html', 
@@ -354,7 +359,9 @@ def google_login_real():
         users = load_json_users()
         user = next((u for u in users if u.get('email') == email), None)
 
+        is_new_user = False
         if not user:
+            is_new_user = True
             base_username = slugify(name.replace(" ", "_"))
             username = base_username if base_username else "usuario"
             counter = 1
@@ -381,6 +388,11 @@ def google_login_real():
         session['username'] = user['username']
         session['email'] = user['email']
         session['profile_pic'] = user.get('profile_pic', picture)
+
+        # Si es usuario nuevo o le falta país/ciudad/teléfono, redirigir a ajustes (settings)
+        if is_new_user or not user.get('country') or not user.get('city') or not user.get('phone'):
+            return jsonify({"status": "success", "redirect": url_for('settings')})
+
         return jsonify({"status": "success", "redirect": url_for('index')})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
@@ -507,18 +519,15 @@ def publish_article():
     if not image_urls:
         image_urls.append("/static/uploads/default_item.png")
 
-    # --- NUEVA LÓGICA DE ORDENAMIENTO ---
+    # --- LÓGICA DE ORDENAMIENTO ---
     current_timestamp = int(datetime.now().timestamp())
     existing_articles = load_articles()
     
-    # Contamos cuántas publicaciones ya tiene este usuario
     user_articles = [art for art in existing_articles if art.get('username') == session['username']]
     
     if len(user_articles) == 0:
-        # Primera vez que publica: va adelante (timestamp normal alto)
         numeric_id = current_timestamp
     else:
-        # Segunda vez en adelante: va atrás de todos los que publicaron (numeric_id en 0)
         numeric_id = 0
 
     article_data = {
@@ -537,7 +546,6 @@ def publish_article():
     }
 
     slug_base = slugify(title)
-    # Usamos el timestamp actual en el slug para garantizar que la URL sea única
     slug = f"{slug_base}-{current_timestamp}"
     article_data['slug'] = slug
 
