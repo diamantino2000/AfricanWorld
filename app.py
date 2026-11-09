@@ -119,11 +119,6 @@ def index(page=1):
     users = load_json_users()
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
 
-    # Si falta país, ciudad o teléfono, redirigir obligatoriamente a ajustes (settings.html)
-    if current_user and (not current_user.get('country') or not current_user.get('city') or not current_user.get('phone')):
-        flash('Por favor, completa tu país, ciudad, teléfono e idioma en tus ajustes antes de continuar.', 'info')
-        return redirect(url_for('settings'))
-
     search = request.args.get('search', '').lower()
     articles = load_articles()
     
@@ -359,9 +354,7 @@ def google_login_real():
         users = load_json_users()
         user = next((u for u in users if u.get('email') == email), None)
 
-        is_new_user = False
         if not user:
-            is_new_user = True
             base_username = slugify(name.replace(" ", "_"))
             username = base_username if base_username else "usuario"
             counter = 1
@@ -388,11 +381,6 @@ def google_login_real():
         session['username'] = user['username']
         session['email'] = user['email']
         session['profile_pic'] = user.get('profile_pic', picture)
-
-        # Si es usuario nuevo o le falta país/ciudad/teléfono, redirigir a ajustes (settings)
-        if is_new_user or not user.get('country') or not user.get('city') or not user.get('phone'):
-            return jsonify({"status": "success", "redirect": url_for('settings')})
-
         return jsonify({"status": "success", "redirect": url_for('index')})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
@@ -523,7 +511,7 @@ def publish_article():
     current_timestamp = int(datetime.now().timestamp())
     existing_articles = load_articles()
     
-    user_articles = [art for art in existing_articles if art.get('username') == session['username']]
+    user_articles = [art for art in existing_articles if art.get('username'] == session['username']]
     
     if len(user_articles) == 0:
         numeric_id = current_timestamp
