@@ -36,6 +36,19 @@
         </div>
     </header>
 
+    <!-- ALERTAS FLASH -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-6xl mx-auto px-4 mt-4 w-full">
+                {% for category, message in messages %}
+                    <div class="p-4 rounded-xl text-sm font-medium {% if category == 'success' %} bg-emerald-100 text-emerald-800 border-l-4 border-african-green {% else %} bg-red-100 text-red-800 border-l-4 border-african-red {% endif %} shadow">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
         
         <!-- DETALLE DEL ARTÍCULO -->
@@ -75,7 +88,6 @@
                         </span>
                     </div>
 
-                    <!-- ESTADÍSTICAS Y PROMEDIO DE ESTRELLAS -->
                     <div class="flex items-center gap-4 text-xs font-bold text-gray-500">
                         <span class="text-african-green">
                             <i class="fa-solid fa-location-dot mr-1"></i>{{ author.country if author and author.country else 'País no especificado' }}, {{ author.city if author and author.city else 'Ciudad no especificada' }}
@@ -98,7 +110,6 @@
                         <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{{ article.description }}</p>
                     </div>
 
-                    <!-- VENDEDOR Y TELÉFONO COPIABLE -->
                     <div class="bg-gray-50 p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div class="flex items-center space-x-3">
                             <img src="{{ author.profile_pic if author and author.profile_pic else '/static/uploads/default_user.png' }}" class="w-10 h-10 rounded-full object-cover border">
@@ -132,7 +143,6 @@
                             </button>
                         </form>
 
-                        <!-- BOTÓN DE DENUNCIAR -->
                         {% if session.get('username') != article.username %}
                             <button type="button" onclick="openReportModal()" class="bg-gray-100 text-african-red hover:bg-african-red hover:text-white px-4 py-3 rounded-xl text-xs font-bold shadow transition border border-gray-200 flex items-center gap-1.5" title="Denunciar publicación">
                                 <i class="fa-solid fa-flag"></i> <span data-es="Denunciar" data-fr="Signaler" data-en="Report" data-pt="Denunciar">Denunciar</span>
@@ -212,10 +222,9 @@
     </div>
 
     <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
-        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-pt="Todos os direitos reservados.">Todos os direitos reservados.</span></p>
+        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-pt="Todos os direitos reservados.">Todos los derechos reservados.</span></p>
     </footer>
 
-    <!-- SCRIPTS DE IDIOMA Y PORTAPAPELES -->
     <script>
         function copyPhone() {
             const phoneText = document.getElementById('phone-number').innerText;
