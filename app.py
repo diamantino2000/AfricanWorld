@@ -173,6 +173,103 @@ def buscar_usuarios():
         filtered_users = users
     return render_template('Busca_user.html', users=filtered_users, query=query)
 
+# --- RUTAS ESPECÍFICAS DE ARTÍCULOS (DEBEN IR ANTES DE /articulo/<slug>) ---
+
+@app.route('/articulo/<slug>/report', methods=['POST'])
+def report_article(slug):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    reason = request.form.get('reason', '').strip()
+    if not reason:
+        flash('El motivo de la denuncia no puede estar vacío.', 'error')
+        return redirect(url_for('article_detail', slug=slug))
+
+    articles = load_articles()
+    article = next((art for art in articles if art.get('slug') == slug), None)
+
+    if not article:
+        flash('El artículo no existe.', 'error')
+        return redirect(url_for('index'))
+
+    report_data = {
+        "article_slug": slug,
+        "article_title": article.get('title', ''),
+        "seller_username": article.get('username', ''),
+        "reporter_username": session['username'],
+        "reason": reason,
+        "date": datetime.now(timezone.utc).isoformat()
+    }
+
+    report_id = int(datetime.now().timestamp())
+    success = fb_put(f"reports/{article['firebase_id']}_{report_id}", report_data)
+
+    if success:
+        flash('Tu denuncia ha sido enviada y registrada correctamente.', 'success')
+    else:
+        flash('Hubo un error al enviar la denuncia. Inténtalo de nuevo.', 'error')
+
+    return redirect(url_for('article_detail', slug=slug))
+
+@app.route('/articulo/<slug>/comment', methods=['POST'])
+def add_comment(slug):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    content = request.form.get('content', '').strip()
+    rating = request.form.get('rating', '5')
+
+    try:
+        rating_val = int(rating)
+    except ValueError:
+        rating_val = 5
+
+    if not content:
+        flash('El comentario no puede estar vacío.', 'error')
+        return redirect(url_for('article_detail', slug=slug))
+
+    articles = load_articles()
+    article = next((art for art in articles if art.get('slug') == slug), None)
+
+    if article:
+        comments = article.get('comments', [])
+        new_comment = {
+            "username": session['username'],
+            "content": content,
+            "rating": rating_val,
+            "date": datetime.now(timezone.utc).isoformat()
+        }
+        comments.append(new_comment)
+        article['comments'] = comments
+
+        fb_put(f"articles/{article['firebase_id']}", article)
+        flash('¡Comentario publicado con éxito!', 'success')
+    else:
+        flash('El artículo no existe.', 'error')
+
+    return redirect(url_for('article_detail', slug=slug))
+
+@app.route('/articulo/<path:article_id>/delete', methods=['POST'])
+def delete_article(article_id):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    
+    articles = load_articles()
+    article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id or art.get('slug') == article_id), None)
+    
+    if article:
+        if article.get('username') == session['username']:
+            fb_delete(f"articles/{article['firebase_id']}")
+            flash('¡Publicación eliminada con éxito!', 'success')
+        else:
+            flash('No tienes permiso para eliminar esta publicación.', 'error')
+    else:
+        flash('El artículo no existe.', 'error')
+        
+    return redirect(url_for('profile', username=session['username']))
+
+# --- RUTA GENERAL DE DETALLE ---
+
 @app.route('/articulo/<slug>')
 def article_detail(slug):
     articles = load_articles()
@@ -209,24 +306,7 @@ def article_detail(slug):
         total_reviews=total_reviews
     )
 
-@app.route('/articulo/<path:article_id>/delete', methods=['POST'])
-def delete_article(article_id):
-    if 'username' not in session:
-        return redirect(url_for('index'))
-    
-    articles = load_articles()
-    article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id or art.get('slug') == article_id), None)
-    
-    if article:
-        if article.get('username') == session['username']:
-            fb_delete(f"articles/{article['firebase_id']}")
-            flash('¡Publicación eliminada con éxito!', 'success')
-        else:
-            flash('No tienes permiso para eliminar esta publicación.', 'error')
-    else:
-        flash('El artículo no existe.', 'error')
-        
-    return redirect(url_for('profile', username=session['username']))
+# --- OTRAS RUTAS DE LA APLICACIÓN ---
 
 @app.route('/complete-onboarding', methods=['POST'])
 def complete_onboarding():
@@ -517,82 +597,6 @@ def remove_from_cart(article_id):
         flash('Artículo eliminado del carrito.', 'success')
         
     return redirect(url_for('view_cart'))
-
-@app.route('/articulo/<slug>/comment', methods=['POST'])
-def add_comment(slug):
-    if 'username' not in session:
-        return redirect(url_for('index'))
-
-    content = request.form.get('content', '').strip()
-    rating = request.form.get('rating', '5')
-
-    try:
-        rating_val = int(rating)
-    except ValueError:
-        rating_val = 5
-
-    if not content:
-        flash('El comentario no puede estar vacío.', 'error')
-        return redirect(url_for('article_detail', slug=slug))
-
-    articles = load_articles()
-    article = next((art for art in articles if art.get('slug') == slug), None)
-
-    if article:
-        comments = article.get('comments', [])
-        new_comment = {
-            "username": session['username'],
-            "content": content,
-            "rating": rating_val,
-            "date": datetime.now(timezone.utc).isoformat()
-        }
-        comments.append(new_comment)
-        article['comments'] = comments
-
-        fb_put(f"articles/{article['firebase_id']}", article)
-        flash('¡Comentario publicado con éxito!', 'success')
-    else:
-        flash('El artículo no existe.', 'error')
-
-    return redirect(url_for('article_detail', slug=slug))
-
-@app.route('/articulo/<slug>/report', methods=['POST'])
-def report_article(slug):
-    if 'username' not in session:
-        return redirect(url_for('index'))
-
-    reason = request.form.get('reason', '').strip()
-    if not reason:
-        flash('El motivo de la denuncia no puede estar vacío.', 'error')
-        return redirect(url_for('article_detail', slug=slug))
-
-    articles = load_articles()
-    article = next((art for art in articles if art.get('slug') == slug), None)
-
-    if not article:
-        flash('El artículo no existe.', 'error')
-        return redirect(url_for('index'))
-
-    # Crear la estructura de datos de la denuncia
-    report_data = {
-        "article_slug": slug,
-        "article_title": article.get('title', ''),
-        "seller_username": article.get('username', ''),
-        "reporter_username": session['username'],
-        "reason": reason,
-        "date": datetime.now(timezone.utc).isoformat()
-    }
-
-    # Guardar en una nueva variable/nodo "reports" en Firebase
-    report_id = int(datetime.now().timestamp())
-    success = fb_put(f"reports/{article['firebase_id']}_{report_id}", report_data)
-
-    if success:
-        flash('Tu denuncia ha sido enviada y registrada correctamente.', 'success')
-    else:
-        flash('Hubo un error al enviar la denuncia. Inténtalo de nuevo.', 'error')
-
-    return redirect(url_for('article_detail', slug=slug))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
