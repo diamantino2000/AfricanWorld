@@ -109,7 +109,7 @@
                             </div>
                         </div>
 
-                        <!-- ACCESO DIRECTO AL PERFIL CORREGIDO -->
+                        <!-- ACCESO DIRECTO AL PERFIL -->
                         <a href="/perfil/{{ session['username'] }}" class="flex items-center space-x-2 bg-african-yellow text-gray-900 px-3 py-1.5 rounded-full shadow text-xs font-bold hover:bg-yellow-400 transition shrink-0 z-10">
                             {% if current_user and current_user.profile_pic %}
                                 <img src="{{ current_user.profile_pic }}" alt="Avatar" class="w-6 h-6 rounded-full object-cover shrink-0 border border-gray-900/20">
@@ -248,33 +248,42 @@
         </div>
     </main>
 
-    <!-- VENTANA FLOTANTE (MODAL) OBLIGATORIA PARA DATOS NUEVOS -->
+    <!-- VENTANA FLOTANTE OBLIGATORIA (IDIOMA, PAÍS, CIUDAD, TELÉFONO) -->
     {% if needs_onboarding %}
     <div id="onboarding-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-md w-full p-8 rounded-3xl shadow-2xl relative space-y-6 border-t-8 border-african-green">
             <div class="text-center space-y-2">
                 <h2 class="text-2xl font-black text-gray-900" data-es="¡Bienvenido a AfricanWorld!" data-fr="Bienvenue sur AfricanWorld !" data-en="Welcome to AfricanWorld!" data-pt="Bem-vindo ao AfricanWorld!">¡Bienvenido a AfricanWorld!</h2>
-                <p class="text-xs text-gray-600 leading-relaxed" data-es="Por favor, completa tus datos de ubicación y contacto para continuar navegando y publicando." data-fr="Veuillez remplir vos coordonnées pour continuer." data-en="Please fill in your details to continue." data-pt="Por favor, preencha seus dados para continuar.">
-                    Por favor, completa tus datos de ubicación y contacto para continuar navegando y publicando.
+                <p class="text-xs text-gray-600 leading-relaxed" data-es="Por favor, selecciona tu idioma y completa tus datos de ubicación y contacto para continuar." data-fr="Veuillez sélectionner votre langue et remplir vos coordonnées." data-en="Please select your language and fill in your details to continue." data-pt="Por favor, selecione seu idioma e preencha seus dados.">
+                    Por favor, selecciona tu idioma y completa tus datos de ubicación y contacto para continuar.
                 </p>
             </div>
 
             <form id="onboarding-form" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">País</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Idioma" data-fr="Langue" data-en="Language" data-pt="Idioma">Idioma</label>
+                    <select name="language" class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50 font-bold">
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="en">🇬🇧 English</option>
+                        <option value="pt">🇵🇹 Português</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="País" data-fr="Pays" data-en="Country" data-pt="País">País</label>
                     <input type="text" name="country" required placeholder="Ej: Nigeria, Kenia, España..." class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Ciudad</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Ciudad" data-fr="Ville" data-en="City" data-pt="Cidade">Ciudad</label>
                     <input type="text" name="city" required placeholder="Ej: Lagos, Nairobi, Madrid..." class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Teléfono</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1" data-es="Teléfono" data-fr="Téléphone" data-en="Phone" data-pt="Telefone">Teléfono</label>
                     <input type="text" name="phone" required placeholder="Ej: +234 800 123 4567" class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
                 </div>
-                <input type="hidden" name="language" id="hidden-lang" value="es">
 
-                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl text-xs font-bold shadow hover:opacity-90 transition">
+                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl text-xs font-bold shadow hover:opacity-90 transition" data-es="Guardar y Continuar" data-fr="Enregistrer et Continuer" data-en="Save and Continue" data-pt="Salvar e Continuar">
                     Guardar y Continuar
                 </button>
             </form>
@@ -282,13 +291,24 @@
     </div>
 
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const selectLang = document.querySelector('select[name="language"]');
+            if (selectLang) {
+                const currentLang = localStorage.getItem("user_selected_language") || "es";
+                selectLang.value = currentLang;
+            }
+        });
+
         document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const selectedLang = this.language.value;
+            localStorage.setItem("user_selected_language", selectedLang);
+
             const formData = {
                 country: this.country.value.trim(),
                 city: this.city.value.trim(),
                 phone: this.phone.value.trim(),
-                language: localStorage.getItem("user_selected_language") || "es"
+                language: selectedLang
             };
 
             try {
@@ -364,17 +384,16 @@
     <!-- FOOTER -->
     <footer class="bg-white border-t mt-12 py-6 text-center text-sm text-gray-500 border-t-4 border-african-red">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved.">Tous droits réservés.</span></p>
+            <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved.">Todos os direitos reservados.</span></p>
             <a href="/terminos" class="text-xs font-bold text-african-green hover:underline flex items-center gap-1">
                 <i class="fa-solid fa-scale-balanced"></i> <span data-es="Términos y Condiciones" data-fr="Termes et Conditions" data-en="Terms & Conditions">Términos y Condiciones</span>
             </a>
         </div>
     </footer>
 
-    <!-- JAVASCRIPT CORREGIDO Y SISTEMA DE IDIOMA AUTOMÁTICO -->
+    <!-- JAVASCRIPT -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // DETECTAR IDIOMA DEL NAVEGADOR / DISPOSITIVO
             const rawLang = (navigator.language || navigator.userLanguage || "es").toLowerCase();
             let langCode = "es";
 
@@ -382,24 +401,25 @@
                 langCode = "fr";
             } else if (rawLang.startsWith("en")) {
                 langCode = "en";
+            } else if (rawLang.startsWith("pt")) {
+                langCode = "pt";
             }
 
-            // Cambiar el atributo lang en la etiqueta <html>
             document.getElementById("html-root").setAttribute("lang", langCode);
             localStorage.setItem("user_selected_language", langCode);
 
-            // TRADUCIR ELEMENTOS CON TEXTO DINÁMICO (data-es, data-fr, data-en)
             document.querySelectorAll("[data-es][data-fr]").forEach(function(el) {
                 if (langCode === "fr" && el.hasAttribute("data-fr")) {
                     el.textContent = el.getAttribute("data-fr");
                 } else if (langCode === "en" && el.hasAttribute("data-en")) {
                     el.textContent = el.getAttribute("data-en");
+                } else if (langCode === "pt" && el.hasAttribute("data-pt")) {
+                    el.textContent = el.getAttribute("data-pt");
                 } else {
                     el.textContent = el.getAttribute("data-es");
                 }
             });
 
-            // TRADUCIR INPUTS Y PLACEHOLDERS
             document.querySelectorAll("[data-es-placeholder]").forEach(function(el) {
                 if (langCode === "fr" && el.hasAttribute("data-fr-placeholder")) {
                     el.setAttribute("placeholder", el.getAttribute("data-fr-placeholder"));
@@ -411,7 +431,6 @@
             });
         });
 
-        // DESVANECER PANTALLA DE INTRO AL CARGAR
         window.addEventListener('load', function() {
             const cover = document.getElementById('render-cover-intro');
             if (cover) {
