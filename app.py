@@ -494,6 +494,64 @@ def profile(username):
 
     return render_template('cuenta.html', profile_user=profile_user, current_user=current_user, articles=user_articles)
 
+@app.route('/follow/<username>', methods=['POST'])
+def toggle_follow(username):
+    if 'username' not in session:
+        return jsonify({"status": "error", "message": "No hay sesión activa"}), 401
+
+    current_username = session['username']
+    if current_username == username:
+        return jsonify({"status": "error", "message": "No te puedes seguir a ti mismo"}), 400
+
+    users = load_json_users()
+    
+    # Buscar al usuario actual y al usuario perfilado
+    current_user = next((u for u in users if u.get('username') == current_username), None)
+    profile_user = next((u for u in users if u.get('username') == username), None)
+
+    if not current_user or not profile_user:
+        return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+
+    # Inicializar listas si no existen
+    if 'following' not in current_user:
+        current_user['following'] = []
+    if 'followers' not in profile_user:
+        profile_user['followers'] = []
+
+    is_following = False
+
+    # Alternar estado de seguir / dejar de seguir
+    if username in current_user['following']:
+        current_user['following'].remove(username)
+        if current_username in profile_user['followers']:
+            profile_user['followers'].remove(current_username)
+        is_following = False
+    else:
+        current_user['following'].append(username)
+        if current_username not in profile_user['followers']:
+            profile_user['followers'].append(current_username)
+        is_following = True
+
+        # Crear notificación para el usuario seguido
+        if 'notifications' not in profile_user:
+            profile_user['notifications'] = []
+        
+        profile_user['notifications'].insert(0, {
+            "message": f"@{current_username} ha empezado a seguirte.",
+            "link": f"/perfil/{current_username}",
+            "read": False,
+            "date": datetime.now(timezone.utc).isoformat()
+        })
+
+    # Guardar cambios en Firebase
+    save_json_users(users)
+
+    return jsonify({
+        "status": "success",
+        "is_following": is_following,
+        "followers_count": len(profile_user['followers'])
+    })
+
 @app.route('/publish', methods=['POST'])
 def publish_article():
     if 'username' not in session:
