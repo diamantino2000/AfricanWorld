@@ -122,5 +122,44 @@
             });
         });
     </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Prioridad: 1. Variable de sesión de Flask, 2. localStorage, 3. Idioma navegador
+        let langCode = "{{ current_lang }}";
+        if (!langCode || langCode === "None") {
+            langCode = localStorage.getItem("user_selected_language") || (navigator.language || "es").substring(0,2);
+        }
+        
+        // Guardar la elección activa en localStorage
+        localStorage.setItem("user_selected_language", langCode);
+        document.documentElement.setAttribute("lang", langCode);
+
+        // Traducir textos con atributos data-es, data-fr, data-en, data-pt
+        document.querySelectorAll("[data-es]").forEach(function(el) {
+            if (langCode === "fr" && el.hasAttribute("data-fr")) {
+                el.textContent = el.getAttribute("data-fr");
+            } else if (langCode === "en" && el.hasAttribute("data-en")) {
+                el.textContent = el.getAttribute("data-en");
+            } else if (langCode === "pt" && el.hasAttribute("data-pt")) {
+                el.textContent = el.getAttribute("data-pt");
+            } else {
+                el.textContent = el.getAttribute("data-es");
+            }
+        });
+
+        // Traducir placeholders en inputs
+        document.querySelectorAll("[data-es-placeholder]").forEach(function(el) {
+            if (langCode === "fr" && el.hasAttribute("data-fr-placeholder")) {
+                el.setAttribute("placeholder", el.getAttribute("data-fr-placeholder"));
+            } else if (langCode === "en" && el.hasAttribute("data-en-placeholder")) {
+                el.setAttribute("placeholder", el.getAttribute("data-en-placeholder"));
+            } else if (langCode === "pt" && el.hasAttribute("data-pt-placeholder")) {
+                el.setAttribute("placeholder", el.getAttribute("data-pt-placeholder"));
+            } else {
+                el.setAttribute("placeholder", el.getAttribute("data-es-placeholder"));
+            }
+        });
+    });
+</script>
 </body>
 </html>
