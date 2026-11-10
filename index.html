@@ -246,6 +246,38 @@
                 </div>
             {% endfor %}
         </div>
+
+        <!-- SECCIÓN DE PAGINACIÓN -->
+        {% if total_pages > 1 %}
+        <div class="flex justify-center items-center space-x-2 my-8">
+            <!-- Botón Anterior -->
+            {% if current_page > 1 %}
+                <a href="{{ url_for('index', page=current_page - 1, search=search) }}" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-100 transition shadow-sm flex items-center gap-1">
+                    <i class="fa-solid fa-chevron-left"></i> <span data-es="Anterior" data-fr="Précédent" data-en="Previous" data-pt="Anterior">Anterior</span>
+                </a>
+            {% else %}
+                <span class="px-4 py-2 bg-gray-100 border border-gray-200 text-gray-400 rounded-xl text-xs font-bold cursor-not-allowed flex items-center gap-1">
+                    <i class="fa-solid fa-chevron-left"></i> <span data-es="Anterior" data-fr="Précédent" data-en="Previous" data-pt="Anterior">Anterior</span>
+                </span>
+            {% endif %}
+
+            <!-- Indicador de página actual -->
+            <span class="px-4 py-2 bg-african-green text-white rounded-xl text-xs font-black shadow-sm">
+                {{ current_page }} / {{ total_pages }}
+            </span>
+
+            <!-- Botón Siguiente -->
+            {% if current_page < total_pages %}
+                <a href="{{ url_for('index', page=current_page + 1, search=search) }}" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-100 transition shadow-sm flex items-center gap-1">
+                    <span data-es="Siguiente" data-fr="Suivant" data-en="Next" data-pt="Próximo">Siguiente</span> <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            {% else %}
+                <span class="px-4 py-2 bg-gray-100 border border-gray-200 text-gray-400 rounded-xl text-xs font-bold cursor-not-allowed flex items-center gap-1">
+                    <span data-es="Siguiente" data-fr="Suivant" data-en="Next" data-pt="Próximo">Siguiente</span> <i class="fa-solid fa-chevron-right"></i>
+                </span>
+            {% endif %}
+        </div>
+        {% endif %}
     </main>
 
     <!-- VENTANA FLOTANTE OBLIGATORIA (IDIOMA, PAÍS, CIUDAD, TELÉFONO) -->
@@ -368,7 +400,7 @@
             <div class="flex items-start gap-2 bg-gray-50 p-3 rounded-xl border">
                 <input type="checkbox" id="accept-terms-check" class="mt-1 rounded border-gray-300 text-african-green focus:ring-african-green">
                 <label for="accept-terms-check" class="text-xs text-gray-700">
-                    <span data-es="Acepto los" data-fr="J'accepte les" data-en="I accept the" data-pt="Aceito os">Acepto los</span> <a href="/terminos" target="_blank" class="text-african-green font-bold hover:underline" data-es="Términos y Condiciones" data-fr="Termes et Conditions" data-en="Terms & Conditions" data-pt="Termos e Condições">Términos y Condiciones</a> (<span data-es="reconozco que los vendedores gestionan directamente sus ventas" data-fr="je reconnais que les vendeurs gèrent directement leurs ventas" data-en="I acknowledge sellers manage their sales directly" data-pt="reconheço que os vendedores gerenciam diretamente suas vendas">reconozco que los vendedores gestionan directamente sus ventas</span>).
+                    <span data-es="Acepto los" data-fr="J'accepte les" data-en="I accept the" data-pt="Aceito os">Acepto los</span> <a href="/terminos" target="_blank" class="text-african-green font-bold hover:underline" data-es="Términos y Condiciones" data-fr="Termes et Conditions" data-en="Terms & Conditions" data-pt="Termos e Condições">Términos y Condiciones</a> (<span data-es="reconozco que los vendedores gestionan directamente sus ventas" data-fr="je reconnais que les vendeurs gèrent directement leurs ventes" data-en="I acknowledge sellers manage their sales directly" data-pt="reconheço que os vendedores gerenciam diretamente suas vendas">reconozco que los vendedores gestionan directamente sus ventas</span>).
                 </label>
             </div>
 
