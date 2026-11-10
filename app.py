@@ -675,6 +675,45 @@ def publish_article():
     flash('¡Artículo publicado con éxito!', 'success')
     return redirect(url_for('profile', username=session['username']))
 
+@app.route('/mark-notifications-read', methods=['POST'])
+def mark_notifications_read():
+    if 'username' not in session:
+        return jsonify({"status": "error", "message": "No hay sesión activa"}), 401
+
+    users = load_json_users()
+    user = next((u for u in users if u.get('username') == session['username']), None)
+
+    if user and user.get('notifications'):
+        # Marcar todas las notificaciones como leídas
+        for noti in user['notifications']:
+            noti['read'] = True
+        
+        save_json_users(users)
+        return jsonify({"status": "success"})
+
+    return jsonify({"status": "error", "message": "No hay notificaciones"}), 404
+
+
+@app.route('/get-notifications-json')
+def get_notifications_json():
+    if 'username' not in session:
+        return jsonify({"status": "error", "unread_count": 0, "notifications": []})
+
+    users = load_json_users()
+    user = next((u for u in users if u.get('username') == session['username']), None)
+
+    if not user:
+        return jsonify({"status": "error", "unread_count": 0, "notifications": []})
+
+    notifications = user.get('notifications', [])
+    unread_count = len([n for n in notifications if not n.get('read', False)])
+
+    return jsonify({
+        "status": "success",
+        "unread_count": unread_count,
+        "notifications": notifications
+    })
+
 @app.route('/logout')
 def logout():
     session.clear()
