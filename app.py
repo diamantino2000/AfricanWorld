@@ -6,12 +6,15 @@ import requests
 import unicodedata
 import re
 import base64
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__, template_folder='.')
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'african-world-secret-key-2026')
+
+# --- CLAVE SECRETA ESTÁTICA Y PERMANENTE (NO USA OS.ENVIRON) ---
+app.config['SECRET_KEY'] = 'african-world-static-permanent-secret-key-2026-fixed'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 
 FIREBASE_DB_URL = "https://african-movies-8568b-default-rtdb.firebaseio.com"
 
@@ -353,6 +356,7 @@ def complete_onboarding():
         
         # GUARDAR IDIOMA EN LA SESIÓN DE FLASK
         session['language'] = language
+        session.permanent = True
         session.modified = True
         return jsonify({"status": "success", "redirect": url_for('index')})
 
@@ -401,6 +405,7 @@ def google_login_real():
         session['email'] = user['email']
         session['profile_pic'] = user.get('profile_pic', picture)
         session['language'] = user.get('language', 'es')
+        session.permanent = True  # Mantiene la sesión abierta permanentemente
         return jsonify({"status": "success", "redirect": url_for('index')})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
@@ -465,6 +470,7 @@ def settings():
                 flash('No se pudo procesar la imagen de perfil.', 'error')
 
         save_json_users(users)
+        session.permanent = True
         flash('¡Ajustes actualizados con éxito!', 'success')
         return redirect(url_for('profile', username=user['username']))
 
@@ -614,6 +620,7 @@ def add_to_cart(article_id):
     
     if article_id not in session['cart']:
         session['cart'].append(article_id)
+        session.permanent = True
         session.modified = True
         flash('¡Artículo añadido al carrito!', 'success')
     else:
@@ -628,6 +635,7 @@ def remove_from_cart(article_id):
     
     if 'cart' in session:
         session['cart'] = [item for item in session['cart'] if item != article_id]
+        session.permanent = True
         session.modified = True
         flash('Artículo eliminado del carrito.', 'success')
         
