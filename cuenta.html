@@ -142,7 +142,7 @@
         {% endif %}
     </main>
 
-    <!-- MODAL PUBLICAR ARTÍCULO -->
+    <!-- MODAL PUBLICAR ARTÍCULO CON CONTROL ANTI-DUPLICACIÓN -->
     <div id="publish-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-lg w-full p-8 rounded-2xl shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto border-t-8 border-african-yellow">
             <button type="button" onclick="closeModal('publish-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
@@ -151,7 +151,7 @@
                 <span data-es="Publicar Artículo" data-fr="Publier un article" data-en="Publish Article" data-pt="Publicar Artigo">Publicar Artículo</span>
             </h2>
             
-            <form id="form-publicar" action="/publish" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="return validatePhotos()">
+            <form id="form-publicar" action="/publish" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="return handleFormSubmit(this)">
                 <div>
                     <label class="block text-sm font-bold text-gray-700" data-es="Título del Artículo" data-fr="Titre de l'article" data-en="Article Title" data-pt="Título do Artigo">Título del Artículo</label>
                     <input type="text" id="titulo" name="title" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
@@ -185,7 +185,9 @@
                     <textarea id="descripcion" name="description" rows="3" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none"></textarea>
                 </div>
 
-                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold hover:opacity-90 transition shadow" data-es="Publicar Anuncio" data-fr="Publier la petite annonce" data-en="Publish Listing" data-pt="Publicar Anúncio">Publicar Anuncio</button>
+                <button type="submit" id="submit-btn" class="w-full bg-african-green text-white py-3 rounded-xl font-bold hover:opacity-90 transition shadow flex items-center justify-center gap-2" data-es="Publicar Anuncio" data-fr="Publier la petite annonce" data-en="Publish Listing" data-pt="Publicar Anúncio">
+                    <span>Publicar Anuncio</span>
+                </button>
             </form>
         </div>
     </div>
@@ -210,7 +212,7 @@
         <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-pt="Todos os direitos reservados.">Todos los derechos reservados.</span></p>
     </footer>
 
-    <!-- SCRIPTS GENERALES Y DE LÓGICA DE TRADUCCIÓN -->
+    <!-- SCRIPTS GENERALES, ANTI-DUPLICACIÓN Y LÓGICA DE TRADUCCIÓN -->
     <script>
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -336,11 +338,25 @@
             }
         }
 
-        function validatePhotos() {
+        // PREVENCIÓN DE DUPLICADOS AL PULSAR EL BOTÓN PUBLICAR MULTIPLES VECES
+        let isSubmitting = false;
+
+        function handleFormSubmit(form) {
             if (selectedFiles.length === 0) {
                 document.getElementById('photo-error').classList.remove('hidden');
                 return false;
             }
+
+            if (isSubmitting) {
+                return false;
+            }
+            isSubmitting = true;
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Publicando...</span>';
+
             return true;
         }
 
