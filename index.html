@@ -109,7 +109,7 @@
                             </div>
                         </div>
 
-                        <!-- ACCESO DIRECTO AL PERFIL -->
+                        <!-- ACCESO DIRECTO AL PERFIL CORREGIDO -->
                         <a href="/perfil/{{ session['username'] }}" class="flex items-center space-x-2 bg-african-yellow text-gray-900 px-3 py-1.5 rounded-full shadow text-xs font-bold hover:bg-yellow-400 transition shrink-0 z-10">
                             {% if current_user and current_user.profile_pic %}
                                 <img src="{{ current_user.profile_pic }}" alt="Avatar" class="w-6 h-6 rounded-full object-cover shrink-0 border border-gray-900/20">
@@ -246,45 +246,70 @@
                 </div>
             {% endfor %}
         </div>
-
-        <!-- CONTROLES DE PAGINACIÓN CLÁSICA -->
-        {% if total_pages > 1 %}
-            <div class="flex items-center justify-center space-x-2 pt-6 border-t mt-8">
-                <!-- Botón Anterior -->
-                {% if current_page > 1 %}
-                    <a href="{{ url_for('index', page=current_page-1, search=search) }}" class="px-4 py-2 bg-white border rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-100 transition shadow-sm flex items-center gap-1">
-                        <i class="fa-solid fa-chevron-left"></i> <span data-es="Anterior" data-fr="Précédent" data-en="Previous">Anterior</span>
-                    </a>
-                {% else %}
-                    <span class="px-4 py-2 bg-gray-100 border rounded-xl text-xs font-bold text-gray-400 cursor-not-allowed flex items-center gap-1">
-                        <i class="fa-solid fa-chevron-left"></i> <span data-es="Anterior" data-fr="Précédent" data-en="Previous">Anterior</span>
-                    </span>
-                {% endif %}
-
-                <!-- Números de página -->
-                <div class="flex items-center space-x-1">
-                    {% for p in range(1, total_pages + 1) %}
-                        {% if p == current_page %}
-                            <span class="px-3.5 py-2 bg-african-green text-white rounded-xl text-xs font-black shadow">{{ p }}</span>
-                        {% else %}
-                            <a href="{{ url_for('index', page=p, search=search) }}" class="px-3.5 py-2 bg-white border rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-100 transition shadow-sm">{{ p }}</a>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-
-                <!-- Botón Siguiente -->
-                {% if current_page < total_pages %}
-                    <a href="{{ url_for('index', page=current_page+1, search=search) }}" class="px-4 py-2 bg-white border rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-100 transition shadow-sm flex items-center gap-1">
-                        <span data-es="Siguiente" data-fr="Suivant" data-en="Next">Siguiente</span> <i class="fa-solid fa-chevron-right"></i>
-                    </a>
-                {% else %}
-                    <span class="px-4 py-2 bg-gray-100 border rounded-xl text-xs font-bold text-gray-400 cursor-not-allowed flex items-center gap-1">
-                        <span data-es="Siguiente" data-fr="Suivant" data-en="Next">Siguiente</span> <i class="fa-solid fa-chevron-right"></i>
-                    </span>
-                {% endif %}
-            </div>
-        {% endif %}
     </main>
+
+    <!-- VENTANA FLOTANTE (MODAL) OBLIGATORIA PARA DATOS NUEVOS -->
+    {% if needs_onboarding %}
+    <div id="onboarding-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-md w-full p-8 rounded-3xl shadow-2xl relative space-y-6 border-t-8 border-african-green">
+            <div class="text-center space-y-2">
+                <h2 class="text-2xl font-black text-gray-900" data-es="¡Bienvenido a AfricanWorld!" data-fr="Bienvenue sur AfricanWorld !" data-en="Welcome to AfricanWorld!" data-pt="Bem-vindo ao AfricanWorld!">¡Bienvenido a AfricanWorld!</h2>
+                <p class="text-xs text-gray-600 leading-relaxed" data-es="Por favor, completa tus datos de ubicación y contacto para continuar navegando y publicando." data-fr="Veuillez remplir vos coordonnées pour continuer." data-en="Please fill in your details to continue." data-pt="Por favor, preencha seus dados para continuar.">
+                    Por favor, completa tus datos de ubicación y contacto para continuar navegando y publicando.
+                </p>
+            </div>
+
+            <form id="onboarding-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">País</label>
+                    <input type="text" name="country" required placeholder="Ej: Nigeria, Kenia, España..." class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Ciudad</label>
+                    <input type="text" name="city" required placeholder="Ej: Lagos, Nairobi, Madrid..." class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Teléfono</label>
+                    <input type="text" name="phone" required placeholder="Ej: +234 800 123 4567" class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
+                </div>
+                <input type="hidden" name="language" id="hidden-lang" value="es">
+
+                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl text-xs font-bold shadow hover:opacity-90 transition">
+                    Guardar y Continuar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = {
+                country: this.country.value.trim(),
+                city: this.city.value.trim(),
+                phone: this.phone.value.trim(),
+                language: localStorage.getItem("user_selected_language") || "es"
+            };
+
+            try {
+                const response = await fetch('/complete-onboarding', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    window.location.href = result.redirect;
+                } else {
+                    alert(result.message || 'Error al guardar los datos.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error de conexión.');
+            }
+        });
+    </script>
+    {% endif %}
 
     <!-- MODAL DE DENUNCIA -->
     <div id="report-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
@@ -339,16 +364,17 @@
     <!-- FOOTER -->
     <footer class="bg-white border-t mt-12 py-6 text-center text-sm text-gray-500 border-t-4 border-african-red">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved.">Todos los derechos reservados.</span></p>
+            <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved.">Tous droits réservés.</span></p>
             <a href="/terminos" class="text-xs font-bold text-african-green hover:underline flex items-center gap-1">
                 <i class="fa-solid fa-scale-balanced"></i> <span data-es="Términos y Condiciones" data-fr="Termes et Conditions" data-en="Terms & Conditions">Términos y Condiciones</span>
             </a>
         </div>
     </footer>
 
-    <!-- JAVASCRIPT Y SISTEMA DE IDIOMA AUTOMÁTICO -->
+    <!-- JAVASCRIPT CORREGIDO Y SISTEMA DE IDIOMA AUTOMÁTICO -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // DETECTAR IDIOMA DEL NAVEGADOR / DISPOSITIVO
             const rawLang = (navigator.language || navigator.userLanguage || "es").toLowerCase();
             let langCode = "es";
 
@@ -358,8 +384,11 @@
                 langCode = "en";
             }
 
+            // Cambiar el atributo lang en la etiqueta <html>
             document.getElementById("html-root").setAttribute("lang", langCode);
+            localStorage.setItem("user_selected_language", langCode);
 
+            // TRADUCIR ELEMENTOS CON TEXTO DINÁMICO (data-es, data-fr, data-en)
             document.querySelectorAll("[data-es][data-fr]").forEach(function(el) {
                 if (langCode === "fr" && el.hasAttribute("data-fr")) {
                     el.textContent = el.getAttribute("data-fr");
@@ -370,6 +399,7 @@
                 }
             });
 
+            // TRADUCIR INPUTS Y PLACEHOLDERS
             document.querySelectorAll("[data-es-placeholder]").forEach(function(el) {
                 if (langCode === "fr" && el.hasAttribute("data-fr-placeholder")) {
                     el.setAttribute("placeholder", el.getAttribute("data-fr-placeholder"));
@@ -381,6 +411,7 @@
             });
         });
 
+        // DESVANECER PANTALLA DE INTRO AL CARGAR
         window.addEventListener('load', function() {
             const cover = document.getElementById('render-cover-intro');
             if (cover) {
@@ -512,67 +543,5 @@
             .catch(err => console.error(err));
         }
     </script>
-    <!-- VENTANA FLOTANTE OBLIGATORIA PARA DATOS NUEVOS -->
-{% if needs_onboarding %}
-<div id="onboarding-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-    <div class="bg-white max-w-md w-full p-8 rounded-3xl shadow-2xl relative space-y-6 border-t-8 border-african-green">
-        <div class="text-center space-y-2">
-            <h2 class="text-2xl font-black text-gray-900" data-es="¡Bienvenido a AfricanWorld!" data-fr="Bienvenue sur AfricanWorld !" data-en="Welcome to AfricanWorld!" data-pt="Bem-vindo ao AfricanWorld!">¡Bienvenido a AfricanWorld!</h2>
-            <p class="text-xs text-gray-600 leading-relaxed" data-es="Por favor, completa tus datos de ubicación y contacto para continuar navegando y publicando." data-fr="Veuillez remplir vos coordonnées pour continuer." data-en="Please fill in your details to continue." data-pt="Por favor, preencha seus dados para continuar.">
-                Por favor, completa tus datos de ubicación y contacto para continuar navegando y publicando.
-            </p>
-        </div>
-
-        <form id="onboarding-form" class="space-y-4">
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">País</label>
-                <input type="text" name="country" required placeholder="Ej: Nigeria, Kenia, España..." class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">Ciudad</label>
-                <input type="text" name="city" required placeholder="Ej: Lagos, Nairobi, Madrid..." class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">Teléfono</label>
-                <input type="text" name="phone" required placeholder="Ej: +234 800 123 4567" class="w-full border p-3 rounded-xl text-xs focus:ring-2 focus:ring-african-green focus:outline-none bg-gray-50">
-            </div>
-            <input type="hidden" name="language" id="hidden-lang" value="es">
-
-            <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl text-xs font-bold shadow hover:opacity-90 transition">
-                Guardar y Continuar
-            </button>
-        </form>
-    </div>
-</div>
-
-<script>
-    document.getElementById('onboarding-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = {
-            country: this.country.value.trim(),
-            city: this.city.value.trim(),
-            phone: this.phone.value.trim(),
-            language: localStorage.getItem("user_selected_language") || "es"
-        };
-
-        try {
-            const response = await fetch('/complete-onboarding', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-            const result = await response.json();
-            if (result.status === 'success') {
-                window.location.href = result.redirect;
-            } else {
-                alert(result.message || 'Error al guardar los datos.');
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Error de conexión.');
-        }
-    });
-</script>
-{% endif %}
 </body>
 </html>
