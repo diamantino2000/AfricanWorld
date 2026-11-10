@@ -37,7 +37,7 @@
                 </span>
             </a>
             <a href="/" class="bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-gray-100 transition flex items-center gap-2">
-                <i class="fa-solid fa-house"></i> <span>Volver</span>
+                <i class="fa-solid fa-house"></i> <span data-es="Volver" data-fr="Retour" data-en="Back" data-pt="Voltar">Volver</span>
             </a>
         </div>
     </header>
@@ -52,8 +52,8 @@
                     <h1 class="text-3xl font-black text-gray-900">@{{ profile_user.username }}</h1>
                     <p class="text-xs text-gray-500"><i class="fa-solid fa-envelope mr-1"></i>{{ profile_user.email }}</p>
                     <div class="flex gap-4 pt-2 justify-center md:justify-start text-xs font-bold text-gray-600">
-                        <span><strong id="followers-count" class="text-gray-900 text-sm">{{ profile_user.followers|length if profile_user.followers else 0 }}</strong> Seguidores</span>
-                        <span><strong class="text-gray-900 text-sm">{{ profile_user.following|length if profile_user.following else 0 }}</strong> Siguiendo</span>
+                        <span><strong id="followers-count" class="text-gray-900 text-sm">{{ profile_user.followers|length if profile_user.followers else 0 }}</strong> <span data-es="Seguidores" data-fr="Abonnés" data-en="Followers" data-pt="Seguidores">Seguidores</span></span>
+                        <span><strong class="text-gray-900 text-sm">{{ profile_user.following|length if profile_user.following else 0 }}</strong> <span data-es="Siguiendo" data-fr="Abonnements" data-en="Following" data-pt="Seguindo">Siguiendo</span></span>
                     </div>
                 </div>
             </div>
@@ -62,14 +62,18 @@
             <div class="flex items-center gap-3 flex-wrap justify-center">
                 {% if session.get('username') and session['username'] == profile_user.username %}
                     <button type="button" onclick="openModal('publish-modal')" class="bg-african-yellow text-gray-900 px-5 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-yellow-400 transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Publicar Artículo
+                        <i class="fa-solid fa-plus"></i> <span data-es="Publicar Artículo" data-fr="Publier un article" data-en="Publish Article" data-pt="Publicar Artigo">Publicar Artículo</span>
                     </button>
                     <a href="/settings" class="bg-gray-100 text-gray-800 border px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-200 transition flex items-center gap-2">
-                        <i class="fa-solid fa-gear"></i> Editar Ajustes
+                        <i class="fa-solid fa-gear"></i> <span data-es="Editar Ajustes" data-fr="Modifier les parámetros" data-en="Edit Settings" data-pt="Editar Configurações">Editar Ajustes</span>
                     </a>
                 {% elif session.get('username') %}
                     {% set is_following = session['username'] in (profile_user.followers or []) %}
-                    <button id="follow-btn" onclick="toggleFollow('{{ profile_user.username }}')" class="{% if is_following %} bg-gray-200 text-gray-800 {% else %} bg-african-green text-white {% endif %} px-6 py-2.5 rounded-xl text-xs font-bold shadow hover:opacity-90 transition">
+                    <button id="follow-btn" onclick="toggleFollow('{{ profile_user.username }}')" class="{% if is_following %} bg-gray-200 text-gray-800 {% else %} bg-african-green text-white {% endif %} px-6 py-2.5 rounded-xl text-xs font-bold shadow hover:opacity-90 transition"
+                        data-es="{{ 'Siguiendo' if is_following else 'Seguir' }}"
+                        data-fr="{{ 'Abonné' if is_following else 'Suivre' }}"
+                        data-en="{{ 'Following' if is_following else 'Follow' }}"
+                        data-pt="{{ 'Seguindo' if is_following else 'Seguir' }}">
                         {{ 'Siguiendo' if is_following else 'Seguir' }}
                     </button>
                 {% endif %}
@@ -80,7 +84,7 @@
         <div class="space-y-4">
             <h2 class="text-xl font-black text-gray-900 flex items-center gap-2 border-b pb-2">
                 <i class="fa-solid fa-box text-african-yellow"></i>
-                <span>Publicaciones de {{ profile_user.username }}</span>
+                <span><span data-es="Publicaciones de" data-fr="Publications de" data-en="Posts by" data-pt="Publicações de">Publicaciones de</span> {{ profile_user.username }}</span>
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -102,7 +106,7 @@
 
                         <!-- PIE DE TARJETA CON MENÚ DE TRES PUNTOS -->
                         <div class="p-5 pt-0 border-t mt-3 flex justify-between items-center text-xs relative">
-                            <a href="/articulo/{{ art.slug }}" class="text-african-green font-bold hover:underline">Ver Publicación &rarr;</a>
+                            <a href="/articulo/{{ art.slug }}" class="text-african-green font-bold hover:underline" data-es="Ver Publicación &rarr;" data-fr="Voir la publication &rarr;" data-en="View Post &rarr;" data-pt="Ver Publicação &rarr;">Ver Publicación &rarr;</a>
                             
                             {% if session.get('username') == profile_user.username %}
                                 <div class="relative">
@@ -114,7 +118,7 @@
                                     <div id="menu-{{ art.id }}" class="absolute right-0 bottom-full mb-2 w-36 bg-white border rounded-2xl shadow-xl hidden z-20 py-2">
                                         <form action="/articulo/{{ art.firebase_id }}/delete" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?')">
                                             <button type="submit" class="w-full text-left px-4 py-2 text-african-red font-bold hover:bg-red-50 transition flex items-center gap-2 text-xs">
-                                                <i class="fa-solid fa-trash"></i> Eliminar
+                                                <i class="fa-solid fa-trash"></i> <span data-es="Eliminar" data-fr="Supprimer" data-en="Delete" data-pt="Excluir">Eliminar</span>
                                             </button>
                                         </form>
                                     </div>
@@ -124,16 +128,16 @@
                     </div>
                 {% else %}
                     <div class="col-span-full text-center py-12 text-gray-400 bg-white rounded-2xl border">
-                        <p>Este usuario aún no ha publicado artículos.</p>
+                        <p data-es="Este usuario aún no ha publicado artículos." data-fr="Cet utilisateur n'a pas encore publié d'articles." data-en="This user has not posted any articles yet." data-pt="Este usuário ainda não publicou artigos.">Este usuario aún no ha publicado artículos.</p>
                     </div>
                 {% endfor %}
             </div>
         </div>
         {% else %}
             <div class="text-center py-16 bg-white rounded-3xl border shadow-sm">
-                <h2 class="text-2xl font-black text-gray-800">Usuario no encontrado</h2>
-                <p class="text-gray-500 mt-2">El perfil que buscas no existe o fue eliminado.</p>
-                <a href="/" class="mt-6 inline-block bg-african-green text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow">Volver al inicio</a>
+                <h2 class="text-2xl font-black text-gray-800" data-es="Usuario no encontrado" data-fr="Utilisateur non trouvé" data-en="User not found" data-pt="Usuário não encontrado">Usuario no encontrado</h2>
+                <p class="text-gray-500 mt-2" data-es="El perfil que buscas no existe o fue eliminado." data-fr="Le profil que vous recherchez n'existe pas ou a été supprimé." data-en="The profile you are looking for does not exist or was deleted." data-pt="O perfil que você procura não existe ou foi excluído.">El perfil que buscas no existe o fue eliminado.</p>
+                <a href="/" class="mt-6 inline-block bg-african-green text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow" data-es="Volver al inicio" data-fr="Retour à l'accueil" data-en="Back to home" data-pt="Voltar ao início">Volver al inicio</a>
             </div>
         {% endif %}
     </main>
@@ -144,23 +148,23 @@
             <button type="button" onclick="closeModal('publish-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
             <h2 class="text-2xl font-black text-gray-900 flex items-center space-x-2">
                 <i class="fa-solid fa-bullhorn text-african-yellow"></i>
-                <span>Publicar Artículo</span>
+                <span data-es="Publicar Artículo" data-fr="Publier un article" data-en="Publish Article" data-pt="Publicar Artigo">Publicar Artículo</span>
             </h2>
             
             <form id="form-publicar" action="/publish" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="return validatePhotos()">
                 <div>
-                    <label class="block text-sm font-bold text-gray-700">Título del Artículo</label>
+                    <label class="block text-sm font-bold text-gray-700" data-es="Título del Artículo" data-fr="Titre de l'article" data-en="Article Title" data-pt="Título do Artigo">Título del Artículo</label>
                     <input type="text" id="titulo" name="title" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700">Precio ($ USD / Local)</label>
+                    <label class="block text-sm font-bold text-gray-700" data-es="Precio ($ USD / Local)" data-fr="Prix ($ USD / Local)" data-en="Price ($ USD / Local)" data-pt="Preço ($ USD / Local)">Precio ($ USD / Local)</label>
                     <input type="number" step="0.01" min="0" id="precio" name="price" placeholder="Ej: 25.00" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none font-bold">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">
-                        Fotos del Artículo <span class="text-xs text-gray-400 font-normal">(Máximo 17 fotos)</span>
+                        <span data-es="Fotos del Artículo" data-fr="Photos de l'article" data-en="Article Photos" data-pt="Fotos do Artigo">Fotos del Artículo</span> <span class="text-xs text-gray-400 font-normal" data-es="(Máximo 17 fotos)" data-fr="(Maximum 17 photos)" data-en="(Maximum 17 photos)" data-pt="(Máximo de 17 fotos)">(Máximo 17 fotos)</span>
                     </label>
                     
                     <input type="file" id="photo-picker" accept="image/*" multiple class="hidden" onchange="handleFileSelect(event)">
@@ -168,20 +172,20 @@
                     <div class="grid grid-cols-4 gap-3 p-3 bg-gray-50 border rounded-2xl" id="photo-preview-grid">
                         <button type="button" onclick="document.getElementById('photo-picker').click()" id="add-photo-btn" class="h-20 border-2 border-dashed border-african-yellow bg-yellow-50 hover:bg-yellow-100 rounded-xl flex flex-col items-center justify-center text-african-yellow transition shadow-sm group">
                             <i class="fa-solid fa-plus text-2xl group-hover:scale-125 transition-transform"></i>
-                            <span class="text-[10px] font-black text-gray-800 mt-1">Añadir Foto</span>
+                            <span class="text-[10px] font-black text-gray-800 mt-1" data-es="Añadir Foto" data-fr="Ajouter une photo" data-en="Add Photo" data-pt="Adicionar Foto">Añadir Foto</span>
                         </button>
                     </div>
                     
                     <input type="file" name="photos" id="final-photos" multiple class="hidden">
-                    <p class="text-xs text-red-500 hidden mt-1 font-bold" id="photo-error">Debes agregar al menos 1 foto válida.</p>
+                    <p class="text-xs text-red-500 hidden mt-1 font-bold" id="photo-error" data-es="Debes agregar al menos 1 foto válida." data-fr="Vous devez ajouter au moins 1 photo valide." data-en="You must add at least 1 valid photo." data-pt="Você deve adicionar pelo menos 1 foto válida.">Debes agregar al menos 1 foto válida.</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700">Descripción</label>
+                    <label class="block text-sm font-bold text-gray-700" data-es="Descripción" data-fr="Description" data-en="Description" data-pt="Descrição">Descripción</label>
                     <textarea id="descripcion" name="description" rows="3" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-african-green focus:outline-none"></textarea>
                 </div>
 
-                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold hover:opacity-90 transition shadow">Publicar Anuncio</button>
+                <button type="submit" class="w-full bg-african-green text-white py-3 rounded-xl font-bold hover:opacity-90 transition shadow" data-es="Publicar Anuncio" data-fr="Publier la petite annonce" data-en="Publish Listing" data-pt="Publicar Anúncio">Publicar Anuncio</button>
             </form>
         </div>
     </div>
@@ -192,21 +196,21 @@
             <div class="w-16 h-16 bg-red-100 text-african-red rounded-full flex items-center justify-center mx-auto text-3xl">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h3 class="text-2xl font-black text-gray-900">Foto no permitida</h3>
-            <p class="text-sm text-gray-600 leading-relaxed">
+            <h3 class="text-2xl font-black text-gray-900" data-es="Foto no permitida" data-fr="Photo non autorisée" data-en="Photo not allowed" data-pt="Foto não permitida">Foto no permitida</h3>
+            <p class="text-sm text-gray-600 leading-relaxed" data-es="Hemos detectado que la imagen que intentas subir puede contener elementos explícitos, sexuales u ofensivos no permitidos." data-fr="Nous avons détecté que l'image que vous tentez de téléverser peut contenir des éléments explicites, sexuels ou offensants non autorisés." data-en="We detected that the image you are trying to upload may contain explicit, sexual, or offensive content that is not allowed." data-pt="Detectamos que a imagem que você está tentando enviar pode conter elementos explícitos, sexuais ou ofensivos não permitidos.">
                 Hemos detectado que la imagen que intentas subir puede contener elementos explícitos, sexuales u ofensivos no permitidos.
             </p>
-            <button type="button" onclick="closeModal('nsfw-warning-modal')" class="w-full bg-african-red text-white py-3 rounded-xl font-bold shadow hover:bg-red-700 transition">
+            <button type="button" onclick="closeModal('nsfw-warning-modal')" class="w-full bg-african-red text-white py-3 rounded-xl font-bold shadow hover:bg-red-700 transition" data-es="Entendido" data-fr="Compris" data-en="Understood" data-pt="Entendido">
                 Entendido
             </button>
         </div>
     </div>
 
     <footer class="bg-white border-t py-6 text-center text-xs text-gray-500 border-t-4 border-african-red">
-        <p>&copy; 2026 AfricanWorld. Todos los derechos reservados.</p>
+        <p>&copy; 2026 AfricanWorld. <span data-es="Todos los derechos reservados." data-fr="Tous droits réservés." data-en="All rights reserved." data-pt="Todos os direitos reservados.">Todos los derechos reservados.</span></p>
     </footer>
 
-    <!-- SCRIPTS GENERALES Y DE MENÚ -->
+    <!-- SCRIPTS GENERALES Y DE LÓGICA DE TRADUCCIÓN -->
     <script>
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -244,12 +248,13 @@
                 if (data.status === 'success') {
                     const btn = document.getElementById('follow-btn');
                     const count = document.getElementById('followers-count');
+                    const lang = localStorage.getItem("user_selected_language") || "es";
                     
                     if (data.is_following) {
-                        btn.textContent = 'Siguiendo';
+                        btn.textContent = (lang === 'fr' ? 'Abonné' : lang === 'en' ? 'Following' : lang === 'pt' ? 'Seguindo' : 'Siguiendo');
                         btn.className = 'bg-gray-200 text-gray-800 px-6 py-2.5 rounded-xl text-xs font-bold shadow hover:opacity-90 transition';
                     } else {
-                        btn.textContent = 'Seguir';
+                        btn.textContent = (lang === 'fr' ? 'Suivre' : lang === 'en' ? 'Follow' : lang === 'pt' ? 'Seguir' : 'Seguir');
                         btn.className = 'bg-african-green text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow hover:opacity-90 transition';
                     }
                     if (count) count.textContent = data.followers_count;
@@ -338,67 +343,41 @@
             }
             return true;
         }
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const savedLang = localStorage.getItem("user_selected_language") || "es";
-            const htmlRoot = document.documentElement;
-            htmlRoot.setAttribute("lang", savedLang);
 
-            if (savedLang === "ar") {
-                htmlRoot.setAttribute("dir", "rtl");
-            } else {
-                htmlRoot.removeAttribute("dir");
+        // SISTEMA UNIFICADO DE TRADUCCIÓN AUTOMÁTICA
+        document.addEventListener("DOMContentLoaded", function() {
+            let langCode = "{{ current_lang }}";
+            if (!langCode || langCode === "None" || langCode === "") {
+                langCode = localStorage.getItem("user_selected_language") || (navigator.language || "es").substring(0, 2);
             }
+            
+            localStorage.setItem("user_selected_language", langCode);
+            document.documentElement.setAttribute("lang", langCode);
 
             document.querySelectorAll("[data-es]").forEach(function(el) {
-                const translation = el.getAttribute("data-" + savedLang);
-                if (translation) {
-                    el.textContent = translation;
+                if (langCode === "fr" && el.hasAttribute("data-fr")) {
+                    el.textContent = el.getAttribute("data-fr");
+                } else if (langCode === "en" && el.hasAttribute("data-en")) {
+                    el.textContent = el.getAttribute("data-en");
+                } else if (langCode === "pt" && el.hasAttribute("data-pt")) {
+                    el.textContent = el.getAttribute("data-pt");
                 } else {
                     el.textContent = el.getAttribute("data-es");
                 }
             });
+
+            document.querySelectorAll("[data-es-placeholder]").forEach(function(el) {
+                if (langCode === "fr" && el.hasAttribute("data-fr-placeholder")) {
+                    el.setAttribute("placeholder", el.getAttribute("data-fr-placeholder"));
+                } else if (langCode === "en" && el.hasAttribute("data-en-placeholder")) {
+                    el.setAttribute("placeholder", el.getAttribute("data-en-placeholder"));
+                } else if (langCode === "pt" && el.hasAttribute("data-pt-placeholder")) {
+                    el.setAttribute("placeholder", el.getAttribute("data-pt-placeholder"));
+                } else {
+                    el.setAttribute("placeholder", el.getAttribute("data-es-placeholder"));
+                }
+            });
         });
     </script>
-   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Prioridad: 1. Variable de sesión de Flask, 2. localStorage, 3. Idioma navegador
-        let langCode = "{{ current_lang }}";
-        if (!langCode || langCode === "None") {
-            langCode = localStorage.getItem("user_selected_language") || (navigator.language || "es").substring(0,2);
-        }
-        
-        // Guardar la elección activa en localStorage
-        localStorage.setItem("user_selected_language", langCode);
-        document.documentElement.setAttribute("lang", langCode);
-
-        // Traducir textos con atributos data-es, data-fr, data-en, data-pt
-        document.querySelectorAll("[data-es]").forEach(function(el) {
-            if (langCode === "fr" && el.hasAttribute("data-fr")) {
-                el.textContent = el.getAttribute("data-fr");
-            } else if (langCode === "en" && el.hasAttribute("data-en")) {
-                el.textContent = el.getAttribute("data-en");
-            } else if (langCode === "pt" && el.hasAttribute("data-pt")) {
-                el.textContent = el.getAttribute("data-pt");
-            } else {
-                el.textContent = el.getAttribute("data-es");
-            }
-        });
-
-        // Traducir placeholders en inputs
-        document.querySelectorAll("[data-es-placeholder]").forEach(function(el) {
-            if (langCode === "fr" && el.hasAttribute("data-fr-placeholder")) {
-                el.setAttribute("placeholder", el.getAttribute("data-fr-placeholder"));
-            } else if (langCode === "en" && el.hasAttribute("data-en-placeholder")) {
-                el.setAttribute("placeholder", el.getAttribute("data-en-placeholder"));
-            } else if (langCode === "pt" && el.hasAttribute("data-pt-placeholder")) {
-                el.setAttribute("placeholder", el.getAttribute("data-pt-placeholder"));
-            } else {
-                el.setAttribute("placeholder", el.getAttribute("data-es-placeholder"));
-            }
-        });
-    });
-</script>
 </body>
 </html>
