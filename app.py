@@ -294,6 +294,30 @@ def delete_article(article_id):
         
     return redirect(url_for('profile', username=session['username']))
 
+@app.route('/articulo/<path:article_id>/mark-sold', methods=['POST'])
+def mark_article_sold(article_id):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    
+    articles = load_articles()
+    article = next((art for art in articles if str(art.get('id')) == str(article_id) or art.get('firebase_id') == article_id or art.get('slug') == article_id), None)
+    
+    if article:
+        if article.get('username') == session['username']:
+            # Alternar el estado de is_sold (True <-> False)
+            article['is_sold'] = not article.get('is_sold', False)
+            fb_put(f"articles/{article['firebase_id']}", article)
+            
+            status_text = "marcado como comprado" if article['is_sold'] else "marcado como disponible"
+            flash(f'¡Artículo {status_text} con éxito!', 'success')
+        else:
+            flash('No tienes permiso para modificar este artículo.', 'error')
+    else:
+        flash('El artículo no existe.', 'error')
+        
+    # Redirigir de vuelta a la página del detalle del artículo
+    return redirect(url_for('article_detail', slug=article.get('slug'))) if article and article.get('slug') else redirect(url_for('index'))
+
 @app.route('/articulo/<slug>')
 def article_detail(slug):
     articles = load_articles()
