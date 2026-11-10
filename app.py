@@ -22,6 +22,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 GOOGLE_CLIENT_ID = "1062928384474-edan147q560ubs30p9fa2ins3vsj8v1q.apps.googleusercontent.com"
 IMGBB_API_KEY = os.environ.get('IMGBB_API_KEY', '3ca96164517ba9751a3ef0e3032206ef')
 
+# --- CONTEXT PROCESSOR GLOBAL PARA MANTENER EL IDIOMA EN CADA TEMPLATE ---
+@app.context_processor
+def inject_user_language():
+    current_lang = session.get('language', 'es')
+    return dict(current_lang=current_lang)
+
 # --- FUNCIONES DE IMGBB Y FIREBASE ---
 
 def upload_to_imgbb(file_bytes):
@@ -119,7 +125,10 @@ def index(page=1):
     users = load_json_users()
     current_user = next((u for u in users if u.get('username') == session.get('username')), None)
 
-    # Detectamos si le falta país, ciudad o teléfono para mostrar la ventana flotante en index.html
+    # Actualizar idioma en la sesión si existe en el usuario
+    if current_user and current_user.get('language'):
+        session['language'] = current_user.get('language')
+
     needs_onboarding = False
     if current_user and (not current_user.get('country') or not current_user.get('city') or not current_user.get('phone')):
         needs_onboarding = True
@@ -341,6 +350,10 @@ def complete_onboarding():
         user['phone'] = phone
         user['language'] = language
         save_json_users(users)
+        
+        # GUARDAR IDIOMA EN LA SESIÓN DE FLASK
+        session['language'] = language
+        session.modified = True
         return jsonify({"status": "success", "redirect": url_for('index')})
 
     return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
@@ -387,8 +400,7 @@ def google_login_real():
         session['username'] = user['username']
         session['email'] = user['email']
         session['profile_pic'] = user.get('profile_pic', picture)
-        
-        # Redirige directo a index sin mandar a settings
+        session['language'] = user.get('language', 'es')
         return jsonify({"status": "success", "redirect": url_for('index')})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
@@ -415,6 +427,7 @@ def settings():
         user['city'] = city
         user['phone'] = phone
         user['language'] = language
+        session['language'] = language
 
         if new_username and new_username != user['username']:
             if any(u.get('username') == new_username for u in users):
@@ -515,7 +528,6 @@ def publish_article():
     if not image_urls:
         image_urls.append("/static/uploads/default_item.png")
 
-    # --- LÓGICA DE ORDENAMIENTO ---
     current_timestamp = int(datetime.now().timestamp())
     existing_articles = load_articles()
     
