@@ -562,5 +562,192 @@
             .catch(err => console.error(err));
         }
     </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Obtener el idioma guardado previamente o detectar el del navegador
+        let langCode = localStorage.getItem("user_selected_language");
+        
+        if (!langCode) {
+            const rawLang = (navigator.language || navigator.userLanguage || "es").toLowerCase();
+            if (rawLang.startsWith("fr")) {
+                langCode = "fr";
+            } else if (rawLang.startsWith("en")) {
+                langCode = "en";
+            } else if (rawLang.startsWith("pt")) {
+                langCode = "pt";
+            } else {
+                langCode = "es";
+            }
+            localStorage.setItem("user_selected_language", langCode);
+        }
+
+        // 2. Aplicar el idioma en la etiqueta <html>
+        document.getElementById("html-root").setAttribute("lang", langCode);
+
+        // 3. Traducir todos los textos de la interfaz según el idioma activo
+        document.querySelectorAll("[data-es]").forEach(function(el) {
+            if (langCode === "fr" && el.hasAttribute("data-fr")) {
+                el.textContent = el.getAttribute("data-fr");
+            } else if (langCode === "en" && el.hasAttribute("data-en")) {
+                el.textContent = el.getAttribute("data-en");
+            } else if (langCode === "pt" && el.hasAttribute("data-pt")) {
+                el.textContent = el.getAttribute("data-pt");
+            } else {
+                el.textContent = el.getAttribute("data-es");
+            }
+        });
+
+        // 4. Traducir los placeholders de los inputs
+        document.querySelectorAll("[data-es-placeholder]").forEach(function(el) {
+            if (langCode === "fr" && el.hasAttribute("data-fr-placeholder")) {
+                el.setAttribute("placeholder", el.getAttribute("data-fr-placeholder"));
+            } else if (langCode === "en" && el.hasAttribute("data-en-placeholder")) {
+                el.setAttribute("placeholder", el.getAttribute("data-en-placeholder"));
+            } else if (langCode === "pt" && el.hasAttribute("data-pt-placeholder")) {
+                el.setAttribute("placeholder", el.getAttribute("data-pt-placeholder"));
+            } else {
+                el.setAttribute("placeholder", el.getAttribute("data-es-placeholder"));
+            }
+        });
+
+        // 5. Sincronizar el select del modal de onboarding si está visible
+        const selectLang = document.querySelector('select[name="language"]');
+        if (selectLang) {
+            selectLang.value = langCode;
+        }
+    });
+
+    // Desvanecer pantalla de intro al cargar
+    window.addEventListener('load', function() {
+        const cover = document.getElementById('render-cover-intro');
+        if (cover) {
+            cover.style.opacity = '0';
+            cover.style.visibility = 'hidden';
+            setTimeout(function() { cover.remove(); }, 500);
+        }
+    });
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    
+    function openReportModal(articleId, articleTitle) {
+        document.getElementById('report-article-title').textContent = articleTitle;
+        document.getElementById('report-form').action = '/report-article/' + articleId;
+        openModal('report-modal');
+    }
+
+    function toggleNotificationsMenu() {
+        const menu = document.getElementById('notifications-menu');
+        const badge = document.getElementById('noti-badge');
+        
+        if (menu) {
+            menu.classList.toggle('hidden');
+            if (!menu.classList.contains('hidden')) {
+                if (badge) badge.classList.add('hidden');
+                fetch('/mark-notifications-read', { method: 'POST' });
+            }
+        }
+    }
+
+    function closeNotificationsMenu() {
+        const menu = document.getElementById('notifications-menu');
+        if (menu && !menu.classList.contains('hidden')) menu.classList.add('hidden');
+    }
+
+    let lastUnreadCount = 0;
+
+    function checkNotificationsRealtime() {
+        var isLoggedIn = "{{ session.get('username', '') }}";
+        if (isLoggedIn !== "") {
+            fetch('/get-notifications-json')
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.status === 'success') {
+                        var badge = document.getElementById('noti-badge');
+                        var container = document.getElementById('notifications-container');
+
+                        if (data.unread_count > 0) {
+                            badge.textContent = data.unread_count;
+                            badge.classList.remove('hidden');
+
+                            if (data.unread_count > lastUnreadCount) {
+                                playNotificationSound();
+                            }
+                        } else {
+                            var menu = document.getElementById('notifications-menu');
+                            if (menu && menu.classList.contains('hidden')) {
+                                badge.classList.add('hidden');
+                            }
+                        }
+                        lastUnreadCount = data.unread_count;
+
+                        if (data.notifications && data.notifications.length > 0) {
+                            var html = '';
+                            data.notifications.forEach(function(noti) {
+                                html += '<a href="' + noti.link + '" class="block p-3 rounded-xl bg-gray-50 hover:bg-emerald-50 transition border border-gray-100 text-xs space-y-1">' +
+                                        '<p class="font-bold text-gray-900 leading-snug">' + noti.message + '</p>' +
+                                        '<span class="text-[10px] text-african-green font-bold block text-right">' + noti.time_ago + '</span>' +
+                                        '</a>';
+                            });
+                            container.innerHTML = html;
+                        }
+                    }
+                })
+                .catch(function(err) { console.error("Error al consultar notificaciones:", err); });
+        }
+    }
+
+    function playNotificationSound() {
+        try {
+            var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                var ctx = new AudioContextClass();
+                var osc = ctx.createOscillator();
+                var gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15);
+            }
+        } catch(e) {}
+    }
+
+    setInterval(checkNotificationsRealtime, 5000);
+
+    let pendingGoogleCredential = null;
+
+    function handleCredentialResponse(response) {
+        pendingGoogleCredential = response.credential;
+        openModal('terms-modal');
+    }
+
+    function confirmGoogleLogin() {
+        const check = document.getElementById('accept-terms-check');
+        if (!check.checked) {
+            document.getElementById('terms-error-msg').classList.remove('hidden');
+            return;
+        }
+
+        fetch('/google-login-real', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential: pendingGoogleCredential })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.href = data.redirect;
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+</script>
 </body>
 </html>
