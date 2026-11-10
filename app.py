@@ -258,9 +258,13 @@ def add_comment(slug):
     article = next((art for art in articles if art.get('slug') == slug), None)
 
     if article:
+        commenter_username = session['username']
+        seller_username = article.get('username')
+
+        # 1. Crear y agregar el nuevo comentario al artículo
         comments = article.get('comments', [])
         new_comment = {
-            "username": session['username'],
+            "username": commenter_username,
             "content": content,
             "rating": rating_val,
             "date": datetime.now(timezone.utc).isoformat()
@@ -268,7 +272,29 @@ def add_comment(slug):
         comments.append(new_comment)
         article['comments'] = comments
 
+        # Guardar el artículo actualizado en Firebase
         fb_put(f"articles/{article['firebase_id']}", article)
+
+        # 2. CREAR NOTIFICACIÓN PARA EL VENDEDOR (solo si no es el mismo que comenta)
+        if seller_username and seller_username != commenter_username:
+            users = load_json_users()
+            seller_user = next((u for u in users if u.get('username') == seller_username), None)
+
+            if seller_user:
+                if 'notifications' not in seller_user:
+                    seller_user['notifications'] = []
+
+                # Insertar la notificación al principio de la lista
+                seller_user['notifications'].insert(0, {
+                    "message": f"@{commenter_username} ha comentado en tu artículo '{article.get('title')}'",
+                    "link": f"/articulo/{slug}",
+                    "read": False,
+                    "date": datetime.now(timezone.utc).isoformat()
+                })
+
+                # Guardar los datos del usuario vendedor en Firebase
+                save_json_users(users)
+
         flash('¡Comentario publicado con éxito!', 'success')
     else:
         flash('El artículo no existe.', 'error')
