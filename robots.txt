@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /terminos
+Disallow: /google-login-real
+Disallow: /static/
+Disallow: /dashboard/
+Disallow: /perfil/
+
+Sitemap: https://africanworld.onrender.com/sitemap.xml
