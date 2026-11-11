@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AfricanWorld - Plataforma Global de Comercio y Negocios</title>
     
+    <!-- Enlace de referencia al archivo robots.txt -->
+    <link rel="help" type="text/plain" href="/robots.txt">
+
     <!-- FAVICON -->
     <link rel="icon" type="image/png" sizes="32x32" href="/static/uploads/logo.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/static/uploads/logo.png">
@@ -153,7 +156,6 @@
 
     <!-- SCRIPT DE TRADUCCIÓN AUTOMÁTICA Y ACCIÓN DE GOOGLE -->
     <script>
-        // DETECCIÓN AUTOMÁTICA DEL IDIOMA DEL DISPOSITIVO Y TRADUCCIÓN INSTANTÁNEA
         document.addEventListener("DOMContentLoaded", function() {
             let sessionLang = "{{ current_lang if current_lang and current_lang != 'None' else '' }}";
             let localLang = localStorage.getItem("user_selected_language");
@@ -181,7 +183,6 @@
             });
         });
 
-        // OCULTAR INTRO VERDE AL CARGAR
         window.addEventListener('load', function() {
             const cover = document.getElementById('render-cover-intro');
             if (cover) {
@@ -193,7 +194,6 @@
             }
         });
 
-        // RESPUESTA INSTANTÁNEA Y DIRECTA AL INICIAR SESIÓN CON GOOGLE
         function handleCredentialResponse(response) {
             const termsCheck = document.getElementById('accept-terms-direct');
             const errorMsg = document.getElementById('terms-error-direct');
